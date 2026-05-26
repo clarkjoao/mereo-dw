@@ -1,0 +1,110 @@
+# ============================================================================
+# Deployment + Service: mereo-dagster-dagster-webserver (UI)
+# ============================================================================
+# Webserver do Dagster (interface gráfica + GraphQL API). Lê definitions do
+# user code via gRPC (workspace.yaml aponta para `mereo-analytics-code:3030`)
+# e persistência via Postgres.
+#
+# Exposto externamente via Ingress `dagster-ui` (http://dagster.mereo.local).
+# Não tem autenticação no webserver — proteção é via rede/Ingress.
+#
+# Diferenças vs daemon:
+#   - strategy: RollingUpdate (stateless — múltiplas réplicas seguras).
+#   - readinessProbe HTTP `/server_info` (mais semântico que TCP).
+#   - SEM o sitecustomize patch — webserver não chama API do Kubernetes.
+#
+# Para escalar: aumentar `replicas`. O Dagster suporta múltiplos webservers
+# atrás de um Service.
+# ----------------------------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: mereo-dagster-dagster-webserver
+  namespace: mereo-analytics
+  labels:
+    app.kubernetes.io/name: dagster
+    component: dagster-webserver
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: dagster
+    component: dagster-webserver
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mereo-dagster-dagster-webserver
+  namespace: mereo-analytics
+  labels:
+    app.kubernetes.io/name: dagster
+    component: dagster-webserver
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dagster
+      component: dagster-webserver
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dagster
+        component: dagster-webserver
+    spec:
+      serviceAccountName: mereo-dagster
+      automountServiceAccountToken: true
+      initContainers:
+        - name: check-db-ready
+          image: docker.io/library/postgres:14.6
+          command:
+            - sh
+            - -c
+            - until pg_isready -h mereo-dagster-postgresql -p 5432 -U test; do echo waiting for database; sleep 2; done;
+      containers:
+        - name: dagster
+          image: docker.io/dagster/dagster-celery-k8s:1.13.6
+          imagePullPolicy: Always
+          command:
+            - /bin/bash
+            - -c
+            - dagster-webserver -h 0.0.0.0 -p 80 -w /dagster-workspace/workspace.yaml
+          env:
+            - name: DAGSTER_PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: dagster-postgresql-secret
+                  key: postgresql-password
+          envFrom:
+            - configMapRef:
+                name: mereo-dagster-webserver-env
+          ports:
+            - name: http
+              containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /server_info
+              port: 80
+            periodSeconds: 20
+            timeoutSeconds: 10
+            failureThreshold: 3
+          volumeMounts:
+            - name: dagster-instance
+              mountPath: /opt/dagster/dagster_home/dagster.yaml
+              subPath: dagster.yaml
+            - name: dagster-workspace-yaml
+              mountPath: /dagster-workspace/
+      volumes:
+        - name: dagster-instance
+          configMap:
+            name: mereo-dagster-instance
+        - name: dagster-workspace-yaml
+          configMap:
+            name: mereo-dagster-workspace-yaml

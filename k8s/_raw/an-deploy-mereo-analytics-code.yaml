@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: mereo-analytics-code
+    app.kubernetes.io/part-of: mereo-analytics
+  name: mereo-analytics-code
+  namespace: mereo-analytics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mereo-analytics-code
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/restartedAt: '2026-05-25T23:49:04-03:00'
+      labels:
+        app: mereo-analytics-code
+    spec:
+      containers:
+      - command:
+        - /bin/bash
+        - /config/dagster/start.sh
+        env:
+        - name: DBT_TARGET
+          value: k8s
+        - name: CH_DBT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: clickhouse-dbt-credentials
+        - name: CH_HOST
+          value: clickhouse-mereo-clickhouse.mereo-clickhouse.svc.cluster.local
+        - name: CH_PORT
+          value: '8123'
+        - name: CH_USER
+          value: dbt
+        - name: CH_RAW_CONSUMER_GROUP
+          value: ch-raw-colaborador-v2
+        - name: MEREPO_PILOT_ENTITY
+          value: colaborador
+        image: python:3.12-slim
+        name: grpc
+        ports:
+        - containerPort: 3030
+          name: grpc
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 90
+          periodSeconds: 10
+          tcpSocket:
+            port: 3030
+          timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: '1'
+            memory: 1Gi
+          requests:
+            cpu: 250m
+            memory: 512Mi
+        volumeMounts:
+        - mountPath: /config/dbt
+          name: dbt-config
+        - mountPath: /config/models
+          name: dbt-models
+          readOnly: true
+        - mountPath: /config/dagster
+          name: dagster-code
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: mereo-dbt-project
+        name: dbt-config
+      - configMap:
+          defaultMode: 420
+          name: mereo-dbt-models
+        name: dbt-models
+      - configMap:
+          defaultMode: 493
+          name: mereo-dagster-code
+        name: dagster-code

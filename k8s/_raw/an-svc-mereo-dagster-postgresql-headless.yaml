@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    meta.helm.sh/release-name: mereo-dagster
+    meta.helm.sh/release-namespace: mereo-analytics
+  labels:
+    app: postgresql
+    app.kubernetes.io/managed-by: Helm
+    chart: postgresql-8.1.0
+    heritage: Helm
+    release: mereo-dagster
+  name: mereo-dagster-postgresql-headless
+  namespace: mereo-analytics
+spec:
+  ports:
+  - name: tcp-postgresql
+    port: 5432
+    targetPort: tcp-postgresql
+  selector:
+    app: postgresql
+    release: mereo-dagster
+  type: ClusterIP

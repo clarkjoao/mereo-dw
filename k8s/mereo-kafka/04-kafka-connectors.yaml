@@ -1,0 +1,158 @@
+# ============================================================================
+# KafkaConnectors: Debezium SqlServerConnector × 3 tenants
+# ============================================================================
+# Cada CR vira uma "task" no Kafka Connect (`mereo-connect`) que monitora UM
+# banco do SQL Server e publica seus eventos CDC em `raw.colaborador`.
+#
+# O que cada connector faz (Debezium SqlServer):
+#   1. snapshot inicial (`snapshot.mode: initial`) — lê o estado atual da tabela
+#      dbo.COLABORADOR sem lock (`snapshot.locking.mode: none`).
+#   2. tail no log CDC do SQL Server (`cdc.fn_cdc_get_all_changes_...`) com
+#      poll.interval.ms=500.
+#   3. aplica 3 transforms SMT, nesta ordem:
+#        a. unwrap (ExtractNewRecordState) → achata payload Debezium
+#           (`before`/`after`/`source`) em uma única linha + campos `__op`,
+#           `__ts_ms`, `__deleted`.
+#        b. reroute (ByLogicalTableRouter) → joga TUDO no tópico unificado
+#           `raw.colaborador`, descartando o prefixo por tenant/banco.
+#        c. tenant (InsertField$Value) → injeta o campo `tenant_slug` estático
+#           ("afya" | "staging" | "allos") em cada mensagem.
+#
+# Por que 3 conectores (e não 1 com várias `database.names`)?
+#   Cada tenant precisa de um `topic.prefix` próprio (requisito Debezium para
+#   isolar offset/state) e de um `tenant_slug` distinto via InsertField.
+#
+# tombstones.on.delete: true (no afya) — Debezium publica uma tombstone null
+# após DELETE para sinalizar removal a consumers que se baseiam em compact
+# logs. Os outros 2 conectores não setam (vale o default true do Debezium 2.x).
+# ----------------------------------------------------------------------------
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: mereogr-afya-colaborador
+  namespace: mereo-kafka
+  labels:
+    strimzi.io/cluster: mereo-connect
+spec:
+  class: io.debezium.connector.sqlserver.SqlServerConnector
+  tasksMax: 1
+  config:
+    # ---- Conexão SQL Server (lê do Secret via FileConfigProvider) ----
+    database.hostname: ${file:/opt/kafka/external-configuration/mssql-creds/debezium.properties:database.hostname}
+    database.port:     ${file:/opt/kafka/external-configuration/mssql-creds/debezium.properties:database.port}
+    database.user:     ${file:/opt/kafka/external-configuration/mssql-creds/debezium.properties:database.user}
+    database.password: ${file:/opt/kafka/external-configuration/mssql-creds/debezium.properties:database.password}
+    database.encrypt: "false"
+    database.trustServerCertificate: "true"
+    database.names: MereoGR-Afya
+
+    # ---- Captura ----
+    table.include.list: dbo.COLABORADOR
+    snapshot.mode: initial
+    snapshot.locking.mode: none      # evita locks no SQL Server (multi-tenant)
+    poll.interval.ms: "500"
+    heartbeat.interval.ms: "10000"
+    tombstones.on.delete: "true"
+
+    # ---- Storage do schema history (Debezium 2.x) ----
+    schema.history.internal.kafka.bootstrap.servers: mereo-kafka-kafka-bootstrap.mereo-kafka:9092
+    schema.history.internal.kafka.topic: mereogr.schema-history
+
+    # ---- Topic prefix → SMT reroute joga tudo em raw.colaborador ----
+    topic.prefix: mereogr-afya
+
+    # ---- Converters (mesmos do KafkaConnect; redundante mas explícito) ----
+    key.converter: org.apache.kafka.connect.json.JsonConverter
+    key.converter.schemas.enable: "false"
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter.schemas.enable: "false"
+
+    # ---- Transforms (ordem importa) ----
+    transforms: unwrap,reroute,tenant
+    transforms.unwrap.type: io.debezium.transforms.ExtractNewRecordState
+    transforms.unwrap.delete.handling.mode: rewrite               # DELETE vira tombstone marcada
+    transforms.unwrap.add.fields: op:en,source.ts_ms:ts_ms        # mantém __op e __ts_ms
+    transforms.reroute.type: io.debezium.transforms.ByLogicalTableRouter
+    transforms.reroute.topic.regex: .*
+    transforms.reroute.topic.replacement: raw.colaborador         # todos os tenants no mesmo tópico
+    transforms.tenant.type: org.apache.kafka.connect.transforms.InsertField$Value
+    transforms.tenant.static.field: tenant_slug
+    transforms.tenant.static.value: afya
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: mereogr-staging-colaborador
+  namespace: mereo-kafka
+  labels:
+    strimzi.io/cluster: mereo-connect
+spec:
+  class: io.debezium.connector.sqlserver.SqlServerConnector
+  tasksMax: 1
+  config:
+    database.hostname: ${file:/opt/kafka/external-configuration/mssql-creds/debezium.properties:database.hostname}
+    database.port:     ${file:/opt/kafka/external-configuration/mssql-creds/debezium.properties:database.port}
+    database.user:     ${file:/opt/kafka/external-configuration/mssql-creds/debezium.properties:database.user}
+    database.password: ${file:/opt/kafka/external-configuration/mssql-creds/debezium.properties:database.password}
+    database.encrypt: "false"
+    database.trustServerCertificate: "true"
+    database.names: MereoGR-Staging
+    table.include.list: dbo.COLABORADOR
+    snapshot.mode: initial
+    snapshot.locking.mode: none
+    schema.history.internal.kafka.bootstrap.servers: mereo-kafka-kafka-bootstrap.mereo-kafka:9092
+    schema.history.internal.kafka.topic: mereogr.schema-history
+    topic.prefix: mereogr-staging
+    key.converter: org.apache.kafka.connect.json.JsonConverter
+    key.converter.schemas.enable: "false"
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter.schemas.enable: "false"
+    transforms: unwrap,reroute,tenant
+    transforms.unwrap.type: io.debezium.transforms.ExtractNewRecordState
+    transforms.unwrap.delete.handling.mode: rewrite
+    transforms.unwrap.add.fields: op:en,source.ts_ms:ts_ms
+    transforms.reroute.type: io.debezium.transforms.ByLogicalTableRouter
+    transforms.reroute.topic.regex: .*
+    transforms.reroute.topic.replacement: raw.colaborador
+    transforms.tenant.type: org.apache.kafka.connect.transforms.InsertField$Value
+    transforms.tenant.static.field: tenant_slug
+    transforms.tenant.static.value: staging
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: mereogr-allos-colaborador
+  namespace: mereo-kafka
+  labels:
+    strimzi.io/cluster: mereo-connect
+spec:
+  class: io.debezium.connector.sqlserver.SqlServerConnector
+  tasksMax: 1
+  config:
+    database.hostname: ${file:/opt/kafka/external-configuration/mssql-creds/debezium.properties:database.hostname}
+    database.port:     ${file:/opt/kafka/external-configuration/mssql-creds/debezium.properties:database.port}
+    database.user:     ${file:/opt/kafka/external-configuration/mssql-creds/debezium.properties:database.user}
+    database.password: ${file:/opt/kafka/external-configuration/mssql-creds/debezium.properties:database.password}
+    database.encrypt: "false"
+    database.trustServerCertificate: "true"
+    database.names: MereoGR-Allos
+    table.include.list: dbo.COLABORADOR
+    snapshot.mode: initial
+    snapshot.locking.mode: none
+    schema.history.internal.kafka.bootstrap.servers: mereo-kafka-kafka-bootstrap.mereo-kafka:9092
+    schema.history.internal.kafka.topic: mereogr.schema-history
+    topic.prefix: mereogr-allos
+    key.converter: org.apache.kafka.connect.json.JsonConverter
+    key.converter.schemas.enable: "false"
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter.schemas.enable: "false"
+    transforms: unwrap,reroute,tenant
+    transforms.unwrap.type: io.debezium.transforms.ExtractNewRecordState
+    transforms.unwrap.delete.handling.mode: rewrite
+    transforms.unwrap.add.fields: op:en,source.ts_ms:ts_ms
+    transforms.reroute.type: io.debezium.transforms.ByLogicalTableRouter
+    transforms.reroute.topic.regex: .*
+    transforms.reroute.topic.replacement: raw.colaborador
+    transforms.tenant.type: org.apache.kafka.connect.transforms.InsertField$Value
+    transforms.tenant.static.field: tenant_slug
+    transforms.tenant.static.value: allos

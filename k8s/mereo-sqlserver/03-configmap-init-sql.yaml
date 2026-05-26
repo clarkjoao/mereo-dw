@@ -1,0 +1,243 @@
+# ============================================================================
+# ConfigMap: mssql-init-sql
+# ============================================================================
+# Scripts SQL de bootstrap, executados em ordem pelo Job `mssql-init` via
+# sqlcmd. Eles preparam o estado mínimo que o Debezium SqlServerConnector
+# espera encontrar para iniciar o snapshot inicial.
+#
+# Ordem de execução (alfabética por nome de arquivo):
+#   01-create-databases.sql  → cria os 3 bancos piloto (multi-tenant)
+#   02-create-colaborador.sql → cria dbo.COLABORADOR em cada banco (schema
+#                               alinhado a analytics/catalog/entities/colaborador.yaml)
+#   03-seed-data.sql          → semente de ~15 linhas por tenant
+#   04-enable-cdc.sql         → habilita CDC (sp_cdc_enable_db + sp_cdc_enable_table)
+#
+# Todos os scripts são idempotentes (IF NOT EXISTS, OBJECT_ID, is_cdc_enabled)
+# para sobreviver a reexecuções do Job.
+#
+# ATENÇÃO: kubectl tem limite de ~1 MiB por ConfigMap. Se adicionar mais
+# tabelas, considere quebrar em múltiplos ConfigMaps ou montar via volume.
+# ----------------------------------------------------------------------------
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mssql-init-sql
+  namespace: mereo-sqlserver
+data:
+  01-create-databases.sql: |
+    -- Bancos piloto simulados (nomes idênticos ao prod)
+    IF NOT EXISTS (SELECT 1 FROM sys.databases WHERE name = N'MereoGR-Afya')
+        CREATE DATABASE [MereoGR-Afya];
+    GO
+
+    IF NOT EXISTS (SELECT 1 FROM sys.databases WHERE name = N'MereoGR-Staging')
+        CREATE DATABASE [MereoGR-Staging];
+    GO
+
+    IF NOT EXISTS (SELECT 1 FROM sys.databases WHERE name = N'MereoGR-Allos')
+        CREATE DATABASE [MereoGR-Allos];
+    GO
+
+  02-create-colaborador.sql: |
+    -- dbo.COLABORADOR — schema alinhado ao contrato analytics/catalog/entities/colaborador.yaml
+    -- Repete o mesmo DDL em cada banco (Afya/Staging/Allos) para garantir isolamento por tenant.
+
+    USE [MereoGR-Afya];
+    GO
+    IF OBJECT_ID(N'dbo.COLABORADOR', N'U') IS NULL
+    CREATE TABLE dbo.COLABORADOR (
+        ID                              INT             NOT NULL,
+        ID_GRUPO_USUARIO                INT             NULL,
+        ID_IDIOMA                       INT             NULL,
+        USER_LOGIN                      NVARCHAR(128)   NULL,
+        NOME                            NVARCHAR(256)   NULL,
+        EMAIL                           NVARCHAR(256)   NULL,
+        WORKFLOW_ACOES                  NVARCHAR(MAX)   NULL,
+        ATIVO                           BIT             NOT NULL CONSTRAINT DF_COLABORADOR_ATIVO DEFAULT (1),
+        FOTO_PATH                       NVARCHAR(512)   NULL,
+        USUARIO_AD                      BIT             NULL,
+        TIPO_COLABORADOR                INT             NULL,
+        EXIBIR_TUTORIAL                 BIT             NULL,
+        Registration                    UNIQUEIDENTIFIER NULL,
+        EXIBIR_TUTORIAL_DASH_PERFORMANCE BIT            NULL,
+        FCMToken                        NVARCHAR(512)   NULL,
+        AvailabilityRelocateStatus      INT             NULL,
+        SignatureConsentAgreement       BIT             NULL,
+        Locality_Id                     INT             NULL,
+        CONSTRAINT PK_COLABORADOR PRIMARY KEY CLUSTERED (ID)
+    );
+    GO
+
+    USE [MereoGR-Staging];
+    GO
+    IF OBJECT_ID(N'dbo.COLABORADOR', N'U') IS NULL
+    CREATE TABLE dbo.COLABORADOR (
+        ID                              INT             NOT NULL,
+        ID_GRUPO_USUARIO                INT             NULL,
+        ID_IDIOMA                       INT             NULL,
+        USER_LOGIN                      NVARCHAR(128)   NULL,
+        NOME                            NVARCHAR(256)   NULL,
+        EMAIL                           NVARCHAR(256)   NULL,
+        WORKFLOW_ACOES                  NVARCHAR(MAX)   NULL,
+        ATIVO                           BIT             NOT NULL CONSTRAINT DF_COLABORADOR_ATIVO DEFAULT (1),
+        FOTO_PATH                       NVARCHAR(512)   NULL,
+        USUARIO_AD                      BIT             NULL,
+        TIPO_COLABORADOR                INT             NULL,
+        EXIBIR_TUTORIAL                 BIT             NULL,
+        Registration                    UNIQUEIDENTIFIER NULL,
+        EXIBIR_TUTORIAL_DASH_PERFORMANCE BIT            NULL,
+        FCMToken                        NVARCHAR(512)   NULL,
+        AvailabilityRelocateStatus      INT             NULL,
+        SignatureConsentAgreement       BIT             NULL,
+        Locality_Id                     INT             NULL,
+        CONSTRAINT PK_COLABORADOR PRIMARY KEY CLUSTERED (ID)
+    );
+    GO
+
+    USE [MereoGR-Allos];
+    GO
+    IF OBJECT_ID(N'dbo.COLABORADOR', N'U') IS NULL
+    CREATE TABLE dbo.COLABORADOR (
+        ID                              INT             NOT NULL,
+        ID_GRUPO_USUARIO                INT             NULL,
+        ID_IDIOMA                       INT             NULL,
+        USER_LOGIN                      NVARCHAR(128)   NULL,
+        NOME                            NVARCHAR(256)   NULL,
+        EMAIL                           NVARCHAR(256)   NULL,
+        WORKFLOW_ACOES                  NVARCHAR(MAX)   NULL,
+        ATIVO                           BIT             NOT NULL CONSTRAINT DF_COLABORADOR_ATIVO DEFAULT (1),
+        FOTO_PATH                       NVARCHAR(512)   NULL,
+        USUARIO_AD                      BIT             NULL,
+        TIPO_COLABORADOR                INT             NULL,
+        EXIBIR_TUTORIAL                 BIT             NULL,
+        Registration                    UNIQUEIDENTIFIER NULL,
+        EXIBIR_TUTORIAL_DASH_PERFORMANCE BIT            NULL,
+        FCMToken                        NVARCHAR(512)   NULL,
+        AvailabilityRelocateStatus      INT             NULL,
+        SignatureConsentAgreement       BIT             NULL,
+        Locality_Id                     INT             NULL,
+        CONSTRAINT PK_COLABORADOR PRIMARY KEY CLUSTERED (ID)
+    );
+    GO
+
+  03-seed-data.sql: |
+    -- Seed ~15 rows por tenant; id_grupo_usuario variado para agregação gold.
+    -- ID começa em 1 em cada tenant — a desambiguação acontece via tenant_slug
+    -- adicionado pelo SMT `tenant` no Debezium.
+
+    USE [MereoGR-Afya];
+    GO
+    IF NOT EXISTS (SELECT 1 FROM dbo.COLABORADOR WHERE ID = 1)
+    INSERT INTO dbo.COLABORADOR (ID, ID_GRUPO_USUARIO, NOME, EMAIL, ATIVO) VALUES
+        (1,  10, N'Ana Afya',      N'ana.afya@mereo.local',      1),
+        (2,  10, N'Bruno Afya',    N'bruno.afya@mereo.local',    1),
+        (3,  10, N'Carla Afya',    N'carla.afya@mereo.local',    1),
+        (4,  20, N'Diego Afya',    N'diego.afya@mereo.local',    1),
+        (5,  20, N'Elisa Afya',    N'elisa.afya@mereo.local',    1),
+        (6,  20, N'Fabio Afya',    N'fabio.afya@mereo.local',    0),
+        (7,  30, N'Gisele Afya',   N'gisele.afya@mereo.local',   1),
+        (8,  30, N'Hugo Afya',     N'hugo.afya@mereo.local',     1),
+        (9,  30, N'Iris Afya',     N'iris.afya@mereo.local',     1),
+        (10, 30, N'Joao Afya',     N'joao.afya@mereo.local',     1),
+        (11, 40, N'Kelly Afya',    N'kelly.afya@mereo.local',    1),
+        (12, 40, N'Leo Afya',      N'leo.afya@mereo.local',      1),
+        (13, 50, N'Maria Afya',    N'maria.afya@mereo.local',    1),
+        (14, 50, N'Nelson Afya',   N'nelson.afya@mereo.local',   1),
+        (15, 50, N'Olivia Afya',   N'olivia.afya@mereo.local',   1);
+    GO
+
+    USE [MereoGR-Staging];
+    GO
+    IF NOT EXISTS (SELECT 1 FROM dbo.COLABORADOR WHERE ID = 1)
+    INSERT INTO dbo.COLABORADOR (ID, ID_GRUPO_USUARIO, NOME, EMAIL, ATIVO) VALUES
+        (1,  100, N'Paula Staging',  N'paula.staging@mereo.local',  1),
+        (2,  100, N'Quintino Staging', N'quintino.staging@mereo.local', 1),
+        (3,  100, N'Rita Staging',   N'rita.staging@mereo.local',    1),
+        (4,  200, N'Sergio Staging', N'sergio.staging@mereo.local',  1),
+        (5,  200, N'Tania Staging',  N'tania.staging@mereo.local',   1),
+        (6,  200, N'Ugo Staging',    N'ugo.staging@mereo.local',     0),
+        (7,  300, N'Vera Staging',   N'vera.staging@mereo.local',    1),
+        (8,  300, N'Walter Staging', N'walter.staging@mereo.local',  1),
+        (9,  300, N'Xenia Staging',  N'xenia.staging@mereo.local',   1),
+        (10, 300, N'Yuri Staging',   N'yuri.staging@mereo.local',    1),
+        (11, 400, N'Zeca Staging',   N'zeca.staging@mereo.local',    1),
+        (12, 400, N'Alice Staging',  N'alice.staging@mereo.local',   1),
+        (13, 500, N'Bob Staging',    N'bob.staging@mereo.local',     1),
+        (14, 500, N'Cecilia Staging', N'cecilia.staging@mereo.local', 1),
+        (15, 500, N'Dan Staging',    N'dan.staging@mereo.local',     1);
+    GO
+
+    USE [MereoGR-Allos];
+    GO
+    IF NOT EXISTS (SELECT 1 FROM dbo.COLABORADOR WHERE ID = 1)
+    INSERT INTO dbo.COLABORADOR (ID, ID_GRUPO_USUARIO, NOME, EMAIL, ATIVO) VALUES
+        (1,  1000, N'Emma Allos',    N'emma.allos@mereo.local',    1),
+        (2,  1000, N'Frank Allos',   N'frank.allos@mereo.local',   1),
+        (3,  1000, N'Grace Allos',   N'grace.allos@mereo.local',   1),
+        (4,  2000, N'Henry Allos',   N'henry.allos@mereo.local',   1),
+        (5,  2000, N'Ivy Allos',     N'ivy.allos@mereo.local',     1),
+        (6,  2000, N'Jack Allos',    N'jack.allos@mereo.local',    0),
+        (7,  3000, N'Kate Allos',    N'kate.allos@mereo.local',    1),
+        (8,  3000, N'Liam Allos',    N'liam.allos@mereo.local',    1),
+        (9,  3000, N'Mia Allos',     N'mia.allos@mereo.local',     1),
+        (10, 3000, N'Noah Allos',    N'noah.allos@mereo.local',    1),
+        (11, 4000, N'Olive Allos',   N'olive.allos@mereo.local',   1),
+        (12, 4000, N'Pete Allos',    N'pete.allos@mereo.local',    1),
+        (13, 5000, N'Quinn Allos',   N'quinn.allos@mereo.local',   1),
+        (14, 5000, N'Rose Allos',    N'rose.allos@mereo.local',    1),
+        (15, 5000, N'Sam Allos',     N'sam.allos@mereo.local',     1);
+    GO
+
+  04-enable-cdc.sql: |
+    -- Habilita CDC nos 3 bancos piloto. Pré-requisitos:
+    --   * SQL Server Agent ativo (env MSSQL_AGENT_ENABLED=true no StatefulSet).
+    --   * Edition que suporta CDC (Developer/Standard/Enterprise — não Express).
+    -- Idempotente: checa is_cdc_enabled e cdc.change_tables antes de habilitar.
+
+    USE [MereoGR-Afya];
+    GO
+    IF (SELECT is_cdc_enabled FROM sys.databases WHERE name = N'MereoGR-Afya') = 0
+        EXEC sys.sp_cdc_enable_db;
+    GO
+    IF NOT EXISTS (
+        SELECT 1 FROM cdc.change_tables
+        WHERE source_object_id = OBJECT_ID(N'dbo.COLABORADOR')
+    )
+        EXEC sys.sp_cdc_enable_table
+            @source_schema = N'dbo',
+            @source_name   = N'COLABORADOR',
+            @role_name     = NULL,
+            @supports_net_changes = 1;
+    GO
+
+    USE [MereoGR-Staging];
+    GO
+    IF (SELECT is_cdc_enabled FROM sys.databases WHERE name = N'MereoGR-Staging') = 0
+        EXEC sys.sp_cdc_enable_db;
+    GO
+    IF NOT EXISTS (
+        SELECT 1 FROM cdc.change_tables
+        WHERE source_object_id = OBJECT_ID(N'dbo.COLABORADOR')
+    )
+        EXEC sys.sp_cdc_enable_table
+            @source_schema = N'dbo',
+            @source_name   = N'COLABORADOR',
+            @role_name     = NULL,
+            @supports_net_changes = 1;
+    GO
+
+    USE [MereoGR-Allos];
+    GO
+    IF (SELECT is_cdc_enabled FROM sys.databases WHERE name = N'MereoGR-Allos') = 0
+        EXEC sys.sp_cdc_enable_db;
+    GO
+    IF NOT EXISTS (
+        SELECT 1 FROM cdc.change_tables
+        WHERE source_object_id = OBJECT_ID(N'dbo.COLABORADOR')
+    )
+        EXEC sys.sp_cdc_enable_table
+            @source_schema = N'dbo',
+            @source_name   = N'COLABORADOR',
+            @role_name     = NULL,
+            @supports_net_changes = 1;
+    GO

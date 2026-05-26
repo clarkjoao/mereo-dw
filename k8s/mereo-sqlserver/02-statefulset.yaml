@@ -1,0 +1,101 @@
+# ============================================================================
+# StatefulSet: mssql (SQL Server 2022 Developer Edition)
+# ============================================================================
+# Fonte de dados primária do pipeline CDC.
+#
+# Por que StatefulSet (e não Deployment)?
+#   - Identidade estável (mssql-0) — Debezium guarda histórico de schema em
+#     tópico Kafka e referencia o host por nome.
+#   - PVC por réplica via `volumeClaimTemplates` — os arquivos .mdf/.ldf do
+#     SQL Server precisam de I/O local persistente.
+#
+# Imagem: `mcr.microsoft.com/mssql/server:2022-latest`
+#   - MSSQL_PID=Developer → licença grátis para PoC (uso restrito a dev/test).
+#   - MSSQL_AGENT_ENABLED=true → necessário para CDC (sp_cdc_enable_db precisa
+#     do SQL Agent ativo para o job de captura).
+#   - ACCEPT_EULA=Y → exigência legal da Microsoft para inicializar o contêiner.
+#
+# Recursos:
+#   - SQL Server 2022 reserva ~2 GB de heap só pra iniciar; abaixo disso o
+#     processo sai com "memory limit too low".
+#   - CPU/memória pequenos por ser PoC — em prod aumentar requests e adicionar
+#     QoS Guaranteed.
+# ----------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mssql
+  namespace: mereo-sqlserver
+  labels:
+    app: mssql
+spec:
+  replicas: 1
+  serviceName: mssql
+  selector:
+    matchLabels:
+      app: mssql
+  template:
+    metadata:
+      labels:
+        app: mssql
+    spec:
+      containers:
+        - name: mssql
+          image: mcr.microsoft.com/mssql/server:2022-latest
+          ports:
+            - name: tds
+              containerPort: 1433
+          env:
+            - name: ACCEPT_EULA
+              value: "Y"
+            - name: MSSQL_PID
+              value: Developer
+            - name: MSSQL_AGENT_ENABLED   # CDC depende do SQL Agent
+              value: "true"
+            - name: MSSQL_SA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mssql-sa-credentials
+                  key: SA_PASSWORD
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2Gi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+          # Probes via sqlcmd — `-C` aceita o certificado self-signed; `-b`
+          # retorna exit != 0 em erro para a probe falhar corretamente.
+          livenessProbe:
+            exec:
+              command:
+                - /bin/bash
+                - -c
+                - /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -Q "SELECT 1" -b -o /dev/null
+            initialDelaySeconds: 60   # bootstrap inicial pode demorar
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 6
+          readinessProbe:
+            exec:
+              command:
+                - /bin/bash
+                - -c
+                - /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -Q "SELECT 1" -b -o /dev/null
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 12
+          volumeMounts:
+            - name: mssql-data
+              mountPath: /var/opt/mssql  # diretório default do MSSQL (data/log/backups)
+  # PVC criado uma vez por réplica e mantido entre rollouts/escalas.
+  # storageClass: usa o default do cluster (local-path neste kind).
+  volumeClaimTemplates:
+    - metadata:
+        name: mssql-data
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 10Gi

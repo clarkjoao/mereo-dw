@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    app.kubernetes.io/part-of: mereo-poc
+  name: clickhouse-play
+  namespace: mereo-clickhouse
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: clickhouse.mereo.local
+    http:
+      paths:
+      - backend:
+          service:
+            name: clickhouse-mereo-clickhouse
+            port:
+              number: 8123
+        path: /
+        pathType: Prefix

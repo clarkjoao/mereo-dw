@@ -1,0 +1,76 @@
+# ============================================================================
+# ClickHouseInstallation (clickhouse.altinity.com/v1)
+# ============================================================================
+# CR do Altinity ClickHouse Operator que descreve o cluster ClickHouse.
+# Pré-requisito: operator `clickhouse-operator` instalado (geralmente no
+# namespace `clickhouse-operator-system`). Sem ele, este CR não cria nada.
+#
+# Topologia (PoC):
+#   - 1 shard × 1 réplica (`shardsCount: 1, replicasCount: 1`).
+#   - Sem ZooKeeper/ClickHouse Keeper (single node).
+#   - HTTP em 8123, TCP nativo em 9000.
+#
+# Recursos GERADOS pelo operator a partir deste CR:
+#   StatefulSet/chi-mereo-clickhouse-main-0-0
+#   Service/chi-mereo-clickhouse-main-0-0 (headless, por pod)
+#   Service/clickhouse-mereo-clickhouse  (load balancer interno, alvo do dbt)
+#   ConfigMaps chi-mereo-clickhouse-common-* (configd/usersd)
+#   PVC ch-data-chi-mereo-clickhouse-main-0-0-0
+#
+# Política de usuários:
+#   default → networks/ip = ::/0 (acesso de qualquer pod do cluster).
+#   O usuário `dbt` (usado pelos pods do namespace mereo-analytics) é criado
+#   via users.xml gerenciado pelo Altinity operator (não está aqui).
+# ----------------------------------------------------------------------------
+apiVersion: clickhouse.altinity.com/v1
+kind: ClickHouseInstallation
+metadata:
+  name: mereo-clickhouse
+  namespace: mereo-clickhouse
+spec:
+  configuration:
+    clusters:
+      - name: main
+        layout:
+          shardsCount: 1
+          replicasCount: 1
+    users:
+      # Sem restrição de origem dentro do cluster (PoC). Em prod restrinja
+      # via networks/ip ao CIDR dos pods do dbt e bloqueie o default.
+      default/networks/ip:
+        - ::/0
+      default/profile: default
+      default/quota: default
+
+  defaults:
+    templates:
+      podTemplate: ch-pod
+      dataVolumeClaimTemplate: ch-data
+
+  templates:
+    podTemplates:
+      - name: ch-pod
+        spec:
+          containers:
+            - name: clickhouse
+              image: clickhouse/clickhouse-server:24.3
+              ports:
+                - name: http
+                  containerPort: 8123
+                - name: tcp
+                  containerPort: 9000
+              resources:
+                requests:
+                  cpu: 500m
+                  memory: 1Gi
+                limits:
+                  cpu: "1"
+                  memory: 2Gi
+
+    volumeClaimTemplates:
+      - name: ch-data
+        spec:
+          accessModes: [ReadWriteOnce]
+          resources:
+            requests:
+              storage: 20Gi  # PVC dos arquivos de dados (parts e merges)

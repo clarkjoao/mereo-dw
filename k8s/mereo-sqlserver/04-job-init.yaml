@@ -1,0 +1,68 @@
+# ============================================================================
+# Job: mssql-init
+# ============================================================================
+# Job one-shot que prepara o estado inicial do SQL Server: cria bancos, tabelas,
+# popula seed e habilita CDC. Roda os scripts do ConfigMap `mssql-init-sql` em
+# ordem alfabética via sqlcmd.
+#
+# Por que um Job e não um initContainer no StatefulSet?
+#   - Os comandos `sp_cdc_enable_db` exigem que o SQL Server esteja totalmente
+#     online (não basta a porta 1433 responder) — o Job espera até 5min em
+#     loop com sqlcmd "SELECT 1" antes de prosseguir.
+#   - Mantém o StatefulSet idempotente em rollouts; só roda o init uma vez.
+#
+# backoffLimit: 8 → tolera ~8 falhas (ex.: SQL ainda subindo na primeira
+# tentativa). ttlSecondsAfterFinished: 86400 → o Job é removido 24h depois de
+# completar; descomente/ajuste se quiser manter o histórico mais tempo.
+# ----------------------------------------------------------------------------
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mssql-init
+  namespace: mereo-sqlserver
+spec:
+  backoffLimit: 8
+  ttlSecondsAfterFinished: 86400
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: sqlcmd
+          image: mcr.microsoft.com/mssql/server:2022-latest  # mesma imagem → traz sqlcmd
+          env:
+            - name: MSSQL_HOST
+              value: mssql.mereo-sqlserver.svc.cluster.local
+            - name: SA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mssql-sa-credentials
+                  key: SA_PASSWORD
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -euo pipefail
+              echo "Aguardando ${MSSQL_HOST}:1433..."
+              for i in $(seq 1 60); do
+                if /opt/mssql-tools18/bin/sqlcmd -S "$MSSQL_HOST" -U sa -P "$SA_PASSWORD" -C -Q "SELECT 1" -b -o /dev/null 2>/dev/null; then
+                  echo "SQL Server respondeu."
+                  break
+                fi
+                if [ "$i" -eq 60 ]; then
+                  echo "Timeout aguardando SQL Server." >&2
+                  exit 1
+                fi
+                sleep 5
+              done
+              for script in /scripts/*.sql; do
+                echo "Executando $(basename "$script")..."
+                /opt/mssql-tools18/bin/sqlcmd -S "$MSSQL_HOST" -U sa -P "$SA_PASSWORD" -C -i "$script"
+              done
+              echo "Init SQL OK"
+          volumeMounts:
+            - name: init-sql
+              mountPath: /scripts
+      volumes:
+        - name: init-sql
+          configMap:
+            name: mssql-init-sql

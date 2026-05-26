@@ -1,0 +1,59 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    meta.helm.sh/release-name: mereo-dagster
+    meta.helm.sh/release-namespace: mereo-analytics
+  labels:
+    app: dagster
+    app.kubernetes.io/managed-by: Helm
+    chart: dagster-1.13.6
+    heritage: Helm
+    release: mereo-dagster
+  name: mereo-dagster-role
+  namespace: mereo-analytics
+rules:
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - batch
+  resources:
+  - jobs/status
+  verbs:
+  - get
+  - watch
+  - list
+- apiGroups:
+  - ''
+  resources:
+  - pods
+  - events
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ''
+  resources:
+  - pods/log
+  - pods/status
+  verbs:
+  - get
+  - watch
+  - list

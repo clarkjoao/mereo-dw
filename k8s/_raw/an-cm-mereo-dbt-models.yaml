@@ -1,0 +1,11 @@
+apiVersion: v1
+data:
+  gold___gold__models.yml: "version: 2\n\nmodels:\n  - name: colaborador_by_grupo\n    columns:\n      - name: tenant_slug\n        tests:\n          - not_null\n      - name: id_grupo_usuario\n        tests:\n          - not_null\n      - name: colaborador_count\n        tests:\n          - not_null\n"
+  gold__colaborador_by_grupo.sql: "{{\n  config(\n    materialized='table',\n    engine='MergeTree()',\n    order_by='(tenant_slug, id_grupo_usuario)',\n    settings={'allow_nullable_key': 1}\n  )\n}}\n\nselect\n    tenant_slug,\n    id_grupo_usuario,\n    count() as colaborador_count,\n    countIf(ativo = 1) as colaborador_ativos,\n    max(_ts_ms) as last_ts_ms\nfrom {{ ref('stg_colaborador') }}\nwhere id_grupo_usuario is not null\ngroup by tenant_slug, id_grupo_usuario\n"
+  staging___raw__sources.yml: "version: 2\n\nsources:\n  - name: raw\n    description: Landing CDC multi-tenant (Debezium \u2192 Kafka \u2192 ClickHouse raw).\n    database: raw\n    schema: raw\n    tables:\n      - name: colaborador\n        description: dbo.COLABORADOR unificado por tenant_slug. Contrato em analytics/catalog/entities/colaborador.yaml\n        columns:\n          - name: id\n            description: PK (dbo.COLABORADOR.ID)\n            tests:\n              - not_null\n          - name: tenant_slug\n            tests:\n              - not_null\n          - name: nome\n          - name: email\n          - name: id_grupo_usuario\n          - name: ativo\n          - name: _ts_ms\n          - name: _deleted\n"
+  staging___staging__models.yml: "version: 2\n\nmodels:\n  - name: stg_colaborador\n    tests:\n      - dbt_utils.unique_combination_of_columns:\n          combination_of_columns:\n            - tenant_slug\n            - id\n    columns:\n      - name: id\n        tests:\n          - not_null\n      - name: tenant_slug\n        tests:\n          - not_null\n"
+  staging__stg_colaborador.sql: "{{\n  config(\n    materialized='view'\n  )\n}}\n\nselect\n    id,\n    tenant_slug,\n    nome,\n    email,\n    id_grupo_usuario,\n    ativo,\n    _ts_ms,\n    _deleted\nfrom {{ source('raw', 'colaborador') }} final\nwhere _deleted = 0\n"
+kind: ConfigMap
+metadata:
+  name: mereo-dbt-models
+  namespace: mereo-analytics

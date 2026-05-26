@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    batch.kubernetes.io/controller-uid: 49f30f49-1a40-42cc-97b8-d75f8d60574b
+    batch.kubernetes.io/job-name: mssql-init
+    controller-uid: 49f30f49-1a40-42cc-97b8-d75f8d60574b
+    job-name: mssql-init
+  name: mssql-init
+  namespace: mereo-sqlserver
+spec:
+  backoffLimit: 8
+  completionMode: NonIndexed
+  completions: 1
+  parallelism: 1
+  selector:
+    matchLabels:
+      batch.kubernetes.io/controller-uid: 49f30f49-1a40-42cc-97b8-d75f8d60574b
+  suspend: false
+  template:
+    metadata:
+      labels:
+        batch.kubernetes.io/controller-uid: 49f30f49-1a40-42cc-97b8-d75f8d60574b
+        batch.kubernetes.io/job-name: mssql-init
+        controller-uid: 49f30f49-1a40-42cc-97b8-d75f8d60574b
+        job-name: mssql-init
+    spec:
+      containers:
+      - command:
+        - /bin/bash
+        - -c
+        - "set -euo pipefail\necho \"Aguardando ${MSSQL_HOST}:1433...\"\nfor i in $(seq 1 60); do\n  if /opt/mssql-tools18/bin/sqlcmd -S \"$MSSQL_HOST\" -U sa -P \"$SA_PASSWORD\" -C -Q \"SELECT 1\" -b -o /dev/null 2>/dev/null; then\n    echo \"SQL Server respondeu.\"\n    break\n  fi\n  if [ \"$i\" -eq 60 ]; then\n    echo \"Timeout aguardando SQL Server.\" >&2\n    exit 1\n  fi\n  sleep 5\ndone\nfor script in /scripts/*.sql; do\n  echo \"Executando $(basename \"$script\")...\"\n  /opt/mssql-tools18/bin/sqlcmd -S \"$MSSQL_HOST\" -U sa -P \"$SA_PASSWORD\" -C -i \"$script\"\ndone\necho \"Init SQL OK\"\n"
+        env:
+        - name: MSSQL_HOST
+          value: mssql.mereo-sqlserver.svc.cluster.local
+        - name: SA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: SA_PASSWORD
+              name: mssql-sa-credentials
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        name: sqlcmd
+        resources: {}
+        volumeMounts:
+        - mountPath: /scripts
+          name: init-sql
+      restartPolicy: OnFailure
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: mssql-init-sql
+        name: init-sql
+  ttlSecondsAfterFinished: 86400

@@ -1,0 +1,50 @@
+apiVersion: clickhouse.altinity.com/v1
+kind: ClickHouseInstallation
+metadata:
+  annotations:
+    clickhouse.altinity.com/reconcile: '1779752423'
+  name: mereo-clickhouse
+  namespace: mereo-clickhouse
+spec:
+  configuration:
+    clusters:
+    - layout:
+        replicasCount: 1
+        shardsCount: 1
+      name: main
+    users:
+      default/networks/ip:
+      - ::/0
+      default/profile: default
+      default/quota: default
+  defaults:
+    templates:
+      dataVolumeClaimTemplate: ch-data
+      podTemplate: ch-pod
+  templates:
+    podTemplates:
+    - name: ch-pod
+      spec:
+        containers:
+        - image: clickhouse/clickhouse-server:24.3
+          name: clickhouse
+          ports:
+          - containerPort: 8123
+            name: http
+          - containerPort: 9000
+            name: tcp
+          resources:
+            limits:
+              cpu: '1'
+              memory: 2Gi
+            requests:
+              cpu: 500m
+              memory: 1Gi
+    volumeClaimTemplates:
+    - name: ch-data
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 20Gi

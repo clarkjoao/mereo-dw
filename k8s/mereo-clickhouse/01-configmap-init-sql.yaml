@@ -1,0 +1,148 @@
+# ============================================================================
+# ConfigMap: clickhouse-init-sql
+# ============================================================================
+# Script DDL que estabelece o schema completo do warehouse:
+#
+#   raw      → ingestão CDC (Kafka engine + ReplacingMergeTree + MV)
+#   gold     → modelos dbt (camada de negócio, materializados pelo dbt-clickhouse)
+#   pipeline → métricas operacionais (watermark, consumer lag, freshness)
+#
+# Fluxo de uma mensagem CDC dentro do ClickHouse:
+#
+#   raw.colaborador_kafka  ── Kafka engine (consumer group ch-raw-colaborador)
+#         │
+#         ▼ (raw.colaborador_mv: MATERIALIZED VIEW dispara em cada INSERT)
+#   raw.colaborador        ── ReplacingMergeTree(_ts_ms, _deleted)
+#                            • dedupe por (tenant_slug, id) → versão mais nova
+#                            • _deleted=1 vira tombstone (filtrado em FINAL)
+#
+# Como este ConfigMap é APLICADO ao ClickHouse?
+#   Não há Job dedicado neste namespace — o init.sql é executado pelo dbt
+#   no boot do `mereo-analytics-code` (etapa dbt parse), e/ou pode ser
+#   executado manualmente via:
+#     kubectl exec -n mereo-clickhouse chi-mereo-clickhouse-main-0-0-0 -- \
+#       clickhouse-client --multiquery < init.sql
+#
+# ATENÇÃO: o ConfigMap NÃO cria o usuário `dbt`; isso é feito via users.xml
+# do ClickHouse (gerenciado pelo Altinity operator) com hash da senha do
+# Secret. Se a senha em Secret/dbt-credentials mudar, atualize users.xml.
+# ----------------------------------------------------------------------------
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clickhouse-init-sql
+  namespace: mereo-clickhouse
+data:
+  init.sql: |
+    -- ------------------------------------------------------------------
+    -- Databases
+    -- ------------------------------------------------------------------
+    CREATE DATABASE IF NOT EXISTS raw;
+    CREATE DATABASE IF NOT EXISTS gold;
+    CREATE DATABASE IF NOT EXISTS pipeline;
+
+    -- ------------------------------------------------------------------
+    -- raw.colaborador — tabela "destino" da camada raw (multi-tenant)
+    -- ReplacingMergeTree usa _ts_ms como versão e _deleted como flag.
+    -- ORDER BY (tenant_slug, id) é a chave de deduplicação.
+    -- ------------------------------------------------------------------
+    CREATE TABLE IF NOT EXISTS raw.colaborador (
+        id Int64,
+        tenant_slug String,
+        nome Nullable(String),
+        email Nullable(String),
+        id_grupo_usuario Nullable(Int64),
+        ativo Nullable(UInt8),
+        _ts_ms UInt64,
+        _deleted UInt8
+    )
+    ENGINE = ReplacingMergeTree(_ts_ms, _deleted)
+    ORDER BY (tenant_slug, id);
+
+    -- ------------------------------------------------------------------
+    -- raw.colaborador_kafka — engine Kafka (consumer do tópico)
+    -- Os campos vêm do JSON achatado pelo Debezium SMT unwrap:
+    --   colunas originais (ID, NOME, ...) + tenant_slug + __ts_ms + __deleted.
+    -- ------------------------------------------------------------------
+    CREATE TABLE IF NOT EXISTS raw.colaborador_kafka (
+        `ID` Int64,
+        `NOME` Nullable(String),
+        `EMAIL` Nullable(String),
+        `ID_GRUPO_USUARIO` Nullable(Int64),
+        `ATIVO` Nullable(Bool),
+        tenant_slug String,
+        ts_ms Nullable(UInt64),
+        `__ts_ms` Nullable(UInt64),
+        __deleted Nullable(String)
+    )
+    ENGINE = Kafka
+    SETTINGS
+        kafka_broker_list = 'mereo-kafka-kafka-bootstrap.mereo-kafka:9092',
+        kafka_topic_list = 'raw.colaborador',
+        kafka_group_name = 'ch-raw-colaborador',
+        kafka_format = 'JSONEachRow',
+        kafka_num_consumers = 1,
+        kafka_skip_broken_messages = 100;   -- tolera 100 mensagens malformadas
+
+    -- ------------------------------------------------------------------
+    -- raw.colaborador_mv — MATERIALIZED VIEW que copia/transforma
+    -- linhas de raw.colaborador_kafka para raw.colaborador.
+    -- Normaliza nomes (UPPER → snake_case), faz cast de tipos
+    -- e converte __deleted ("true"/"false") em UInt8 (1/0).
+    -- ------------------------------------------------------------------
+    CREATE MATERIALIZED VIEW IF NOT EXISTS raw.colaborador_mv
+    TO raw.colaborador AS
+    SELECT
+        ID AS id,
+        tenant_slug,
+        NOME AS nome,
+        EMAIL AS email,
+        ID_GRUPO_USUARIO AS id_grupo_usuario,
+        if(ATIVO IS NULL, NULL, toUInt8(ATIVO)) AS ativo,
+        coalesce(ts_ms, __ts_ms, toUInt64(0)) AS _ts_ms,
+        if(__deleted = 'true', toUInt8(1), toUInt8(0)) AS _deleted
+    FROM raw.colaborador_kafka
+    WHERE ID IS NOT NULL;
+
+    -- ------------------------------------------------------------------
+    -- pipeline.* — métricas operacionais (preenchidas pelo CronJob
+    -- `pipeline-lag-snapshot` e pelo sensor de freshness do Dagster).
+    -- ------------------------------------------------------------------
+    CREATE TABLE IF NOT EXISTS pipeline.entity_watermarks (
+        entity String,
+        ch_max_ts_ms UInt64,
+        kafka_hi_offset Nullable(Int64),
+        checked_at DateTime64(3) DEFAULT now64(3)
+    )
+    ENGINE = ReplacingMergeTree(checked_at)
+    ORDER BY entity;
+
+    CREATE TABLE IF NOT EXISTS pipeline.consumer_lag_snapshots (
+        consumer_group String,
+        topic String,
+        lag Int64,
+        snapshot_at DateTime64(3) DEFAULT now64(3)
+    )
+    ENGINE = MergeTree()
+    ORDER BY (consumer_group, topic, snapshot_at);
+
+    CREATE TABLE IF NOT EXISTS pipeline.freshness_events (
+        entity String,
+        dbt_blocked UInt8,
+        reason String,
+        at DateTime64(3) DEFAULT now64(3)
+    )
+    ENGINE = MergeTree()
+    ORDER BY (entity, at);
+
+    CREATE TABLE IF NOT EXISTS pipeline.recovery_runs (
+        run_id String,
+        entity String,
+        gap_from DateTime64(3),
+        gap_to DateTime64(3),
+        status String,
+        rows_loaded UInt64,
+        at DateTime64(3) DEFAULT now64(3)
+    )
+    ENGINE = MergeTree()
+    ORDER BY (run_id, at);

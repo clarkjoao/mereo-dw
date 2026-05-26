@@ -1,0 +1,28 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  labels:
+    strimzi.io/cluster: mereo-kafka
+  name: mereogr.schema-history
+  namespace: mereo-kafka
+spec:
+  config:
+    cleanup.policy: delete
+    retention.ms: -1
+    segment.bytes: 33554432
+  partitions: 1
+  replicas: 1
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  labels:
+    strimzi.io/cluster: mereo-kafka
+  name: raw.colaborador
+  namespace: mereo-kafka
+spec:
+  config:
+    cleanup.policy: delete
+    retention.ms: 604800000
+  partitions: 6
+  replicas: 1

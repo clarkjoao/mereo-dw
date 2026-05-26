@@ -1,0 +1,41 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnect
+metadata:
+  annotations:
+    strimzi.io/use-connector-resources: 'true'
+  name: mereo-connect
+  namespace: mereo-kafka
+spec:
+  bootstrapServers: mereo-kafka-kafka-bootstrap.mereo-kafka:9092
+  config:
+    config.providers: file
+    config.providers.file.class: org.apache.kafka.common.config.provider.FileConfigProvider
+    config.storage.replication.factor: 1
+    config.storage.topic: mereo-connect-configs
+    group.id: mereo-connect-cluster
+    key.converter: org.apache.kafka.connect.json.JsonConverter
+    key.converter.schemas.enable: false
+    offset.storage.replication.factor: 1
+    offset.storage.topic: mereo-connect-offsets
+    status.storage.replication.factor: 1
+    status.storage.topic: mereo-connect-status
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter.schemas.enable: false
+  externalConfiguration:
+    volumes:
+    - name: mssql-creds
+      secret:
+        secretName: mssql-debezium-creds
+  image: cdc-poc/kafka-connect-debezium:2.7.3.Final-kafka3.7.1
+  jvmOptions:
+    -Xms: 512m
+    -Xmx: 1024m
+  replicas: 1
+  resources:
+    limits:
+      cpu: '1'
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+  version: 3.7.1

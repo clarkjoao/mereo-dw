@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: pipeline-lag-snapshot
+  namespace: mereo-clickhouse
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    metadata: {}
+    spec:
+      template:
+        metadata: {}
+        spec:
+          containers:
+          - command:
+            - /bin/bash
+            - -ec
+            - 'HOST="clickhouse-mereo-clickhouse.mereo-clickhouse.svc.cluster.local"
+
+              clickhouse-client --host "$HOST" --multiquery --query "
+
+              INSERT INTO pipeline.entity_watermarks (entity, ch_max_ts_ms, checked_at)
+
+              SELECT ''colaborador'', coalesce(max(_ts_ms), 0), now64(3) FROM raw.colaborador;
+
+
+              INSERT INTO pipeline.consumer_lag_snapshots (consumer_group, topic, lag, snapshot_at)
+
+              SELECT group, table, coalesce(sum(num_messages - coalesce(offset, 0)), 0), now64(3)
+
+              FROM system.kafka_consumers
+
+              WHERE group = ''ch-raw-colaborador''
+
+              GROUP BY group, table;
+
+              "
+
+              echo "pipeline snapshot OK"
+
+              '
+            image: clickhouse/clickhouse-server:24.3
+            name: snapshot
+            resources: {}
+          restartPolicy: OnFailure
+  schedule: '*/5 * * * *'
+  successfulJobsHistoryLimit: 3
+  suspend: false

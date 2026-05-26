@@ -1,0 +1,58 @@
+# ============================================================================
+# CronJob: pipeline-lag-snapshot
+# ============================================================================
+# Toma um snapshot operacional do pipeline a cada 5 minutos:
+#   1. `pipeline.entity_watermarks` recebe MAX(_ts_ms) de raw.colaborador,
+#      indicando até quando temos dados em ClickHouse para a entidade.
+#   2. `pipeline.consumer_lag_snapshots` recebe o lag agregado do consumer
+#      `ch-raw-colaborador` (Kafka engine do ClickHouse).
+#
+# Essas tabelas alimentam:
+#   - O sensor `raw_freshness_sensor` do Dagster (decide se libera dbt build).
+#   - Dashboards de observabilidade da pipeline (gold layer).
+#
+# concurrencyPolicy: Forbid → se um job ainda está rodando quando chega a hora
+# do próximo, o próximo é pulado. Evita acumular execuções.
+#
+# As métricas saem do sistema interno do ClickHouse:
+#   - system.kafka_consumers expõe `num_messages` (lidas) e `offset` (commit)
+#     por consumer group; o `lag` aqui é (num_messages - offset) somado.
+#
+# Resources: vazio — apenas um shell + clickhouse-client; o agendamento curto
+# evita pico, mas em prod adicione requests/limits e considere reduzir image
+# para alpine + clickhouse-client (24.3 server é >700 MB).
+# ----------------------------------------------------------------------------
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: pipeline-lag-snapshot
+  namespace: mereo-clickhouse
+spec:
+  schedule: "*/5 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: snapshot
+              image: clickhouse/clickhouse-server:24.3
+              command:
+                - /bin/bash
+                - -ec
+                - |
+                  HOST="clickhouse-mereo-clickhouse.mereo-clickhouse.svc.cluster.local"
+                  clickhouse-client --host "$HOST" --multiquery --query "
+                  INSERT INTO pipeline.entity_watermarks (entity, ch_max_ts_ms, checked_at)
+                  SELECT 'colaborador', coalesce(max(_ts_ms), 0), now64(3) FROM raw.colaborador;
+
+                  INSERT INTO pipeline.consumer_lag_snapshots (consumer_group, topic, lag, snapshot_at)
+                  SELECT group, table, coalesce(sum(num_messages - coalesce(offset, 0)), 0), now64(3)
+                  FROM system.kafka_consumers
+                  WHERE group = 'ch-raw-colaborador'
+                  GROUP BY group, table;
+                  "
+                  echo "pipeline snapshot OK"

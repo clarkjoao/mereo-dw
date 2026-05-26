@@ -1,0 +1,124 @@
+# ============================================================================
+# Deployment + Service: mereo-analytics-code (gRPC user code location)
+# ============================================================================
+# Esse pod é o "user code server" do Dagster: roda um servidor gRPC na 3030 que
+# o webserver e o daemon usam para descobrir/dispatch definitions
+# (assets, jobs, schedules, sensors).
+#
+# Imagem `python:3.12-slim` — pip install acontece no `start.sh`. Vantagens:
+#   - rebuilds rápidos (só `kubectl rollout restart`).
+#   - hot reload do código via ConfigMap.
+# Custo: cada pod novo pega ~30s para `pip install`. Em prod, construir
+# imagem custom com deps pre-instaladas.
+#
+# Probes:
+#   - readinessProbe: TCP na 3030 com initialDelay 90s (alto para cobrir
+#     `pip install` + `dbt parse`). Aumentar se rede do node for lenta.
+#
+# Volumes (todos ConfigMap):
+#   /config/dbt      → mereo-dbt-project (dbt_project.yml + profiles)
+#   /config/models   → mereo-dbt-models (modelos .sql)
+#   /config/dagster  → mereo-dagster-code (Python + scripts, mode 0755)
+#
+# Annotation `kubectl.kubernetes.io/restartedAt`:
+#   Adicionada pelo comando `kubectl rollout restart`. Não editar manualmente.
+# ----------------------------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: mereo-analytics-code
+  namespace: mereo-analytics
+  labels:
+    app: mereo-analytics-code
+spec:
+  type: ClusterIP
+  selector:
+    app: mereo-analytics-code
+  ports:
+    - name: grpc
+      port: 3030
+      targetPort: 3030
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mereo-analytics-code
+  namespace: mereo-analytics
+  labels:
+    app: mereo-analytics-code
+    app.kubernetes.io/part-of: mereo-analytics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mereo-analytics-code
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app: mereo-analytics-code
+    spec:
+      containers:
+        - name: grpc
+          image: python:3.12-slim
+          command:
+            - /bin/bash
+            - /config/dagster/start.sh
+          ports:
+            - name: grpc
+              containerPort: 3030
+          env:
+            - name: DBT_TARGET
+              value: k8s             # seleciona output `k8s` do profiles.yml
+            - name: CH_DBT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: clickhouse-dbt-credentials
+                  key: password
+            - name: CH_HOST
+              value: clickhouse-mereo-clickhouse.mereo-clickhouse.svc.cluster.local
+            - name: CH_PORT
+              value: "8123"
+            - name: CH_USER
+              value: dbt
+            - name: CH_RAW_CONSUMER_GROUP
+              value: ch-raw-colaborador-v2
+            - name: MEREPO_PILOT_ENTITY
+              value: colaborador
+          readinessProbe:
+            tcpSocket:
+              port: 3030
+            initialDelaySeconds: 90  # cobre pip install + dbt parse iniciais
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          volumeMounts:
+            - mountPath: /config/dbt
+              name: dbt-config
+            - mountPath: /config/models
+              name: dbt-models
+              readOnly: true
+            - mountPath: /config/dagster
+              name: dagster-code
+      volumes:
+        - name: dbt-config
+          configMap:
+            name: mereo-dbt-project
+        - name: dbt-models
+          configMap:
+            name: mereo-dbt-models
+        - name: dagster-code
+          configMap:
+            name: mereo-dagster-code
+            defaultMode: 493  # 0755 — scripts e .py executáveis

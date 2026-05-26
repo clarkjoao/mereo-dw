@@ -1,0 +1,119 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  labels:
+    strimzi.io/cluster: mereo-connect
+  name: mereogr-afya-colaborador
+  namespace: mereo-kafka
+spec:
+  class: io.debezium.connector.sqlserver.SqlServerConnector
+  config:
+    database.encrypt: 'false'
+    database.hostname: ${file:/opt/kafka/external-configuration/mssql-creds/debezium.properties:database.hostname}
+    database.names: MereoGR-Afya
+    database.password: ${file:/opt/kafka/external-configuration/mssql-creds/debezium.properties:database.password}
+    database.port: ${file:/opt/kafka/external-configuration/mssql-creds/debezium.properties:database.port}
+    database.trustServerCertificate: 'true'
+    database.user: ${file:/opt/kafka/external-configuration/mssql-creds/debezium.properties:database.user}
+    heartbeat.interval.ms: '10000'
+    key.converter: org.apache.kafka.connect.json.JsonConverter
+    key.converter.schemas.enable: 'false'
+    poll.interval.ms: '500'
+    schema.history.internal.kafka.bootstrap.servers: mereo-kafka-kafka-bootstrap.mereo-kafka:9092
+    schema.history.internal.kafka.topic: mereogr.schema-history
+    snapshot.locking.mode: none
+    snapshot.mode: initial
+    table.include.list: dbo.COLABORADOR
+    tombstones.on.delete: 'true'
+    topic.prefix: mereogr-afya
+    transforms: unwrap,reroute,tenant
+    transforms.reroute.topic.regex: .*
+    transforms.reroute.topic.replacement: raw.colaborador
+    transforms.reroute.type: io.debezium.transforms.ByLogicalTableRouter
+    transforms.tenant.static.field: tenant_slug
+    transforms.tenant.static.value: afya
+    transforms.tenant.type: org.apache.kafka.connect.transforms.InsertField$Value
+    transforms.unwrap.add.fields: op:en,source.ts_ms:ts_ms
+    transforms.unwrap.delete.handling.mode: rewrite
+    transforms.unwrap.type: io.debezium.transforms.ExtractNewRecordState
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter.schemas.enable: 'false'
+  tasksMax: 1
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  labels:
+    strimzi.io/cluster: mereo-connect
+  name: mereogr-allos-colaborador
+  namespace: mereo-kafka
+spec:
+  class: io.debezium.connector.sqlserver.SqlServerConnector
+  config:
+    database.encrypt: 'false'
+    database.hostname: ${file:/opt/kafka/external-configuration/mssql-creds/debezium.properties:database.hostname}
+    database.names: MereoGR-Allos
+    database.password: ${file:/opt/kafka/external-configuration/mssql-creds/debezium.properties:database.password}
+    database.port: ${file:/opt/kafka/external-configuration/mssql-creds/debezium.properties:database.port}
+    database.trustServerCertificate: 'true'
+    database.user: ${file:/opt/kafka/external-configuration/mssql-creds/debezium.properties:database.user}
+    key.converter: org.apache.kafka.connect.json.JsonConverter
+    key.converter.schemas.enable: 'false'
+    schema.history.internal.kafka.bootstrap.servers: mereo-kafka-kafka-bootstrap.mereo-kafka:9092
+    schema.history.internal.kafka.topic: mereogr.schema-history
+    snapshot.locking.mode: none
+    snapshot.mode: initial
+    table.include.list: dbo.COLABORADOR
+    topic.prefix: mereogr-allos
+    transforms: unwrap,reroute,tenant
+    transforms.reroute.topic.regex: .*
+    transforms.reroute.topic.replacement: raw.colaborador
+    transforms.reroute.type: io.debezium.transforms.ByLogicalTableRouter
+    transforms.tenant.static.field: tenant_slug
+    transforms.tenant.static.value: allos
+    transforms.tenant.type: org.apache.kafka.connect.transforms.InsertField$Value
+    transforms.unwrap.add.fields: op:en,source.ts_ms:ts_ms
+    transforms.unwrap.delete.handling.mode: rewrite
+    transforms.unwrap.type: io.debezium.transforms.ExtractNewRecordState
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter.schemas.enable: 'false'
+  tasksMax: 1
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  labels:
+    strimzi.io/cluster: mereo-connect
+  name: mereogr-staging-colaborador
+  namespace: mereo-kafka
+spec:
+  class: io.debezium.connector.sqlserver.SqlServerConnector
+  config:
+    database.encrypt: 'false'
+    database.hostname: ${file:/opt/kafka/external-configuration/mssql-creds/debezium.properties:database.hostname}
+    database.names: MereoGR-Staging
+    database.password: ${file:/opt/kafka/external-configuration/mssql-creds/debezium.properties:database.password}
+    database.port: ${file:/opt/kafka/external-configuration/mssql-creds/debezium.properties:database.port}
+    database.trustServerCertificate: 'true'
+    database.user: ${file:/opt/kafka/external-configuration/mssql-creds/debezium.properties:database.user}
+    key.converter: org.apache.kafka.connect.json.JsonConverter
+    key.converter.schemas.enable: 'false'
+    schema.history.internal.kafka.bootstrap.servers: mereo-kafka-kafka-bootstrap.mereo-kafka:9092
+    schema.history.internal.kafka.topic: mereogr.schema-history
+    snapshot.locking.mode: none
+    snapshot.mode: initial
+    table.include.list: dbo.COLABORADOR
+    topic.prefix: mereogr-staging
+    transforms: unwrap,reroute,tenant
+    transforms.reroute.topic.regex: .*
+    transforms.reroute.topic.replacement: raw.colaborador
+    transforms.reroute.type: io.debezium.transforms.ByLogicalTableRouter
+    transforms.tenant.static.field: tenant_slug
+    transforms.tenant.static.value: staging
+    transforms.tenant.type: org.apache.kafka.connect.transforms.InsertField$Value
+    transforms.unwrap.add.fields: op:en,source.ts_ms:ts_ms
+    transforms.unwrap.delete.handling.mode: rewrite
+    transforms.unwrap.type: io.debezium.transforms.ExtractNewRecordState
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter.schemas.enable: 'false'
+  tasksMax: 1

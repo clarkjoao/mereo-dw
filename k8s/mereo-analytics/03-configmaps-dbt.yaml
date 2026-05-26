@@ -1,0 +1,194 @@
+# ============================================================================
+# ConfigMaps com o PROJETO DBT
+# ============================================================================
+# Em vez de empacotar o projeto dbt numa imagem Docker dedicada, o projeto vive
+# em dois ConfigMaps que são montados nos pods do mereo-analytics-code
+# (gRPC server) e nos pods de run job lançados pelo K8sRunLauncher:
+#
+#   mereo-dbt-project  → dbt_project.yml, profiles.yml, packages.yml
+#   mereo-dbt-models   → arquivos .sql/.yml de staging e gold
+#
+# Arquivos de modelo usam `__` como separador de pasta (sem barras nas keys
+# do ConfigMap): `staging__stg_colaborador.sql` representa
+# `models/staging/stg_colaborador.sql`. O `sync-workspace.sh` em
+# `mereo-dagster-code` reconstrói a árvore antes de chamar `dbt parse`.
+#
+# Vantagem: rebuild de modelo é só `kubectl apply` + restart do deployment —
+# não precisa rebuildar imagem.
+# Limitação: ConfigMaps têm ~1 MiB → suficiente p/ entidade piloto, mas o
+# caminho de escala é mover para volume de PV ou puxar via git-sync.
+# ----------------------------------------------------------------------------
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mereo-dbt-project
+  namespace: mereo-analytics
+data:
+  dbt_project.yml: |
+    name: mereo_analytics
+    version: 1.0.0
+    config-version: 2
+    profile: mereo_clickhouse
+
+    model-paths: ["models"]
+    analysis-paths: ["analyses"]
+    test-paths: ["tests"]
+    seed-paths: ["seeds"]
+    macro-paths: ["macros"]
+    snapshot-paths: ["snapshots"]
+
+    target-path: target
+    clean-targets:
+      - target
+      - dbt_packages
+
+    models:
+      mereo_analytics:
+        staging:
+          +materialized: view     # staging = view (sem custo de storage)
+        gold:
+          +materialized: table    # gold = table (consultas rápidas)
+
+    vars:
+      raw_database: raw
+      gold_database: gold
+
+  packages.yml: |
+    packages:
+      - package: dbt-labs/dbt_utils
+        version: 1.3.0
+
+  # IMPORTANTE: profiles.yml define DOIS targets:
+  #   dev: aponta pra localhost:18123 (port-forward kubectl)
+  #   k8s: aponta pro service `clickhouse-mereo-clickhouse...8123` (in-cluster)
+  # Os deployments setam DBT_TARGET=k8s para selecionar o target k8s.
+  profiles.yml: |
+    mereo_clickhouse:
+      target: dev
+      outputs:
+        dev:
+          type: clickhouse
+          schema: gold
+          host: localhost
+          port: 18123
+          user: dbt
+          password: "{{ env_var('CH_DBT_PASSWORD') }}"
+          secure: false
+          verify: false
+        k8s:
+          type: clickhouse
+          schema: gold
+          host: clickhouse-mereo-clickhouse.mereo-clickhouse.svc.cluster.local
+          port: 8123
+          user: dbt
+          password: "{{ env_var('CH_DBT_PASSWORD') }}"
+          secure: false
+          verify: false
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mereo-dbt-models
+  namespace: mereo-analytics
+data:
+  # ----- sources: declara raw.colaborador como fonte -----
+  staging___raw__sources.yml: |
+    version: 2
+
+    sources:
+      - name: raw
+        description: Landing CDC multi-tenant (Debezium → Kafka → ClickHouse raw).
+        database: raw
+        schema: raw
+        tables:
+          - name: colaborador
+            description: dbo.COLABORADOR unificado por tenant_slug. Contrato em analytics/catalog/entities/colaborador.yaml
+            columns:
+              - name: id
+                description: PK (dbo.COLABORADOR.ID)
+                tests:
+                  - not_null
+              - name: tenant_slug
+                tests:
+                  - not_null
+              - name: nome
+              - name: email
+              - name: id_grupo_usuario
+              - name: ativo
+              - name: _ts_ms
+              - name: _deleted
+
+  # ----- staging: stg_colaborador (view, deduplicação via FINAL + filtro deleted) -----
+  staging___staging__models.yml: |
+    version: 2
+
+    models:
+      - name: stg_colaborador
+        tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns:
+                - tenant_slug
+                - id
+        columns:
+          - name: id
+            tests:
+              - not_null
+          - name: tenant_slug
+            tests:
+              - not_null
+
+  staging__stg_colaborador.sql: |
+    {{
+      config(
+        materialized='view'
+      )
+    }}
+
+    select
+        id,
+        tenant_slug,
+        nome,
+        email,
+        id_grupo_usuario,
+        ativo,
+        _ts_ms,
+        _deleted
+    from {{ source('raw', 'colaborador') }} final  -- FINAL aplica dedupe do ReplacingMergeTree
+    where _deleted = 0                              -- filtra tombstones
+
+  # ----- gold: colaborador_by_grupo (table MergeTree para dashboards) -----
+  gold___gold__models.yml: |
+    version: 2
+
+    models:
+      - name: colaborador_by_grupo
+        columns:
+          - name: tenant_slug
+            tests:
+              - not_null
+          - name: id_grupo_usuario
+            tests:
+              - not_null
+          - name: colaborador_count
+            tests:
+              - not_null
+
+  gold__colaborador_by_grupo.sql: |
+    {{
+      config(
+        materialized='table',
+        engine='MergeTree()',
+        order_by='(tenant_slug, id_grupo_usuario)',
+        settings={'allow_nullable_key': 1}
+      )
+    }}
+
+    select
+        tenant_slug,
+        id_grupo_usuario,
+        count() as colaborador_count,
+        countIf(ativo = 1) as colaborador_ativos,
+        max(_ts_ms) as last_ts_ms
+    from {{ ref('stg_colaborador') }}
+    where id_grupo_usuario is not null
+    group by tenant_slug, id_grupo_usuario

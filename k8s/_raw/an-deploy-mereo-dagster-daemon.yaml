@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    meta.helm.sh/release-name: mereo-dagster
+    meta.helm.sh/release-namespace: mereo-analytics
+  labels:
+    app.kubernetes.io/instance: mereo-dagster
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: dagster
+    app.kubernetes.io/version: 1.13.6
+    component: dagster-daemon
+    deployment: daemon
+    helm.sh/chart: dagster-1.13.6
+  name: mereo-dagster-daemon
+  namespace: mereo-analytics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: mereo-dagster
+      app.kubernetes.io/name: dagster
+      component: dagster-daemon
+      deployment: daemon
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        checksum/dagster-instance: 8313f9ce86b88e7625ee92633f2e893a8831de37e75af0a14f80a4bc253c06d6
+        checksum/dagster-workspace: 4be108f47500326d2388b94d95f78aed84a03cdf2171d5b1082c2705f2b4e6f9
+      labels:
+        app.kubernetes.io/instance: mereo-dagster
+        app.kubernetes.io/name: dagster
+        component: dagster-daemon
+        deployment: daemon
+    spec:
+      affinity: {}
+      automountServiceAccountToken: true
+      containers:
+      - command:
+        - /bin/bash
+        - -c
+        - dagster-daemon run -w /dagster-workspace/workspace.yaml
+        env:
+        - name: DAGSTER_PG_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: postgresql-password
+              name: dagster-postgresql-secret
+        - name: DAGSTER_DAEMON_HEARTBEAT_TOLERANCE
+          value: '1800'
+        envFrom:
+        - configMapRef:
+            name: mereo-dagster-daemon-env
+        image: docker.io/dagster/dagster-celery-k8s:1.13.6
+        imagePullPolicy: Always
+        name: dagster
+        resources: {}
+        volumeMounts:
+        - mountPath: /opt/dagster/dagster_home/dagster.yaml
+          name: dagster-instance
+          subPath: dagster.yaml
+        - mountPath: /dagster-workspace/
+          name: dagster-workspace-yaml
+        - mountPath: /config/dagster
+          name: dagster-code
+        - mountPath: /usr/local/lib/python3.10/site-packages/sitecustomize.py
+          name: dagster-code
+          subPath: k8s-client-auth-fix.py
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - until pg_isready -h mereo-dagster-postgresql -p 5432 -U test; do echo waiting for database; sleep 2; done;
+        image: docker.io/library/postgres:14.6
+        name: check-db-ready
+        resources: {}
+      serviceAccount: mereo-dagster
+      serviceAccountName: mereo-dagster
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: mereo-dagster-instance
+        name: dagster-instance
+      - configMap:
+          defaultMode: 420
+          name: mereo-dagster-workspace-yaml
+        name: dagster-workspace-yaml
+      - configMap:
+          defaultMode: 493
+          name: mereo-dagster-code
+        name: dagster-code

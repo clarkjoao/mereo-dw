@@ -1,0 +1,48 @@
+# ============================================================================
+# Namespaces da plataforma Mereo Analytics (PoC CDC)
+# ============================================================================
+# A plataforma roda em 4 namespaces que correspondem aos 4 estágios do fluxo de
+# dados (CDC = Change Data Capture):
+#
+#   mereo-sqlserver   →  Fonte: SQL Server 2022 com CDC habilitado (origem dos
+#                        bancos MereoGR-Afya, MereoGR-Staging, MereoGR-Allos).
+#   mereo-kafka       →  Bus de eventos: Strimzi Kafka + ZooKeeper +
+#                        Kafka Connect/Debezium (lê CDC do SQL Server).
+#   mereo-clickhouse  →  Data Warehouse colunar: ClickHouse via Altinity
+#                        Operator + Materialized View consumindo o tópico Kafka.
+#   mereo-analytics   →  Orquestração: Dagster + dbt (transformações
+#                        staging→gold) e Postgres interno do Dagster.
+#
+# Aplicar primeiro: kubectl apply -f 00-namespaces.yaml
+# ----------------------------------------------------------------------------
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mereo-sqlserver
+  labels:
+    app.kubernetes.io/part-of: mereo-cdc
+    stage: source
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mereo-kafka
+  labels:
+    app.kubernetes.io/part-of: mereo-cdc
+    stage: bus
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mereo-clickhouse
+  labels:
+    app.kubernetes.io/part-of: mereo-cdc
+    stage: warehouse
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mereo-analytics
+  labels:
+    app.kubernetes.io/part-of: mereo-cdc
+    stage: orchestration

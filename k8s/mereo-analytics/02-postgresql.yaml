@@ -1,0 +1,179 @@
+# ============================================================================
+# Postgres interno do Dagster (StatefulSet + Services)
+# ============================================================================
+# Banco usado pelo Dagster como `run_storage`, `event_log_storage` e
+# `schedule_storage`. Não confundir com o data warehouse (ClickHouse) — este
+# Postgres armazena metadados de execução do orquestrador.
+#
+# Origem do manifest: chart bitnami/postgresql v8.1.0 (Helm). Mantém a
+# imagem upstream `postgres:14.6` com wrapper bitnami para chmod inicial.
+#
+# Tópicos sensíveis:
+#   - PGDATA=/bitnami/postgresql/data ; o initContainer (UID 0) cria/chmoda
+#     esse diretório e depois o container principal roda como UID 1001
+#     (securityContext.runAsUser=1001, fsGroup=1001).
+#   - Service headless (`-headless`) é o `serviceName` do StatefulSet para
+#     resolução DNS estável do pod (mereo-dagster-postgresql-0.<headless>).
+#   - O Service regular (sem -headless) é o ClusterIP usado pelos clientes
+#     (env DAGSTER_PG_HOSTNAME = mereo-dagster-postgresql).
+#
+# Tamanho do PVC: 8Gi — suficiente para o histórico de runs do PoC. Em prod
+# aumentar e considerar substituir por CloudNativePG (já presente no cluster
+# no namespace cnpg-system) para HA.
+# ----------------------------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: mereo-dagster-postgresql
+  namespace: mereo-analytics
+  labels:
+    app: postgresql
+spec:
+  type: ClusterIP
+  selector:
+    app: postgresql
+    release: mereo-dagster
+    role: master
+  ports:
+    - name: tcp-postgresql
+      port: 5432
+      targetPort: tcp-postgresql
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mereo-dagster-postgresql-headless
+  namespace: mereo-analytics
+  labels:
+    app: postgresql
+spec:
+  type: ClusterIP
+  clusterIP: None    # headless → DNS retorna IP do pod (mereo-dagster-postgresql-0)
+  selector:
+    app: postgresql
+    release: mereo-dagster
+  ports:
+    - name: tcp-postgresql
+      port: 5432
+      targetPort: tcp-postgresql
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mereo-dagster-postgresql
+  namespace: mereo-analytics
+  labels:
+    app: postgresql
+spec:
+  replicas: 1
+  serviceName: mereo-dagster-postgresql-headless
+  selector:
+    matchLabels:
+      app: postgresql
+      release: mereo-dagster
+      role: master
+  template:
+    metadata:
+      labels:
+        app: postgresql
+        release: mereo-dagster
+        role: master
+    spec:
+      securityContext:
+        fsGroup: 1001         # grupo de POSSE do volume montado
+      initContainers:
+        - name: init-chmod-data
+          image: docker.io/bitnami/minideb:stretch
+          securityContext:
+            runAsUser: 0       # precisa de root para chown -R
+          command:
+            - /bin/sh
+            - -c
+            - |
+              mkdir -p /bitnami/postgresql/data
+              chmod 700 /bitnami/postgresql/data
+              find /bitnami/postgresql -mindepth 0 -maxdepth 1 \
+                   -not -name ".snapshot" -not -name "lost+found" | \
+                xargs chown -R 1001:1001
+              chmod -R 777 /dev/shm
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+          volumeMounts:
+            - name: data
+              mountPath: /bitnami/postgresql
+            - name: dshm
+              mountPath: /dev/shm
+      containers:
+        - name: mereo-dagster-postgresql
+          image: docker.io/library/postgres:14.6
+          securityContext:
+            runAsUser: 1001
+          ports:
+            - name: tcp-postgresql
+              containerPort: 5432
+          env:
+            - name: BITNAMI_DEBUG
+              value: "false"
+            - name: POSTGRESQL_PORT_NUMBER
+              value: "5432"
+            - name: POSTGRESQL_VOLUME_DIR
+              value: /bitnami/postgresql
+            - name: PGDATA
+              value: /bitnami/postgresql/data
+            - name: POSTGRES_USER
+              value: test
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mereo-dagster-postgresql
+                  key: postgresql-password
+            - name: POSTGRES_DB
+              value: test
+            - name: POSTGRESQL_ENABLE_LDAP
+              value: "no"
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - exec pg_isready -U "test" -d "test" -h 127.0.0.1 -p 5432
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - -e
+                - |
+                  pg_isready -U "test" -d "test" -h 127.0.0.1 -p 5432
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+          volumeMounts:
+            - name: dshm
+              mountPath: /dev/shm
+            - name: data
+              mountPath: /bitnami/postgresql
+      volumes:
+        - name: dshm
+          emptyDir:
+            medium: Memory     # /dev/shm para os locks do Postgres
+            sizeLimit: 1Gi
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 8Gi
