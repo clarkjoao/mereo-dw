@@ -1,28 +1,28 @@
 # ============================================================================
-# ConfigMaps com o PROJETO DBT
+# ConfigMap: dbt-project + dbt-models
 # ============================================================================
-# Em vez de empacotar o projeto dbt numa imagem Docker dedicada, o projeto vive
-# em dois ConfigMaps que são montados nos pods do mereo-analytics-code
-# (gRPC server) e nos pods de run job lançados pelo K8sRunLauncher:
+# Em vez de empacotar o projeto dbt numa imagem Docker, ele vive em 2
+# ConfigMaps que são montados nos pods do Dagster (analytics-code) e nos
+# pods de run job lançados pelo K8sRunLauncher:
 #
-#   mereo-dbt-project  → dbt_project.yml, profiles.yml, packages.yml
-#   mereo-dbt-models   → arquivos .sql/.yml de staging e gold
+#   dbt-project → dbt_project.yml + profiles.yml + packages.yml
+#   dbt-models  → arquivos .sql/.yml de staging e gold
 #
-# Arquivos de modelo usam `__` como separador de pasta (sem barras nas keys
-# do ConfigMap): `staging__stg_colaborador.sql` representa
-# `models/staging/stg_colaborador.sql`. O `sync-workspace.sh` em
-# `mereo-dagster-code` reconstrói a árvore antes de chamar `dbt parse`.
+# Arquivos de modelo usam `__` como separador de pasta:
+#   staging__stg_colaborador.sql  ≡  models/staging/stg_colaborador.sql
+# O `sync-workspace.sh` em dagster-code reconstrói a árvore antes do dbt parse.
 #
-# Vantagem: rebuild de modelo é só `kubectl apply` + restart do deployment —
-# não precisa rebuildar imagem.
-# Limitação: ConfigMaps têm ~1 MiB → suficiente p/ entidade piloto, mas o
-# caminho de escala é mover para volume de PV ou puxar via git-sync.
+# Vantagem: rebuild de modelo é só `kubectl apply` + restart do deployment.
+# Limitação: ConfigMaps têm ~1 MiB; em escala mover pra git-sync sidecar ou PV.
+#
+# Profiles.yml: o target `k8s` aponta para `clickhouse-mereo-clickhouse` —
+# nome curto, mesmo namespace.
 # ----------------------------------------------------------------------------
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: mereo-dbt-project
-  namespace: mereo-analytics
+  name: dbt-project
+  namespace: mereo
 data:
   dbt_project.yml: |
     name: mereo_analytics
@@ -45,9 +45,9 @@ data:
     models:
       mereo_analytics:
         staging:
-          +materialized: view     # staging = view (sem custo de storage)
+          +materialized: view
         gold:
-          +materialized: table    # gold = table (consultas rápidas)
+          +materialized: table
 
     vars:
       raw_database: raw
@@ -58,10 +58,6 @@ data:
       - package: dbt-labs/dbt_utils
         version: 1.3.0
 
-  # IMPORTANTE: profiles.yml define DOIS targets:
-  #   dev: aponta pra localhost:18123 (port-forward kubectl)
-  #   k8s: aponta pro service `clickhouse-mereo-clickhouse...8123` (in-cluster)
-  # Os deployments setam DBT_TARGET=k8s para selecionar o target k8s.
   profiles.yml: |
     mereo_clickhouse:
       target: dev
@@ -78,7 +74,7 @@ data:
         k8s:
           type: clickhouse
           schema: gold
-          host: clickhouse-mereo-clickhouse.mereo-clickhouse.svc.cluster.local
+          host: clickhouse-mereo-clickhouse   # service no mesmo namespace
           port: 8123
           user: dbt
           password: "{{ env_var('CH_DBT_PASSWORD') }}"
@@ -88,10 +84,9 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: mereo-dbt-models
-  namespace: mereo-analytics
+  name: dbt-models
+  namespace: mereo
 data:
-  # ----- sources: declara raw.colaborador como fonte -----
   staging___raw__sources.yml: |
     version: 2
 
@@ -118,7 +113,6 @@ data:
               - name: _ts_ms
               - name: _deleted
 
-  # ----- staging: stg_colaborador (view, deduplicação via FINAL + filtro deleted) -----
   staging___staging__models.yml: |
     version: 2
 
@@ -153,10 +147,9 @@ data:
         ativo,
         _ts_ms,
         _deleted
-    from {{ source('raw', 'colaborador') }} final  -- FINAL aplica dedupe do ReplacingMergeTree
-    where _deleted = 0                              -- filtra tombstones
+    from {{ source('raw', 'colaborador') }} final   -- FINAL = dedupe ReplacingMergeTree
+    where _deleted = 0                               -- filtra tombstones
 
-  # ----- gold: colaborador_by_grupo (table MergeTree para dashboards) -----
   gold___gold__models.yml: |
     version: 2
 

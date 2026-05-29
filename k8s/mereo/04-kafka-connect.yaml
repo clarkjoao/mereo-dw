@@ -1,0 +1,66 @@
+# ============================================================================
+# KafkaConnect cluster (Strimzi)
+# ============================================================================
+# Hospeda os connectors Debezium. A annotation
+# `strimzi.io/use-connector-resources: "true"` instrui o Strimzi a reconciliar
+# KafkaConnector CRs (em vez de exigir POST direto na REST API /connectors).
+#
+# Imagem custom `cdc-poc/kafka-connect-debezium:2.7.3.Final-kafka3.7.1`:
+# estende a imagem oficial Strimzi Kafka 3.7.1 com os plugins Debezium
+# SqlServer + transforms. Construir e publicar em registry privado para uso
+# em prod (não puxa do Docker Hub).
+#
+# externalConfiguration: monta o Secret `mssql-debezium-creds` como volume
+# em /opt/kafka/external-configuration/mssql-creds/. Os connectors leem
+# essas chaves via FileConfigProvider sem expor a senha no CR.
+#
+# bootstrapServers/schema-history: nomes curtos (mesmo namespace).
+# ----------------------------------------------------------------------------
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnect
+metadata:
+  name: mereo-connect
+  namespace: mereo
+  annotations:
+    strimzi.io/use-connector-resources: "true"
+spec:
+  version: 3.7.1
+  replicas: 1
+  bootstrapServers: mereo-kafka-kafka-bootstrap:9092
+  image: cdc-poc/kafka-connect-debezium:2.7.3.Final-kafka3.7.1
+  config:
+    group.id: mereo-connect-cluster
+
+    # Tópicos internos do Connect (criados automaticamente).
+    config.storage.topic: mereo-connect-configs
+    offset.storage.topic: mereo-connect-offsets
+    status.storage.topic: mereo-connect-status
+    config.storage.replication.factor: 1
+    offset.storage.replication.factor: 1
+    status.storage.replication.factor: 1
+
+    key.converter: org.apache.kafka.connect.json.JsonConverter
+    key.converter.schemas.enable: false
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter.schemas.enable: false
+
+    # FileConfigProvider para ler do Secret montado.
+    config.providers: file
+    config.providers.file.class: org.apache.kafka.common.config.provider.FileConfigProvider
+
+  externalConfiguration:
+    volumes:
+      - name: mssql-creds
+        secret:
+          secretName: mssql-debezium-creds
+
+  jvmOptions:
+    -Xms: 512m
+    -Xmx: 1024m
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "1"
+      memory: 2Gi

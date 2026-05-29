@@ -1,37 +1,31 @@
 # ============================================================================
 # ConfigMap: clickhouse-init-sql
 # ============================================================================
-# Script DDL que estabelece o schema completo do warehouse:
+# Script DDL canônico do warehouse:
 #
 #   raw      → ingestão CDC (Kafka engine + ReplacingMergeTree + MV)
-#   gold     → modelos dbt (camada de negócio, materializados pelo dbt-clickhouse)
+#   gold     → modelos dbt (materializados pelo dbt-clickhouse)
 #   pipeline → métricas operacionais (watermark, consumer lag, freshness)
 #
 # Fluxo de uma mensagem CDC dentro do ClickHouse:
 #
-#   raw.colaborador_kafka  ── Kafka engine (consumer group ch-raw-colaborador)
+#   raw.colaborador_kafka  ── Kafka engine (consumer ch-raw-colaborador)
 #         │
 #         ▼ (raw.colaborador_mv: MATERIALIZED VIEW dispara em cada INSERT)
 #   raw.colaborador        ── ReplacingMergeTree(_ts_ms, _deleted)
 #                            • dedupe por (tenant_slug, id) → versão mais nova
 #                            • _deleted=1 vira tombstone (filtrado em FINAL)
 #
-# Como este ConfigMap é APLICADO ao ClickHouse?
-#   Não há Job dedicado neste namespace — o init.sql é executado pelo dbt
-#   no boot do `mereo-analytics-code` (etapa dbt parse), e/ou pode ser
-#   executado manualmente via:
-#     kubectl exec -n mereo-clickhouse chi-mereo-clickhouse-main-0-0-0 -- \
-#       clickhouse-client --multiquery < init.sql
-#
-# ATENÇÃO: o ConfigMap NÃO cria o usuário `dbt`; isso é feito via users.xml
-# do ClickHouse (gerenciado pelo Altinity operator) com hash da senha do
-# Secret. Se a senha em Secret/dbt-credentials mudar, atualize users.xml.
+# Como aplicar: o init.sql NÃO roda automaticamente. Execute manualmente:
+#   kubectl exec -n mereo chi-mereo-clickhouse-main-0-0-0 -- \
+#     bash -c "clickhouse-client --multiquery < /docker-entrypoint-initdb.d/init.sql"
+# Ou monte este ConfigMap como volume no podTemplate do CHI (alternativa em prod).
 # ----------------------------------------------------------------------------
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: clickhouse-init-sql
-  namespace: mereo-clickhouse
+  namespace: mereo
 data:
   init.sql: |
     -- ------------------------------------------------------------------
@@ -42,9 +36,7 @@ data:
     CREATE DATABASE IF NOT EXISTS pipeline;
 
     -- ------------------------------------------------------------------
-    -- raw.colaborador — tabela "destino" da camada raw (multi-tenant)
-    -- ReplacingMergeTree usa _ts_ms como versão e _deleted como flag.
-    -- ORDER BY (tenant_slug, id) é a chave de deduplicação.
+    -- raw.colaborador — tabela destino da camada raw (multi-tenant)
     -- ------------------------------------------------------------------
     CREATE TABLE IF NOT EXISTS raw.colaborador (
         id Int64,
@@ -61,8 +53,7 @@ data:
 
     -- ------------------------------------------------------------------
     -- raw.colaborador_kafka — engine Kafka (consumer do tópico)
-    -- Os campos vêm do JSON achatado pelo Debezium SMT unwrap:
-    --   colunas originais (ID, NOME, ...) + tenant_slug + __ts_ms + __deleted.
+    -- Hostname encurtado: mesmo namespace que o Kafka.
     -- ------------------------------------------------------------------
     CREATE TABLE IF NOT EXISTS raw.colaborador_kafka (
         `ID` Int64,
@@ -77,18 +68,17 @@ data:
     )
     ENGINE = Kafka
     SETTINGS
-        kafka_broker_list = 'mereo-kafka-kafka-bootstrap.mereo-kafka:9092',
+        kafka_broker_list = 'mereo-kafka-kafka-bootstrap:9092',
         kafka_topic_list = 'raw.colaborador',
         kafka_group_name = 'ch-raw-colaborador',
         kafka_format = 'JSONEachRow',
         kafka_num_consumers = 1,
-        kafka_skip_broken_messages = 100;   -- tolera 100 mensagens malformadas
+        kafka_skip_broken_messages = 100;
 
     -- ------------------------------------------------------------------
-    -- raw.colaborador_mv — MATERIALIZED VIEW que copia/transforma
-    -- linhas de raw.colaborador_kafka para raw.colaborador.
-    -- Normaliza nomes (UPPER → snake_case), faz cast de tipos
-    -- e converte __deleted ("true"/"false") em UInt8 (1/0).
+    -- raw.colaborador_mv — MV que normaliza/copia para raw.colaborador.
+    -- Renomeia colunas (UPPER → snake_case), faz cast de tipos,
+    -- converte __deleted ("true"/"false") em UInt8 (1/0).
     -- ------------------------------------------------------------------
     CREATE MATERIALIZED VIEW IF NOT EXISTS raw.colaborador_mv
     TO raw.colaborador AS
@@ -105,8 +95,8 @@ data:
     WHERE ID IS NOT NULL;
 
     -- ------------------------------------------------------------------
-    -- pipeline.* — métricas operacionais (preenchidas pelo CronJob
-    -- `pipeline-lag-snapshot` e pelo sensor de freshness do Dagster).
+    -- pipeline.* — métricas operacionais
+    -- (preenchidas pelo CronJob pipeline-lag-snapshot e sensor freshness)
     -- ------------------------------------------------------------------
     CREATE TABLE IF NOT EXISTS pipeline.entity_watermarks (
         entity String,

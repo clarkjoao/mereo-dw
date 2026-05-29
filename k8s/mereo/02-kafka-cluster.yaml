@@ -1,0 +1,78 @@
+# ============================================================================
+# Kafka cluster (Strimzi)
+# ============================================================================
+# Cluster Kafka completo: broker + ZooKeeper + Entity Operator.
+# Pré-requisito: Strimzi Cluster Operator instalado (geralmente cluster-wide
+# ou no namespace `kafka`).
+#
+# Topologia PoC:
+#   - 1 broker Kafka 3.7.1 (listener plain/9092 sem TLS — só tráfego in-cluster).
+#   - 1 ZooKeeper (próxima major migra para KRaft).
+#   - replication.factor=1 em todos tópicos internos → NÃO usar em prod.
+#
+# Recursos GERADOS pelo Strimzi a partir deste CR:
+#   StatefulSet/mereo-kafka-kafka, StatefulSet/mereo-kafka-zookeeper,
+#   Deployment/mereo-kafka-entity-operator,
+#   Service/mereo-kafka-kafka-bootstrap (alvo dos clientes Kafka),
+#   Service/mereo-kafka-kafka-brokers (headless), Service zookeeper,
+#   Secrets de TLS (mereo-kafka-cluster-ca, etc), NetworkPolicies, PVCs.
+#
+# O nome do CR (`mereo-kafka`) é mantido porque vira prefixo de TODOS os
+# recursos derivados — renomear obrigaria reescrever as referências em
+# clients (kafka_broker_list no ClickHouse, bootstrapServers no Connect, etc).
+# ----------------------------------------------------------------------------
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: mereo-kafka
+  namespace: mereo
+spec:
+  kafka:
+    version: 3.7.1
+    replicas: 1
+    listeners:
+      - name: plain
+        port: 9092
+        type: internal
+        tls: false
+    config:
+      offsets.topic.replication.factor: 1
+      transaction.state.log.replication.factor: 1
+      transaction.state.log.min.isr: 1
+      default.replication.factor: 1
+      min.insync.replicas: 1
+      inter.broker.protocol.version: "3.7"
+      auto.create.topics.enable: true              # desligar em prod
+      log.retention.hours: 168                     # 7 dias
+      log.retention.bytes: 10737418240             # 10 GiB
+      log.segment.bytes: 536870912
+    jvmOptions:
+      -Xms: 1024m
+      -Xmx: 2048m
+    resources:
+      requests:
+        cpu: 500m
+        memory: 2Gi
+      limits:
+        cpu: "1"
+        memory: 4Gi
+    storage:
+      type: persistent-claim
+      size: 20Gi
+      deleteClaim: false
+  zookeeper:
+    replicas: 1
+    storage:
+      type: persistent-claim
+      size: 5Gi
+      deleteClaim: false
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+  entityOperator:
+    topicOperator: {}    # reconcilia KafkaTopic CRs
+    userOperator: {}     # reconcilia KafkaUser CRs (não usado ainda)

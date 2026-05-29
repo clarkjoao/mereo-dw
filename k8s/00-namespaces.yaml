@@ -1,48 +1,35 @@
 # ============================================================================
-# Namespaces da plataforma Mereo Analytics (PoC CDC)
+# Namespaces da plataforma Mereo
 # ============================================================================
-# A plataforma roda em 4 namespaces que correspondem aos 4 estágios do fluxo de
-# dados (CDC = Change Data Capture):
+# Topologia simplificada em 2 namespaces:
 #
-#   mereo-sqlserver   →  Fonte: SQL Server 2022 com CDC habilitado (origem dos
-#                        bancos MereoGR-Afya, MereoGR-Staging, MereoGR-Allos).
-#   mereo-kafka       →  Bus de eventos: Strimzi Kafka + ZooKeeper +
-#                        Kafka Connect/Debezium (lê CDC do SQL Server).
-#   mereo-clickhouse  →  Data Warehouse colunar: ClickHouse via Altinity
-#                        Operator + Materialized View consumindo o tópico Kafka.
-#   mereo-analytics   →  Orquestração: Dagster + dbt (transformações
-#                        staging→gold) e Postgres interno do Dagster.
+#   mereo-sqlserver  →  Banco de produção SIMULADO (fonte CDC).
+#                       Apartado para representar um sistema "externo" ao
+#                       resto da plataforma — em produção, este namespace
+#                       NÃO existiria: o SQL Server seria um servidor fora
+#                       do cluster (RDS, Azure SQL, on-prem) acessado via
+#                       endpoint estável.
 #
-# Aplicar primeiro: kubectl apply -f 00-namespaces.yaml
+#   mereo            →  Plataforma Mereo unificada. Concentra todas as peças
+#                       de transporte + warehouse + orquestração:
+#                         • Kafka + ZooKeeper + Kafka Connect (Strimzi)
+#                         • ClickHouse (Altinity)
+#                         • Dagster (webserver, daemon, user-code) + Postgres
+#                         • dbt project (em ConfigMap)
+#                         • Ingresses (clickhouse.mereo.local, dagster.mereo.local)
 # ----------------------------------------------------------------------------
 apiVersion: v1
 kind: Namespace
 metadata:
   name: mereo-sqlserver
   labels:
-    app.kubernetes.io/part-of: mereo-cdc
-    stage: source
+    app.kubernetes.io/part-of: mereo
+    role: external-source     # marca que este NS imita um sistema externo
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: mereo-kafka
+  name: mereo
   labels:
-    app.kubernetes.io/part-of: mereo-cdc
-    stage: bus
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: mereo-clickhouse
-  labels:
-    app.kubernetes.io/part-of: mereo-cdc
-    stage: warehouse
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: mereo-analytics
-  labels:
-    app.kubernetes.io/part-of: mereo-cdc
-    stage: orchestration
+    app.kubernetes.io/part-of: mereo
+    role: platform

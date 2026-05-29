@@ -1,0 +1,51 @@
+# ============================================================================
+# Ingresses: dagster-ui + clickhouse-play
+# ============================================================================
+# Expostos via Traefik (ingressClassName=traefik). Adicionar em /etc/hosts:
+#   151.244.141.115  dagster.mereo.local  clickhouse.mereo.local
+#
+# IMPORTANTE: nenhum Ingress tem auth. Em prod, adicionar middleware Traefik
+# (basic-auth, forward-auth via OAuth2 proxy, ou Hub IDP).
+# ----------------------------------------------------------------------------
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dagster-ui
+  namespace: mereo
+  labels:
+    app: dagster
+    component: webserver
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: dagster.mereo.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dagster-webserver
+                port:
+                  number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: clickhouse-play
+  namespace: mereo
+  labels:
+    app: clickhouse
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: clickhouse.mereo.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: clickhouse-mereo-clickhouse   # service gerado pelo CHI
+                port:
+                  number: 8123                      # HTTP nativo do ClickHouse

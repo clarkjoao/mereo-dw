@@ -1,0 +1,96 @@
+# ============================================================================
+# Deployment: dagster-daemon (background daemon)
+# ============================================================================
+# Motor do Dagster: roda schedules, sensors, run queue e run launcher.
+# É quem CRIA os Kubernetes Jobs de cada run via K8sRunLauncher
+# (config no ConfigMap `dagster-instance`).
+#
+# strategy: Recreate → daemon SINGLETON. Nunca rodar 2 simultâneos (concorrem
+# por fila/sensors).
+#
+# initContainer: aguarda Postgres ficar pronto (`pg_isready`) em loop infinito.
+#
+# Mount peculiar: o `sitecustomize.py` é montado via
+# `subPath: k8s-client-auth-fix.py` em /usr/local/lib/python3.10/.../sitecustomize.py.
+# Esse arquivo é AUTOMATICAMENTE importado pelo Python no startup e patcheia
+# a config do kubernetes-client (sem isso → system:anonymous).
+# ----------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dagster-daemon
+  namespace: mereo
+  labels:
+    app: dagster
+    component: daemon
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate     # singleton
+  selector:
+    matchLabels:
+      app: dagster
+      component: daemon
+  template:
+    metadata:
+      labels:
+        app: dagster
+        component: daemon
+    spec:
+      serviceAccountName: dagster
+      automountServiceAccountToken: true   # daemon precisa do token p/ criar Jobs
+      initContainers:
+        - name: wait-postgres
+          image: docker.io/library/postgres:14.6
+          command:
+            - sh
+            - -c
+            - until pg_isready -h dagster-postgresql -p 5432 -U dagster; do echo waiting for database; sleep 2; done;
+      containers:
+        - name: daemon
+          image: docker.io/dagster/dagster-celery-k8s:1.13.6
+          imagePullPolicy: Always
+          command:
+            - /bin/bash
+            - -c
+            - dagster-daemon run -w /dagster-workspace/workspace.yaml
+          env:
+            - name: DAGSTER_PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: dagster-postgresql
+                  key: postgresql-password
+            - name: DAGSTER_DAEMON_HEARTBEAT_TOLERANCE
+              value: "1800"   # 30min sem heartbeat → daemon marcado dead
+          envFrom:
+            - configMapRef:
+                name: dagster-env
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 768Mi
+          volumeMounts:
+            - name: dagster-instance
+              mountPath: /opt/dagster/dagster_home/dagster.yaml
+              subPath: dagster.yaml
+            - name: dagster-workspace
+              mountPath: /dagster-workspace/
+            - name: dagster-code
+              mountPath: /config/dagster
+            - name: dagster-code
+              mountPath: /usr/local/lib/python3.10/site-packages/sitecustomize.py
+              subPath: k8s-client-auth-fix.py
+      volumes:
+        - name: dagster-instance
+          configMap:
+            name: dagster-instance
+        - name: dagster-workspace
+          configMap:
+            name: dagster-workspace
+        - name: dagster-code
+          configMap:
+            name: dagster-code
+            defaultMode: 493

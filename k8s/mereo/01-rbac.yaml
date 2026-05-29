@@ -1,31 +1,30 @@
 # ============================================================================
-# RBAC para o Dagster (ServiceAccount + Role + RoleBinding)
+# RBAC para o Dagster
 # ============================================================================
-# O `dagster-daemon` usa o K8sRunLauncher: cada run do Dagster vira um Kubernetes
-# Job no namespace `mereo-analytics`. Para conseguir criar/observar/cancelar
-# esses jobs, o pod do daemon precisa de permissões — daí esta Role.
+# O dagster-daemon usa o K8sRunLauncher: cada run vira um Kubernetes Job no
+# namespace `mereo`. Para criar/observar/cancelar esses jobs, o pod do daemon
+# precisa de permissões — daí esta Role.
 #
-# Princípio do menor privilégio: limita ao namespace e a 2 grupos
-# (`batch` para Jobs e `""` para Pods/Events/Logs). Sem acesso a Secrets ou a
-# outros namespaces.
+# Princípio do menor privilégio: limita ao namespace `mereo` e a 2 grupos
+# (`batch` para Jobs e `""` para Pods/Events/Logs). Sem acesso a Secrets ou
+# a outros namespaces.
 #
 # automountServiceAccountToken: false na SA → cada pod que QUER o token monta
 # manualmente via automountServiceAccountToken: true no template do Deployment
-# (daemon e webserver fazem isso). Os pods de run job montam token pelo
-# K8sRunLauncher (load_incluster_config: true).
+# (daemon e webserver fazem isso).
 # ----------------------------------------------------------------------------
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: mereo-dagster
-  namespace: mereo-analytics
-automountServiceAccountToken: false   # apps opt-in via template do pod
+  name: dagster
+  namespace: mereo
+automountServiceAccountToken: false
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: mereo-dagster-role
-  namespace: mereo-analytics
+  name: dagster
+  namespace: mereo
 rules:
   - apiGroups: ["batch"]
     resources: ["jobs"]
@@ -43,12 +42,12 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: mereo-dagster-rolebinding
-  namespace: mereo-analytics
+  name: dagster
+  namespace: mereo
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: mereo-dagster-role
+  name: dagster
 subjects:
   - kind: ServiceAccount
-    name: mereo-dagster
+    name: dagster

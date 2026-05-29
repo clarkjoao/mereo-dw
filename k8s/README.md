@@ -1,125 +1,149 @@
-# Mereo Analytics — Manifests Kubernetes
+# Mereo — Manifests Kubernetes
 
-Snapshot declarativo dos 4 namespaces que compõem a plataforma de analytics
-da Mereo, extraído via `kubectl` do cluster atual e re-anotado com a intenção
-de cada peça.
+Plataforma de analytics da Mereo organizada em **2 namespaces**:
+
+- **`mereo`** — aplicação completa (Kafka, ClickHouse, Dagster, dbt, Postgres).
+- **`mereo-sqlserver`** — banco de produção simulado, apartado para
+  representar uma fonte externa ao cluster. Em ambientes reais este
+  namespace **não existe** — o SQL Server seria um servidor gerenciado
+  (RDS / Azure SQL / on-prem) acessado via endpoint estável.
 
 ## Arquitetura em uma página
 
 ```
-┌────────────────────┐    CDC log     ┌────────────────────┐
-│  mereo-sqlserver   │ ────────────▶ │   mereo-kafka      │
-│  SQL Server 2022   │  (Debezium     │  Strimzi Kafka     │
-│  3 bancos:         │  SqlServer)    │  + ZooKeeper       │
-│   • MereoGR-Afya   │                │  + Kafka Connect   │
-│   • MereoGR-Staging│                │  (3 Connectors)    │
-│   • MereoGR-Allos  │                │  tópico unificado: │
-│  Tabela piloto:    │                │   raw.colaborador  │
-│   dbo.COLABORADOR  │                └──────────┬─────────┘
-└────────────────────┘                           │
-                                                 │ Kafka engine
-                                                 ▼
-┌──────────────────────┐  dbt build  ┌────────────────────┐
-│  mereo-analytics     │ ──────────▶ │  mereo-clickhouse  │
-│  Dagster webserver   │   (ClickH.  │  ClickHouseInstall │
-│  Dagster daemon      │    via      │  raw / gold /      │
-│  user-code (gRPC)    │    dbt-CH)  │  pipeline schemas  │
-│  Postgres (metadata) │             │  CronJob lag snap. │
-└──────────────────────┘             └────────────────────┘
+┌────────────────────────────┐
+│   mereo-sqlserver          │  ◄── fonte externa simulada
+│   SQL Server 2022          │      (em prod: RDS/Azure SQL/on-prem)
+│   3 bancos:                │
+│    • MereoGR-Afya          │
+│    • MereoGR-Staging       │
+│    • MereoGR-Allos         │
+│   Tabela piloto:           │
+│    dbo.COLABORADOR (CDC)   │
+└──────────────┬─────────────┘
+               │ TDS 1433 (cross-namespace)
+               │ Debezium SqlServerConnector × 3
+               ▼
+╔══════════════════════════════════════════════════════════════╗
+║   mereo                                  PLATAFORMA          ║
+║                                                              ║
+║   ┌───────────────────────────┐  ┌────────────────────────┐  ║
+║   │ Kafka (Strimzi)           │  │ ClickHouse (Altinity)  │  ║
+║   │  • Kafka 3.7.1 broker     │─▶│  • raw.colaborador     │  ║
+║   │  • ZooKeeper              │  │   ◀ ENGINE = Kafka     │  ║
+║   │  • Kafka Connect (Debez.) │  │  • MV normaliza → raw  │  ║
+║   │   tópico: raw.colaborador │  │  • gold/* (dbt build)  │  ║
+║   │                           │  │  • pipeline.* (lag/wm) │  ║
+║   └───────────────────────────┘  └───────────┬────────────┘  ║
+║                                              │ HTTP 8123     ║
+║   ┌────────────────────────────────────┐     │               ║
+║   │ Dagster                            │─────┘ dbt build     ║
+║   │  • dagster-webserver (UI)          │                     ║
+║   │  • dagster-daemon (K8sRunLauncher) │                     ║
+║   │  • analytics-code (gRPC user code) │                     ║
+║   │  • dagster-postgresql (metadados)  │                     ║
+║   │  • dbt project + models (CM)       │                     ║
+║   └────────────────────────────────────┘                     ║
+║                                                              ║
+║   Ingresses (Traefik):                                       ║
+║    • dagster.mereo.local    → dagster-webserver:80           ║
+║    • clickhouse.mereo.local → clickhouse-mereo-clickhouse:8123║
+╚══════════════════════════════════════════════════════════════╝
 ```
 
-Documento de contrato da entidade piloto:
-`analytics/catalog/entities/colaborador.yaml`.
+Contrato da entidade piloto: `analytics/catalog/entities/colaborador.yaml`.
 
 ## Layout dos arquivos
 
 ```
 k8s/
-├── 00-namespaces.yaml                  # cria os 4 namespaces
-├── mereo-sqlserver/                    # FONTE (CDC source)
+├── README.md
+├── 00-namespaces.yaml                  # mereo + mereo-sqlserver
+├── mereo-sqlserver/                    # FONTE EXTERNA (apartado)
 │   ├── 00-secret-sa-credentials.yaml
 │   ├── 01-service.yaml
 │   ├── 02-statefulset.yaml
 │   ├── 03-configmap-init-sql.yaml      # DDL + seed + sp_cdc_enable_*
 │   └── 04-job-init.yaml
-├── mereo-kafka/                        # BUS de eventos (Strimzi)
-│   ├── 00-secret-debezium-creds.yaml
-│   ├── 01-kafka-cluster.yaml           # Kafka CR (broker + ZK + entityOperator)
-│   ├── 02-kafka-topics.yaml            # schema-history + raw.colaborador
-│   ├── 03-kafka-connect.yaml           # KafkaConnect CR
-│   └── 04-kafka-connectors.yaml        # 3 Debezium SqlServerConnector
-├── mereo-clickhouse/                   # DATA WAREHOUSE
-│   ├── 00-secret-dbt-credentials.yaml
-│   ├── 01-configmap-init-sql.yaml      # DDL raw/gold/pipeline + MV Kafka
-│   ├── 02-clickhouse-installation.yaml # CR do Altinity operator
-│   ├── 03-ingress-clickhouse-play.yaml
-│   └── 04-cronjob-pipeline-lag-snapshot.yaml
-└── mereo-analytics/                    # ORQUESTRAÇÃO (Dagster + dbt + Pg)
-    ├── 00-secrets.yaml
-    ├── 01-rbac.yaml                    # SA + Role (Jobs/Pods/Events) + Binding
-    ├── 02-postgresql.yaml              # Postgres interno do Dagster
-    ├── 03-configmaps-dbt.yaml          # dbt project + models
-    ├── 04-configmaps-dagster.yaml      # dagster.yaml + workspace + código Python
-    ├── 05-deployment-analytics-code.yaml
-    ├── 06-deployment-dagster-daemon.yaml
-    ├── 07-deployment-dagster-webserver.yaml
-    └── 08-ingress-dagster-ui.yaml
+└── mereo/                              # PLATAFORMA UNIFICADA
+    ├── 00-secrets.yaml                 # dagster-pg + dbt-cred + debezium-creds
+    ├── 01-rbac.yaml                    # SA + Role + RoleBinding
+    ├── 02-kafka-cluster.yaml           # Strimzi Kafka CR
+    ├── 03-kafka-topics.yaml            # schema-history + raw.colaborador
+    ├── 04-kafka-connect.yaml           # KafkaConnect CR
+    ├── 05-kafka-connectors.yaml        # 3 Debezium SqlServerConnector
+    ├── 06-clickhouse-installation.yaml # Altinity ClickHouseInstallation
+    ├── 07-clickhouse-init-sql.yaml     # DDL raw/gold/pipeline + MV Kafka
+    ├── 08-cronjob-lag-snapshot.yaml    # snapshot 5min de watermark+lag
+    ├── 09-postgresql.yaml              # Postgres interno do Dagster
+    ├── 10-configmap-dbt.yaml           # dbt project + models
+    ├── 11-configmaps-dagster.yaml      # dagster-env + workspace + instance + code
+    ├── 12-deployment-analytics-code.yaml
+    ├── 13-deployment-dagster-daemon.yaml
+    ├── 14-deployment-dagster-webserver.yaml
+    └── 15-ingresses.yaml               # dagster-ui + clickhouse-play
 ```
 
-A numeração no nome do arquivo (`00-`, `01-`, ...) reflete a **ordem de
-aplicação** dentro de cada namespace: Secrets/ConfigMaps antes dos workloads
-que os referenciam.
+A numeração reflete **ordem de aplicação**: Secrets/ConfigMaps → CRs do
+Kafka → CRs do ClickHouse → Postgres → Dagster → Ingresses.
+
+## O que mudou (vs. versão anterior em 4 namespaces)
+
+| Antes | Depois | Motivo |
+| --- | --- | --- |
+| `mereo-kafka`, `mereo-clickhouse`, `mereo-analytics` | `mereo` (único) | Uma aplicação, um namespace. |
+| `mereo-dagster-dagster-webserver` | `dagster-webserver` | Eliminado prefixo duplo. |
+| `mereo-dagster-{daemon,webserver,pipeline}-env` (3 idênticos) | `dagster-env` (1) | Dedupe. |
+| `dagster-postgresql-secret` + `mereo-dagster-postgresql` (2 secrets iguais) | `dagster-postgresql` (1) | Dedupe. |
+| `mereo-dagster-postgresql` (StatefulSet) | `dagster-postgresql` | Prefixo redundante. |
+| Postgres user/db = `test`/`test` | `dagster`/`dagster` | Default vergonhoso do chart bitnami. |
+| `clickhouse-dbt-credentials` em 2 namespaces (clickhouse + analytics) | 1 cópia em `mereo` | Mesmo namespace, sem replicação. |
+| URLs FQDN cross-ns: `clickhouse-mereo-clickhouse.mereo-clickhouse.svc...` | `clickhouse-mereo-clickhouse` | Same-namespace, nome curto. |
+| Labels Helm órfãs (`heritage`, `chart`, `release`, `app.kubernetes.io/managed-by: Helm`) | Removidas | Não há Helm gerenciando. |
+| Annotations `meta.helm.sh/release-*` | Removidas | Idem. |
+| `kubectl.kubernetes.io/restartedAt` em template | Removida | Era resíduo de `kubectl rollout restart`. |
+
+**Nomes preservados** (não renomeados porque são identificadores de cluster
+em CRs — renomear obrigaria reescrever todas as referências em clientes):
+- `mereo-kafka` (Kafka CR — vira prefixo de pods/services Strimzi).
+- `mereo-clickhouse` (CHI — vira prefixo de pods/services Altinity).
+- `mereo-connect` (KafkaConnect CR).
 
 ## Pré-requisitos no cluster
 
-Estes manifests **assumem** que os operators e add-ons abaixo já estão
-instalados no cluster:
-
-| Componente | Função | Namespace típico |
+| Componente | Função | Como verificar |
 | --- | --- | --- |
-| Strimzi Cluster Operator | Reconcilia `Kafka`, `KafkaConnect`, `KafkaTopic`, `KafkaConnector` | `kafka` (ou cluster-wide) |
-| Altinity ClickHouse Operator | Reconcilia `ClickHouseInstallation` | `clickhouse-operator-system` |
-| Traefik | Ingress controller (classe `traefik`) | `traefik` |
-| StorageClass `local-path` | StorageClass default | `local-path-storage` |
-| (opcional) cert-manager | Não usado pela PoC, mas presente | `cert-manager` |
-
-Para checar:
-
-```sh
-kubectl get crd kafkas.kafka.strimzi.io clickhouseinstallations.clickhouse.altinity.com ingressclasses.networking.k8s.io
-```
+| Strimzi Cluster Operator | Reconcilia Kafka/KafkaConnect/KafkaTopic/KafkaConnector | `kubectl get crd kafkas.kafka.strimzi.io` |
+| Altinity ClickHouse Operator | Reconcilia ClickHouseInstallation | `kubectl get crd clickhouseinstallations.clickhouse.altinity.com` |
+| Traefik | Ingress controller (`ingressClassName: traefik`) | `kubectl get ingressclass traefik` |
+| StorageClass default | Provisiona PVCs (local-path, EBS, etc) | `kubectl get sc` |
 
 ## Aplicação completa do zero
 
 ```sh
 # 1) Namespaces
-kubectl apply -f 00-namespaces.yaml
+kubectl apply -f k8s/00-namespaces.yaml
 
-# 2) Fonte
-kubectl apply -f mereo-sqlserver/
+# 2) Fonte externa simulada
+kubectl apply -f k8s/mereo-sqlserver/
 
-# 3) Bus (esperar Kafka CR ficar READY antes dos connectors)
-kubectl apply -f mereo-kafka/00-secret-debezium-creds.yaml
-kubectl apply -f mereo-kafka/01-kafka-cluster.yaml
-kubectl wait kafka/mereo-kafka -n mereo-kafka --for=condition=Ready --timeout=10m
-kubectl apply -f mereo-kafka/02-kafka-topics.yaml
-kubectl apply -f mereo-kafka/03-kafka-connect.yaml
-kubectl wait kafkaconnect/mereo-connect -n mereo-kafka --for=condition=Ready --timeout=10m
-kubectl apply -f mereo-kafka/04-kafka-connectors.yaml
+# 3) Aplicar tudo da plataforma. Strimzi/Altinity vão reconciliar em sequência.
+kubectl apply -f k8s/mereo/
 
-# 4) Warehouse
-kubectl apply -f mereo-clickhouse/
-# init.sql precisa ser aplicado manualmente (ou via dbt sync-workspace):
-kubectl exec -n mereo-clickhouse chi-mereo-clickhouse-main-0-0-0 -- \
-  bash -c 'cat /etc/clickhouse-server/conf.d/init.sql | clickhouse-client --multiquery'
+# 4) Esperar Kafka ficar Ready ANTES dos connectors funcionarem
+kubectl wait kafka/mereo-kafka      -n mereo --for=condition=Ready --timeout=10m
+kubectl wait kafkaconnect/mereo-connect -n mereo --for=condition=Ready --timeout=10m
 
-# 5) Orquestração
-kubectl apply -f mereo-analytics/
+# 5) ClickHouse: aplicar o init.sql (não roda automaticamente)
+kubectl exec -n mereo chi-mereo-clickhouse-main-0-0-0 -- \
+  bash -c 'cat <<EOF | clickhouse-client --multiquery
+$(kubectl get cm clickhouse-init-sql -n mereo -o jsonpath="{.data.init\.sql}")
+EOF'
 ```
 
 ## URLs locais (Traefik)
 
-Adicionar em `/etc/hosts` (substituir IP pelo do Ingress controller):
+Adicionar em `/etc/hosts`:
 
 ```
 151.244.141.115  dagster.mereo.local  clickhouse.mereo.local
@@ -127,45 +151,38 @@ Adicionar em `/etc/hosts` (substituir IP pelo do Ingress controller):
 
 | URL | Aponta para |
 | --- | --- |
-| `http://dagster.mereo.local` | Webserver Dagster (orquestrador) |
+| `http://dagster.mereo.local` | Webserver Dagster |
 | `http://clickhouse.mereo.local` | ClickHouse HTTP / Play UI |
 
-## Observações importantes
+## Limitações conhecidas (PoC)
 
-1. **Senhas em base64**: os Secrets aqui contêm valores reais da PoC em
-   base64 puro. Em produção, substituir por integração com cofre (External
-   Secrets Operator, Vault, SOPS, AWS/Azure KMS).
-2. **`replication.factor=1`**: Kafka, Connect, ClickHouse — tudo single-node.
-   NÃO é HA. Para prod, escalar Kafka para 3 brokers e ClickHouse para
-   ZooKeeper + 2+ réplicas (ou ClickHouse Keeper integrado).
-3. **Helm release labels**: alguns manifests (Dagster, Postgres bitnami)
-   carregam labels `helm.sh/chart`/`meta.helm.sh/release-name` originárias
-   do install via Helm. Foram preservadas porque mover para apply puro sem
-   essas labels causaria conflito se você decidir um dia voltar ao Helm.
-   Para limpar, basta remover manualmente.
-4. **Job `mssql-init`**: rode-o de novo após alteração no
-   `mssql-init-sql` ConfigMap:
+1. **Secrets em base64 puro** — em prod, ExternalSecrets Operator + Vault/SOPS.
+2. **`replication.factor=1`** (Kafka, Connect, ClickHouse) — não é HA.
+3. **`auto.create.topics.enable=true`** — desligar em prod.
+4. **`pip install` em runtime** nos pods do Dagster — em prod construir imagem
+   custom com deps pre-instaladas para evitar cold-start.
+5. **Sem auth nos Ingresses** — adicionar middleware Traefik (basic-auth ou
+   OAuth2 proxy) em prod.
+6. **`init.sql` do ClickHouse manual** — não há Job dedicado. Considere
+   montar como volume no podTemplate do `ClickHouseInstallation` em prod.
+7. **Job `mssql-init` é one-shot**. Para reexecutar:
    ```sh
    kubectl delete job mssql-init -n mereo-sqlserver
-   kubectl apply -f mereo-sqlserver/04-job-init.yaml
+   kubectl apply -f k8s/mereo-sqlserver/04-job-init.yaml
    ```
-5. **Schema do ClickHouse**: `clickhouse-init-sql` ConfigMap é o DDL
-   canônico — fonte da verdade da estrutura `raw.*`, `gold.*`, `pipeline.*`.
-   Mudou? Roda manualmente via `clickhouse-client --multiquery`.
 
 ## Como esses YAMLs foram gerados
 
-Extraídos diretamente do cluster atual em **26/05/2026** com:
+Extraídos do cluster real em 26/05/2026 via:
 
 ```sh
-kubectl get <kind> <name> -n <namespace> -o yaml \
+kubectl get <kind> <name> -n <ns> -o yaml \
   | python3 k8s/_raw/clean_yaml.py > <arquivo>
 ```
 
-O script `_raw/clean_yaml.py` remove campos de runtime (status,
-resourceVersion, uid, managedFields, finalizers, ownerReferences) e
-defaults verbosos do API server (terminationMessagePath, schedulerName,
-clusterIP, etc), produzindo manifests aplicáveis idempotentemente.
-
-Os arquivos finais foram re-anotados manualmente com a intenção de cada
-configuração (cabeçalhos + comentários inline).
+O script `_raw/clean_yaml.py` remove campos de runtime (status, uid,
+managedFields, finalizers, ownerReferences, kubectl annotations) e defaults
+verbosos do API server, produzindo manifests aplicáveis idempotentemente.
+Os arquivos finais foram **re-anotados manualmente** com a intenção de cada
+peça de configuração + reorganizados em 2 namespaces (esta versão) ou
+4 (versão anterior — pasta `_raw/` ainda contém os originais).

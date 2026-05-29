@@ -1,0 +1,42 @@
+# ============================================================================
+# KafkaTopics (declarativos via Topic Operator do Strimzi)
+# ============================================================================
+#   - mereogr.schema-history → tópico interno do Debezium para guardar DDL
+#     (não consumir manualmente). retention=-1 = infinita.
+#   - raw.colaborador        → tópico UNIFICADO de eventos da entidade
+#     COLABORADOR para todos os tenants. Cada Debezium connector roteia
+#     mereogr-<tenant>.<db>.dbo.COLABORADOR → raw.colaborador via SMT
+#     ByLogicalTableRouter, adicionando o campo `tenant_slug`.
+#
+# 6 partições em raw.colaborador → paralelismo no consumer do ClickHouse.
+# Chave da mensagem é o PK `ID`, então rows com mesmo tenant+ID caem sempre
+# na mesma partição (ordem preservada por entidade).
+# ----------------------------------------------------------------------------
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: mereogr.schema-history
+  namespace: mereo
+  labels:
+    strimzi.io/cluster: mereo-kafka
+spec:
+  partitions: 1
+  replicas: 1
+  config:
+    cleanup.policy: delete
+    retention.ms: -1
+    segment.bytes: 33554432
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: raw.colaborador
+  namespace: mereo
+  labels:
+    strimzi.io/cluster: mereo-kafka
+spec:
+  partitions: 6
+  replicas: 1
+  config:
+    cleanup.policy: delete
+    retention.ms: 604800000   # 7 dias

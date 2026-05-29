@@ -1,34 +1,30 @@
 # ============================================================================
-# Deployment + Service: mereo-dagster-dagster-webserver (UI)
+# Deployment + Service: dagster-webserver (UI + GraphQL API)
 # ============================================================================
-# Webserver do Dagster (interface gráfica + GraphQL API). Lê definitions do
-# user code via gRPC (workspace.yaml aponta para `mereo-analytics-code:3030`)
-# e persistência via Postgres.
+# Webserver do Dagster — lê definitions do user code via gRPC (workspace.yaml
+# aponta para analytics-code:3030) e persistência via Postgres.
 #
-# Exposto externamente via Ingress `dagster-ui` (http://dagster.mereo.local).
-# Não tem autenticação no webserver — proteção é via rede/Ingress.
+# Exposto via Ingress (ver 15-ingresses.yaml) em http://dagster.mereo.local.
+# Sem auth no webserver — proteger via Ingress/middleware em prod.
 #
 # Diferenças vs daemon:
-#   - strategy: RollingUpdate (stateless — múltiplas réplicas seguras).
+#   - strategy: RollingUpdate (stateless — pode escalar replicas).
 #   - readinessProbe HTTP `/server_info` (mais semântico que TCP).
-#   - SEM o sitecustomize patch — webserver não chama API do Kubernetes.
-#
-# Para escalar: aumentar `replicas`. O Dagster suporta múltiplos webservers
-# atrás de um Service.
+#   - SEM o sitecustomize patch — webserver não chama a API do Kubernetes.
 # ----------------------------------------------------------------------------
 apiVersion: v1
 kind: Service
 metadata:
-  name: mereo-dagster-dagster-webserver
-  namespace: mereo-analytics
+  name: dagster-webserver
+  namespace: mereo
   labels:
-    app.kubernetes.io/name: dagster
-    component: dagster-webserver
+    app: dagster
+    component: webserver
 spec:
   type: ClusterIP
   selector:
-    app.kubernetes.io/name: dagster
-    component: dagster-webserver
+    app: dagster
+    component: webserver
   ports:
     - name: http
       port: 80
@@ -37,11 +33,11 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mereo-dagster-dagster-webserver
-  namespace: mereo-analytics
+  name: dagster-webserver
+  namespace: mereo
   labels:
-    app.kubernetes.io/name: dagster
-    component: dagster-webserver
+    app: dagster
+    component: webserver
 spec:
   replicas: 1
   strategy:
@@ -51,25 +47,25 @@ spec:
       maxUnavailable: 25%
   selector:
     matchLabels:
-      app.kubernetes.io/name: dagster
-      component: dagster-webserver
+      app: dagster
+      component: webserver
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: dagster
-        component: dagster-webserver
+        app: dagster
+        component: webserver
     spec:
-      serviceAccountName: mereo-dagster
+      serviceAccountName: dagster
       automountServiceAccountToken: true
       initContainers:
-        - name: check-db-ready
+        - name: wait-postgres
           image: docker.io/library/postgres:14.6
           command:
             - sh
             - -c
-            - until pg_isready -h mereo-dagster-postgresql -p 5432 -U test; do echo waiting for database; sleep 2; done;
+            - until pg_isready -h dagster-postgresql -p 5432 -U dagster; do echo waiting for database; sleep 2; done;
       containers:
-        - name: dagster
+        - name: webserver
           image: docker.io/dagster/dagster-celery-k8s:1.13.6
           imagePullPolicy: Always
           command:
@@ -80,11 +76,11 @@ spec:
             - name: DAGSTER_PG_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: dagster-postgresql-secret
+                  name: dagster-postgresql
                   key: postgresql-password
           envFrom:
             - configMapRef:
-                name: mereo-dagster-webserver-env
+                name: dagster-env
           ports:
             - name: http
               containerPort: 80
@@ -95,16 +91,23 @@ spec:
             periodSeconds: 20
             timeoutSeconds: 10
             failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 768Mi
           volumeMounts:
             - name: dagster-instance
               mountPath: /opt/dagster/dagster_home/dagster.yaml
               subPath: dagster.yaml
-            - name: dagster-workspace-yaml
+            - name: dagster-workspace
               mountPath: /dagster-workspace/
       volumes:
         - name: dagster-instance
           configMap:
-            name: mereo-dagster-instance
-        - name: dagster-workspace-yaml
+            name: dagster-instance
+        - name: dagster-workspace
           configMap:
-            name: mereo-dagster-workspace-yaml
+            name: dagster-workspace

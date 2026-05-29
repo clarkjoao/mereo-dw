@@ -1,39 +1,31 @@
 # ============================================================================
-# Postgres interno do Dagster (StatefulSet + Services)
+# Postgres interno do Dagster
 # ============================================================================
-# Banco usado pelo Dagster como `run_storage`, `event_log_storage` e
-# `schedule_storage`. Não confundir com o data warehouse (ClickHouse) — este
-# Postgres armazena metadados de execução do orquestrador.
+# Banco usado pelo Dagster como run_storage, event_log_storage e
+# schedule_storage (metadados de execução do orquestrador — NÃO confundir
+# com o data warehouse ClickHouse).
 #
-# Origem do manifest: chart bitnami/postgresql v8.1.0 (Helm). Mantém a
-# imagem upstream `postgres:14.6` com wrapper bitnami para chmod inicial.
+# Origem: chart bitnami/postgresql v8.1.0 simplificado (labels Helm removidas).
+# Mantém o wrapper bitnami só para o initContainer de chmod inicial.
 #
-# Tópicos sensíveis:
-#   - PGDATA=/bitnami/postgresql/data ; o initContainer (UID 0) cria/chmoda
-#     esse diretório e depois o container principal roda como UID 1001
-#     (securityContext.runAsUser=1001, fsGroup=1001).
-#   - Service headless (`-headless`) é o `serviceName` do StatefulSet para
-#     resolução DNS estável do pod (mereo-dagster-postgresql-0.<headless>).
-#   - O Service regular (sem -headless) é o ClusterIP usado pelos clientes
-#     (env DAGSTER_PG_HOSTNAME = mereo-dagster-postgresql).
+# Service headless (`-headless`) é o serviceName do StatefulSet para DNS
+# estável do pod. Service regular (sem suffix) é o ClusterIP que os clientes
+# usam — note o nome curto `dagster-postgresql` (não `mereo-dagster-...`).
 #
-# Tamanho do PVC: 8Gi — suficiente para o histórico de runs do PoC. Em prod
-# aumentar e considerar substituir por CloudNativePG (já presente no cluster
-# no namespace cnpg-system) para HA.
+# Tamanho do PVC: 8Gi. Em prod, considere substituir por CloudNativePG
+# (já presente no cluster em cnpg-system) para HA + backups automáticos.
 # ----------------------------------------------------------------------------
 apiVersion: v1
 kind: Service
 metadata:
-  name: mereo-dagster-postgresql
-  namespace: mereo-analytics
+  name: dagster-postgresql
+  namespace: mereo
   labels:
-    app: postgresql
+    app: dagster-postgresql
 spec:
   type: ClusterIP
   selector:
-    app: postgresql
-    release: mereo-dagster
-    role: master
+    app: dagster-postgresql
   ports:
     - name: tcp-postgresql
       port: 5432
@@ -42,16 +34,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: mereo-dagster-postgresql-headless
-  namespace: mereo-analytics
+  name: dagster-postgresql-headless
+  namespace: mereo
   labels:
-    app: postgresql
+    app: dagster-postgresql
 spec:
   type: ClusterIP
-  clusterIP: None    # headless → DNS retorna IP do pod (mereo-dagster-postgresql-0)
+  clusterIP: None     # headless → DNS retorna IP do pod
   selector:
-    app: postgresql
-    release: mereo-dagster
+    app: dagster-postgresql
   ports:
     - name: tcp-postgresql
       port: 5432
@@ -60,32 +51,28 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: mereo-dagster-postgresql
-  namespace: mereo-analytics
+  name: dagster-postgresql
+  namespace: mereo
   labels:
-    app: postgresql
+    app: dagster-postgresql
 spec:
   replicas: 1
-  serviceName: mereo-dagster-postgresql-headless
+  serviceName: dagster-postgresql-headless
   selector:
     matchLabels:
-      app: postgresql
-      release: mereo-dagster
-      role: master
+      app: dagster-postgresql
   template:
     metadata:
       labels:
-        app: postgresql
-        release: mereo-dagster
-        role: master
+        app: dagster-postgresql
     spec:
       securityContext:
-        fsGroup: 1001         # grupo de POSSE do volume montado
+        fsGroup: 1001
       initContainers:
         - name: init-chmod-data
           image: docker.io/bitnami/minideb:stretch
           securityContext:
-            runAsUser: 0       # precisa de root para chown -R
+            runAsUser: 0
           command:
             - /bin/sh
             - -c
@@ -98,15 +85,15 @@ spec:
               chmod -R 777 /dev/shm
           resources:
             requests:
-              cpu: 250m
-              memory: 256Mi
+              cpu: 100m
+              memory: 128Mi
           volumeMounts:
             - name: data
               mountPath: /bitnami/postgresql
             - name: dshm
               mountPath: /dev/shm
       containers:
-        - name: mereo-dagster-postgresql
+        - name: postgres
           image: docker.io/library/postgres:14.6
           securityContext:
             runAsUser: 1001
@@ -114,31 +101,23 @@ spec:
             - name: tcp-postgresql
               containerPort: 5432
           env:
-            - name: BITNAMI_DEBUG
-              value: "false"
-            - name: POSTGRESQL_PORT_NUMBER
-              value: "5432"
-            - name: POSTGRESQL_VOLUME_DIR
-              value: /bitnami/postgresql
             - name: PGDATA
               value: /bitnami/postgresql/data
             - name: POSTGRES_USER
-              value: test
+              value: dagster
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mereo-dagster-postgresql
+                  name: dagster-postgresql
                   key: postgresql-password
             - name: POSTGRES_DB
-              value: test
-            - name: POSTGRESQL_ENABLE_LDAP
-              value: "no"
+              value: dagster
           livenessProbe:
             exec:
               command:
                 - /bin/sh
                 - -c
-                - exec pg_isready -U "test" -d "test" -h 127.0.0.1 -p 5432
+                - exec pg_isready -U dagster -d dagster -h 127.0.0.1 -p 5432
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -148,9 +127,7 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - -e
-                - |
-                  pg_isready -U "test" -d "test" -h 127.0.0.1 -p 5432
+                - exec pg_isready -U dagster -d dagster -h 127.0.0.1 -p 5432
             initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 5
@@ -159,6 +136,9 @@ spec:
             requests:
               cpu: 250m
               memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
           volumeMounts:
             - name: dshm
               mountPath: /dev/shm
@@ -167,7 +147,7 @@ spec:
       volumes:
         - name: dshm
           emptyDir:
-            medium: Memory     # /dev/shm para os locks do Postgres
+            medium: Memory
             sizeLimit: 1Gi
   volumeClaimTemplates:
     - metadata:

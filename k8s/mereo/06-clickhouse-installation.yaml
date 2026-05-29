@@ -1,32 +1,26 @@
 # ============================================================================
-# ClickHouseInstallation (clickhouse.altinity.com/v1)
+# ClickHouseInstallation (Altinity Operator)
 # ============================================================================
-# CR do Altinity ClickHouse Operator que descreve o cluster ClickHouse.
-# Pré-requisito: operator `clickhouse-operator` instalado (geralmente no
-# namespace `clickhouse-operator-system`). Sem ele, este CR não cria nada.
-#
-# Topologia (PoC):
-#   - 1 shard × 1 réplica (`shardsCount: 1, replicasCount: 1`).
-#   - Sem ZooKeeper/ClickHouse Keeper (single node).
-#   - HTTP em 8123, TCP nativo em 9000.
+# Cluster ClickHouse single-node (PoC). Pré-requisito: Altinity ClickHouse
+# Operator instalado (geralmente em clickhouse-operator-system).
 #
 # Recursos GERADOS pelo operator a partir deste CR:
 #   StatefulSet/chi-mereo-clickhouse-main-0-0
-#   Service/chi-mereo-clickhouse-main-0-0 (headless, por pod)
-#   Service/clickhouse-mereo-clickhouse  (load balancer interno, alvo do dbt)
-#   ConfigMaps chi-mereo-clickhouse-common-* (configd/usersd)
+#   Service/chi-mereo-clickhouse-main-0-0       (headless, por pod)
+#   Service/clickhouse-mereo-clickhouse         (LB interno → alvo do dbt)
+#   ConfigMaps chi-mereo-clickhouse-common-*    (configd/usersd)
 #   PVC ch-data-chi-mereo-clickhouse-main-0-0-0
 #
 # Política de usuários:
 #   default → networks/ip = ::/0 (acesso de qualquer pod do cluster).
-#   O usuário `dbt` (usado pelos pods do namespace mereo-analytics) é criado
-#   via users.xml gerenciado pelo Altinity operator (não está aqui).
+#   O usuário `dbt` é criado via users.xml gerenciado pelo operator (não está
+#   neste manifest). A senha hash precisa bater com clickhouse-dbt-credentials.
 # ----------------------------------------------------------------------------
 apiVersion: clickhouse.altinity.com/v1
 kind: ClickHouseInstallation
 metadata:
   name: mereo-clickhouse
-  namespace: mereo-clickhouse
+  namespace: mereo
 spec:
   configuration:
     clusters:
@@ -35,10 +29,8 @@ spec:
           shardsCount: 1
           replicasCount: 1
     users:
-      # Sem restrição de origem dentro do cluster (PoC). Em prod restrinja
-      # via networks/ip ao CIDR dos pods do dbt e bloqueie o default.
       default/networks/ip:
-        - ::/0
+        - ::/0          # PoC; em prod restrinja ao CIDR dos pods do dbt
       default/profile: default
       default/quota: default
 
@@ -73,4 +65,4 @@ spec:
           accessModes: [ReadWriteOnce]
           resources:
             requests:
-              storage: 20Gi  # PVC dos arquivos de dados (parts e merges)
+              storage: 20Gi

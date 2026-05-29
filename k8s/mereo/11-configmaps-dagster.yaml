@@ -1,92 +1,55 @@
 # ============================================================================
 # ConfigMaps do Dagster
 # ============================================================================
-# 5 ConfigMaps:
+# 4 ConfigMaps (eram 6 antes — os 3 *-env idênticos foram consolidados em 1
+# único `dagster-env`):
 #
-#   mereo-dagster-instance        → dagster.yaml (config canônica do Dagster:
-#                                   storages, run_launcher, schedules).
-#   mereo-dagster-workspace-yaml  → workspace.yaml (aponta para o gRPC server
-#                                   `mereo-analytics-code:3030`).
-#   mereo-dagster-daemon-env      → envs comuns do daemon (DAGSTER_HOME, etc).
-#   mereo-dagster-webserver-env   → envs comuns do webserver (UI).
-#   mereo-dagster-pipeline-env    → envs herdados pelos run jobs.
-#   mereo-dagster-code            → CÓDIGO PYTHON do `mereo_analytics`
-#                                   (definitions.py, sync-workspace.sh, ...).
-#
-# Os ConfigMaps -env são idênticos (mesmo conteúdo); estão duplicados para
-# permitir override por componente sem afetar os outros.
+#   dagster-env       → envs comuns (DAGSTER_HOME + config dos run jobs).
+#                       Compartilhado por daemon, webserver e run jobs.
+#   dagster-workspace → workspace.yaml (aponta para o gRPC `analytics-code:3030`).
+#   dagster-instance  → dagster.yaml (config canônica: storages + run_launcher).
+#   dagster-code      → código Python do user code + scripts de bootstrap.
 # ----------------------------------------------------------------------------
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: mereo-dagster-daemon-env
-  namespace: mereo-analytics
+  name: dagster-env
+  namespace: mereo
 data:
   DAGSTER_HOME: /opt/dagster/dagster_home
-  DAGSTER_K8S_PIPELINE_RUN_ENV_CONFIGMAP: mereo-dagster-pipeline-env
+  DAGSTER_K8S_PIPELINE_RUN_ENV_CONFIGMAP: dagster-env
   DAGSTER_K8S_PIPELINE_RUN_IMAGE: docker.io/dagster/user-code-example:1.13.6
   DAGSTER_K8S_PIPELINE_RUN_IMAGE_PULL_POLICY: Always
-  DAGSTER_K8S_PIPELINE_RUN_NAMESPACE: mereo-analytics
+  DAGSTER_K8S_PIPELINE_RUN_NAMESPACE: mereo
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: mereo-dagster-webserver-env
-  namespace: mereo-analytics
-data:
-  DAGSTER_HOME: /opt/dagster/dagster_home
-  DAGSTER_K8S_PIPELINE_RUN_ENV_CONFIGMAP: mereo-dagster-pipeline-env
-  DAGSTER_K8S_PIPELINE_RUN_IMAGE: docker.io/dagster/user-code-example:1.13.6
-  DAGSTER_K8S_PIPELINE_RUN_IMAGE_PULL_POLICY: Always
-  DAGSTER_K8S_PIPELINE_RUN_NAMESPACE: mereo-analytics
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: mereo-dagster-pipeline-env
-  namespace: mereo-analytics
-data:
-  DAGSTER_HOME: /opt/dagster/dagster_home
-  DAGSTER_K8S_PIPELINE_RUN_ENV_CONFIGMAP: mereo-dagster-pipeline-env
-  DAGSTER_K8S_PIPELINE_RUN_IMAGE: docker.io/dagster/user-code-example:1.13.6
-  DAGSTER_K8S_PIPELINE_RUN_IMAGE_PULL_POLICY: Always
-  DAGSTER_K8S_PIPELINE_RUN_NAMESPACE: mereo-analytics
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: mereo-dagster-workspace-yaml
-  namespace: mereo-analytics
+  name: dagster-workspace
+  namespace: mereo
 data:
   workspace.yaml: |
     load_from:
       - grpc_server:
-          host: mereo-analytics-code   # service do user code (Deployment)
+          host: analytics-code        # service do user code (mesmo namespace)
           port: 3030
           location_name: mereo-analytics
 ---
 # ----------------------------------------------------------------------------
-# mereo-dagster-instance — dagster.yaml
+# dagster-instance — dagster.yaml (config principal do orquestrador)
 # ----------------------------------------------------------------------------
-# Configuração CENTRAL do Dagster. Define onde persiste estado, como executa
-# runs, e o que monitora.
-#
 # Pontos chave:
-#   * run_launcher: K8sRunLauncher  → cada run vira um Job no namespace
-#     mereo-analytics. As envs (DBT_TARGET, CH_*) e volumes (dbt project +
-#     dagster code) são INJETADAS aqui, então os runs reutilizam o MESMO
-#     projeto dbt que o daemon vê.
-#   * run_storage / event_log_storage / schedule_storage = Postgres
-#     (mereo-dagster-postgresql). Senha vem da env DAGSTER_PG_PASSWORD.
-#   * QueuedRunCoordinator: enfileira execuções (vs LaunchAllRunCoordinator
-#     que dispara imediato sem fila). max_concurrent_runs: -1 = ilimitado.
-#   * run_monitoring: poll de 120s nos jobs K8s, detecta runs órfãs.
+#   * run_launcher: K8sRunLauncher (cada run vira um Job no mesmo namespace).
+#   * run/event_log/schedule_storage = Postgres (`dagster-postgresql`).
+#     User/DB agora são `dagster`/`dagster` (antes era `test`/`test`).
+#   * QueuedRunCoordinator: enfileira execuções.
+#   * run_monitoring: poll de 120s nos Jobs K8s (detecta runs órfãos).
 # ----------------------------------------------------------------------------
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: mereo-dagster-instance
-  namespace: mereo-analytics
+  name: dagster-instance
+  namespace: mereo
 data:
   dagster.yaml: |
     scheduler:
@@ -98,11 +61,11 @@ data:
       class: PostgresScheduleStorage
       config:
         postgres_db:
-          username: test
+          username: dagster
           password:
             env: DAGSTER_PG_PASSWORD
-          hostname: mereo-dagster-postgresql
-          db_name: test
+          hostname: dagster-postgresql
+          db_name: dagster
           port: 5432
           params: {}
 
@@ -111,20 +74,18 @@ data:
       class: K8sRunLauncher
       config:
         load_incluster_config: true
-        job_namespace: mereo-analytics
+        job_namespace: mereo
         image_pull_policy: IfNotPresent
-        service_account_name: mereo-dagster
-        # Imagem leve — entrypoint instala dagster/dbt via pip a cada run.
-        # Para reduzir cold-start em prod, construir imagem custom com deps.
+        service_account_name: dagster
         job_image: "python:3.12-slim"
         dagster_home: "/opt/dagster/dagster_home"
-        instance_config_map: "mereo-dagster-instance"
-        postgres_password_secret: "dagster-postgresql-secret"
+        instance_config_map: "dagster-instance"
+        postgres_password_secret: "dagster-postgresql"
         env_secrets:
-          - clickhouse-dbt-credentials   # injeta CH_DBT_PASSWORD
+          - clickhouse-dbt-credentials
         env_vars:
           - DBT_TARGET=k8s
-          - CH_HOST=clickhouse-mereo-clickhouse.mereo-clickhouse.svc.cluster.local
+          - CH_HOST=clickhouse-mereo-clickhouse
           - CH_PORT=8123
           - CH_USER=dbt
           - CH_RAW_CONSUMER_GROUP=ch-raw-colaborador-v2
@@ -139,14 +100,14 @@ data:
             name: dagster-code
         volumes:
           - configMap:
-              name: mereo-dbt-project
+              name: dbt-project
             name: dbt-config
           - configMap:
-              name: mereo-dbt-models
+              name: dbt-models
             name: dbt-models
           - configMap:
-              defaultMode: 493         # 0755 — scripts dentro deste CM são executáveis
-              name: mereo-dagster-code
+              defaultMode: 493     # 0755 — scripts executáveis
+              name: dagster-code
             name: dagster-code
         resources:
           limits:
@@ -166,11 +127,11 @@ data:
       class: PostgresRunStorage
       config:
         postgres_db:
-          username: test
+          username: dagster
           password:
             env: DAGSTER_PG_PASSWORD
-          hostname: mereo-dagster-postgresql
-          db_name: test
+          hostname: dagster-postgresql
+          db_name: dagster
           port: 5432
           params: {}
 
@@ -179,11 +140,11 @@ data:
       class: PostgresEventLogStorage
       config:
         postgres_db:
-          username: test
+          username: dagster
           password:
             env: DAGSTER_PG_PASSWORD
-          hostname: mereo-dagster-postgresql
-          db_name: test
+          hostname: dagster-postgresql
+          db_name: dagster
           port: 5432
           params: {}
 
@@ -221,31 +182,24 @@ data:
       enabled: true
 ---
 # ----------------------------------------------------------------------------
-# mereo-dagster-code — CÓDIGO PYTHON do user code location + scripts
+# dagster-code — CÓDIGO PYTHON do user code location + scripts
 # ----------------------------------------------------------------------------
-# Igual aos dbt models: o código não está em imagem, está aqui no ConfigMap.
-# `start.sh` (default mode 0755) é o entrypoint do gRPC server e:
-#   1. instala via pip dagster + dagster-dbt + dbt-clickhouse;
-#   2. roda sync-workspace.sh que monta /opt/dagster com:
-#      - dbt project (de /config/dbt)
-#      - models reorganizados (de /config/models)
-#      - código mereo_analytics (de /config/dagster)
-#   3. `dbt deps` + `dbt parse` para gerar o manifest.json (necessário ao
-#      `@dbt_assets` do Dagster);
+# `start.sh` (mode 0755) é o entrypoint do gRPC server:
+#   1. instala via pip dagster + dagster-dbt + dbt-clickhouse.
+#   2. roda sync-workspace.sh que monta /opt/dagster com dbt project + models
+#      + código Python.
+#   3. `dbt deps` + `dbt parse` para gerar manifest.json (usado pelo @dbt_assets).
 #   4. exec `dagster api grpc -h 0.0.0.0 -p 3030 -m mereo_analytics.definitions`.
 #
-# `run-worker-entrypoint.sh` é o equivalente para os pods de RUN JOB
-# (K8sRunLauncher) — instala deps e exec do comando Dagster.
-#
-# `k8s-client-auth-fix.py` é um sitecustomize que corrige um bug do
-# kubernetes-client 36.x quando carregado in-cluster (BearerToken vs
-# authorization). Sem isso, o daemon falha com "system:anonymous".
+# `k8s-client-auth-fix.py` é um sitecustomize que corrige bug do
+# kubernetes-client 36.x (BearerToken vs authorization). Sem ele o daemon
+# falha como system:anonymous.
 # ----------------------------------------------------------------------------
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: mereo-dagster-code
-  namespace: mereo-analytics
+  name: dagster-code
+  namespace: mereo
 data:
   __init__.py: |
     """Mereo analytics Dagster code location."""
@@ -389,8 +343,6 @@ data:
         sensors=[raw_freshness_sensor],
     )
 
-  # Patch obrigatório para kubernetes-client 36.x; sem isso o run_launcher
-  # autentica como system:anonymous e falha ao criar Jobs.
   k8s-client-auth-fix.py: |
     # kubernetes-client 36.x: load_incluster_config grava api_key["authorization"],
     # mas auth_settings() só lê api_key["BearerToken"] — requests saem como system:anonymous.
@@ -407,10 +359,9 @@ data:
 
     Configuration.auth_settings = _patched_auth_settings
 
-  # Entrypoint dos pods de RUN JOB (lançados pelo K8sRunLauncher).
   run-worker-entrypoint.sh: |
     #!/usr/bin/env bash
-    # Entrypoint dos run jobs K8s: deps + workspace + exec do comando Dagster (execute_run).
+    # Entrypoint dos run jobs K8s: deps + workspace + exec do comando Dagster.
     set -euo pipefail
 
     if ! command -v dagster >/dev/null 2>&1; then
@@ -428,7 +379,6 @@ data:
 
     exec "$@"
 
-  # Entrypoint do user code pod (`mereo-analytics-code`).
   start.sh: |
     #!/usr/bin/env bash
     set -euo pipefail
@@ -444,7 +394,6 @@ data:
       -m mereo_analytics.definitions \
       --working-directory /opt/dagster/app
 
-  # Reorganiza ConfigMaps → árvore de diretórios + dbt parse.
   sync-workspace.sh: |
     #!/usr/bin/env bash
     # Sincroniza ConfigMaps → /opt/dagster (user-code pod e run jobs).
@@ -454,7 +403,7 @@ data:
     cp /config/dbt/dbt_project.yml /config/dbt/packages.yml /opt/dagster/dbt/
     cp /config/dbt/profiles.yml /opt/dagster/dbt/profiles.yml
 
-    # Expande chave `staging__stg_colaborador.sql` -> staging/stg_colaborador.sql.
+    # Expande chave `staging__stg_colaborador.sql` → staging/stg_colaborador.sql.
     for f in /config/models/*; do
       [ -f "$f" ] || continue
       key=$(basename "$f")

@@ -2,9 +2,9 @@
 # Service: mssql
 # ============================================================================
 # Endpoint TDS (porta 1433) consumido por:
-#   - `mereo-kafka/mereo-connect` (Debezium SqlServerConnector) via FQDN:
+#   - `mereo/mereo-connect` (Debezium SqlServerConnector) cross-namespace via:
 #     mssql.mereo-sqlserver.svc.cluster.local:1433
-#   - `mereo-sqlserver/mssql-init` Job durante o bootstrap.
+#   - `mereo-sqlserver/mssql-init` Job durante o bootstrap (same-namespace).
 #
 # É um ClusterIP simples — não expomos o SQL Server fora do cluster.
 # O nome (`mssql`) é a `serviceName` do StatefulSet, que também publica o pod
