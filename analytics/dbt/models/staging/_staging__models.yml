@@ -1,0 +1,16 @@
+version: 2
+
+models:
+  - name: stg_colaborador
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - tenant_slug
+            - id
+    columns:
+      - name: id
+        tests:
+          - not_null
+      - name: tenant_slug
+        tests:
+          - not_null

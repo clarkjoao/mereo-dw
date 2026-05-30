@@ -1,0 +1,62 @@
+# Contrato da entidade colaborador — derivado de output/groups/mereogr/schema/tables/
+# Regenerar amostra completa: python3 analytics/catalog/generate_entity_contracts.py
+
+entity: colaborador
+source:
+  schema: dbo
+  table: COLABORADOR
+kafka_topic: raw.colaborador
+clickhouse:
+  database: raw
+  table: colaborador
+  consumer_group: ch-raw-colaborador-v2
+
+pilot_databases:
+  - MereoGR-Afya
+  - MereoGR-Staging
+  - MereoGR-Allos
+
+pk_columns: [ID]
+
+# Colunas idênticas nos 3 tenants piloto (18 cols, drift zero)
+columns_common:
+  - ID
+  - ID_GRUPO_USUARIO
+  - ID_IDIOMA
+  - USER_LOGIN
+  - NOME
+  - EMAIL
+  - WORKFLOW_ACOES
+  - ATIVO
+  - FOTO_PATH
+  - USUARIO_AD
+  - TIPO_COLABORADOR
+  - EXIBIR_TUTORIAL
+  - Registration
+  - EXIBIR_TUTORIAL_DASH_PERFORMANCE
+  - FCMToken
+  - AvailabilityRelocateStatus
+  - SignatureConsentAgreement
+  - Locality_Id
+
+# Subconjunto usado no landing CH + dbt (POC)
+landing_columns:
+  - name: id
+    source: ID
+    type: Int64
+  - name: nome
+    source: NOME
+    type: String
+  - name: email
+    source: EMAIL
+    type: String
+  - name: id_grupo_usuario
+    source: ID_GRUPO_USUARIO
+    type: Int64
+  - name: ativo
+    source: ATIVO
+    type: UInt8
+
+dbt:
+  staging: stg_colaborador
+  gold: colaborador_by_grupo

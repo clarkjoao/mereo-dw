@@ -1,0 +1,27 @@
+name: mereo_analytics
+version: 1.0.0
+config-version: 2
+profile: mereo_clickhouse
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: target
+clean-targets:
+  - target
+  - dbt_packages
+
+models:
+  mereo_analytics:
+    staging:
+      +materialized: view
+    gold:
+      +materialized: table
+
+vars:
+  raw_database: raw
+  gold_database: gold

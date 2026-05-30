@@ -1,0 +1,12 @@
+# Grupos de bancos para mapeamento.
+# Uso: uv run python -m mereo_tools discover --group mereogr
+
+[mereogr]
+pattern = "MereoGR-*"
+reference_db = "MereoGR-Staging"
+
+# Futuro — descomente quando for mapear outros grupos:
+# [mereo_core]
+# pattern = "Mereo-%"
+# exclude = ["MereoGR-%"]
+# reference_db = "Mereo-Global"
