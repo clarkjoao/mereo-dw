@@ -142,11 +142,23 @@ uv run python -m mereo_tools mapping-report --group mereogr
 # 4. Backup local prod → disco (schema + dados; conservador com prod)
 uv run python -m mereo_tools backup-local \
   --databases MereoGR-Staging,MereoGR-Allos,MereoGR-Afya \
-  --batch-size 500 --pause-batch 0.25 --pause-table 0.4 --pause-db 15
+  --resume \
+  --sample-limit 50000 \
+  --sample-databases MereoGR-Allos,MereoGR-Afya \
+  --schema-only-audit \
+  --batch-size 2000 --pause-batch 0.05 --pause-table 0.2 --pause-db 10
 # retomar: ... backup-local --resume
+# aceitar parcial: --accept-partial dbo.ValorMatriz
 # Saída: output/backups/{database}/schema/schema.sql + data/*.jsonl.gz
 
-# 5. Clone prod → sim (restaurar no SQL Server teste — estratégia alternativa)
+# 5. Restore backup → sim (sem bater em prod)
+kubectl port-forward -n mereo-sqlserver svc/mssql 11434:1433
+MSSQL_HOST=127.0.0.1 MSSQL_PORT=11434 uv run python -m mereo_tools restore-local \
+  --databases MereoGR-Staging,MereoGR-Allos,MereoGR-Afya \
+  --enable-cdc --batch-size 500 --resume
+# Saída: SQL Server sim populado; resumo em output/backups/restore_summary.json
+
+# 6. Clone prod → sim (alternativa direta prod→sim)
 kubectl port-forward -n mereo-sqlserver svc/mssql 11433:1433
 MSSQL_HOST=127.0.0.1 MSSQL_PORT=11433 uv run python -m mereo_tools clone-sim \
   --databases MereoGR-Staging,MereoGR-Allos,MereoGR-Afya \
