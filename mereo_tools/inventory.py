@@ -6,11 +6,12 @@ import csv
 import json
 import sys
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any
 
 from mereo_tools import db
-from mereo_tools.groups import DatabaseGroup, get_group
+from mereo_tools.config import SourceKind
+from mereo_tools.db_list import load_database_list
+from mereo_tools.groups import get_group
 
 TABLES_SQL = """
 SELECT
@@ -61,23 +62,6 @@ FROM sys.database_files
 """
 
 
-def load_database_list(group: DatabaseGroup, db_filter: str | None, limit: int | None) -> list[str]:
-    if group.databases_file.exists():
-        rows = json.loads(group.databases_file.read_text(encoding="utf-8"))
-        names = [r["name"] for r in rows if r.get("state_desc") == "ONLINE"]
-    else:
-        from mereo_tools.discover import discover_databases
-
-        rows = discover_databases(group)
-        names = [r["name"] for r in rows if r.get("state_desc") == "ONLINE"]
-
-    if db_filter:
-        names = [n for n in names if n == db_filter]
-    if limit:
-        names = names[:limit]
-    return names
-
-
 def inventory_database(conn, database: str) -> tuple[dict[str, Any], list[dict[str, Any]], str | None]:
     error: str | None = None
     meta: dict[str, Any] = {"database": database, "scanned_at": datetime.now(timezone.utc).isoformat()}
@@ -94,7 +78,7 @@ def inventory_database(conn, database: str) -> tuple[dict[str, Any], list[dict[s
             size_row = db.fetchone(conn, DB_SIZE_SQL)
             meta["file_size_mb"] = float(size_row["file_size_mb"]) if size_row and size_row.get("file_size_mb") else 0.0
             meta["space_used_mb"] = float(size_row["space_used_mb"]) if size_row and size_row.get("space_used_mb") else 0.0
-            meta["total_size_mb"] = meta["space_used_mb"]  # alias legado
+            meta["total_size_mb"] = meta["space_used_mb"]
 
             table_rows = db.fetchall(conn, TABLES_SQL)
             pk_map: dict[tuple[str, str], str] = {}
@@ -132,6 +116,8 @@ def inventory_database(conn, database: str) -> tuple[dict[str, Any], list[dict[s
         error = str(exc)
         meta["table_count"] = 0
         meta["cdc_table_count"] = 0
+        meta["file_size_mb"] = 0.0
+        meta["space_used_mb"] = 0.0
         meta["total_size_mb"] = 0.0
         meta["cdc_enabled"] = False
 
@@ -141,12 +127,20 @@ def inventory_database(conn, database: str) -> tuple[dict[str, Any], list[dict[s
 def run_inventory(
     group_name: str,
     *,
-    db_filter: str | None = None,
+    source: SourceKind = "mereo",
+    databases: list[str] | None = None,
+    use_sample: bool = False,
     limit: int | None = None,
     resume: bool = False,
+    pause: float = 1.0,
 ) -> int:
     group = get_group(group_name)
-    names = load_database_list(group, db_filter, limit)
+    names = load_database_list(
+        group,
+        databases=databases,
+        use_sample=use_sample,
+        limit=limit,
+    )
     if not names:
         print("Nenhum banco para processar.", file=sys.stderr)
         return 1
@@ -158,9 +152,9 @@ def run_inventory(
     log_path = group.output_dir / "run.log"
 
     summary_rows: list[dict[str, Any]] = []
-    conn = db.connect()
+    conn = db.connect(source=source)
 
-    print(f"Inventário — {len(names)} banco(s)")
+    print(f"Inventário — {len(names)} banco(s), source={source}, pause={pause}s")
 
     try:
         for i, name in enumerate(names, 1):
@@ -215,6 +209,9 @@ def run_inventory(
                 with log_path.open("a", encoding="utf-8") as log:
                     log.write(f"{datetime.now(timezone.utc).isoformat()} inventory {name}: {error}\n")
 
+            if i < len(names):
+                db.pause_between_databases(pause)
+
     finally:
         conn.close()
 
@@ -230,6 +227,27 @@ def run_inventory(
         "cdc_table_count",
         "errors",
     ]
+
+    # Recompõe summary a partir de todos meta.json (resume em lotes sobrescrevia antes)
+    all_rows: list[dict[str, Any]] = []
+    for meta_path in sorted(db_dir.glob("*/meta.json")):
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        all_rows.append(
+            {
+                "database": meta.get("database", meta_path.parent.name),
+                "state": "ONLINE",
+                "table_count": meta.get("table_count", 0),
+                "space_used_mb": meta.get("space_used_mb", 0),
+                "file_size_mb": meta.get("file_size_mb", 0),
+                "total_size_mb": meta.get("total_size_mb", 0),
+                "cdc_enabled": meta.get("cdc_enabled", False),
+                "cdc_table_count": meta.get("cdc_table_count", 0),
+                "errors": meta.get("errors", ""),
+            }
+        )
+    if all_rows:
+        summary_rows = all_rows
+
     with csv_path.open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fields)
         writer.writeheader()
@@ -241,16 +259,19 @@ def run_inventory(
 
 
 def main(argv: list[str] | None = None) -> int:
-    from mereo_tools.cli import base_parser
+    from mereo_tools.cli import base_parser, resolve_source
 
     parser = base_parser("Inventário de tabelas, tamanho e CDC por banco")
     args = parser.parse_args(argv)
     try:
         return run_inventory(
             args.group,
-            db_filter=args.db,
+            source=resolve_source(args),
+            databases=args.databases,
+            use_sample=args.sample,
             limit=args.limit,
             resume=args.resume,
+            pause=args.pause,
         )
     except Exception as exc:
         print(f"Erro: {exc}", file=sys.stderr)

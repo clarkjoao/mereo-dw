@@ -1,9 +1,27 @@
 # Grupos de bancos para mapeamento.
-# Uso: uv run python -m mereo_tools discover --group mereogr
+# Uso: uv run python -m mereo_tools discover --group mereogr --source mereo
 
 [mereogr]
 pattern = "MereoGR-*"
-reference_db = "MereoGR-Staging"
+reference_db = "MereoGR-Afya"
+
+# Amostra curada para schema/drift (validar se schemas são iguais entre tenants)
+mapping_sample = [
+  "MereoGR-Afya",
+  "MereoGR-Staging",
+  "MereoGR-Allos",
+  "MereoGR-Magalu",
+  "MereoGR-Klabin",
+  "MereoGR-Mrv",
+  "MereoGR-Picpay",
+  "MereoGR-Vibra",
+  "MereoGR-Sereducacional",
+  "MereoGR-GrupoDirecional",
+  "MereoGR-implantacao",
+  "MereoGR-HMLAfya",
+  "MereoGR-comercialtrial",
+  "MereoGR-constance-poc",
+]
 
 # Futuro — descomente quando for mapear outros grupos:
 # [mereo_core]

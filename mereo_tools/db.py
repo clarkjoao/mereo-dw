@@ -1,23 +1,36 @@
 from __future__ import annotations
 
+import time
 from contextlib import contextmanager
 from typing import Any, Iterator
 
 import pymssql
 
-from mereo_tools.config import MssqlConfig, load_mssql_config
+from mereo_tools.config import MssqlConfig, SourceKind, load_config
+
+# Timeouts conservadores para o cliente real (MEREO_*)
+Mereo_DEFAULTS = {"login_timeout": 15, "timeout": 120}
+# Simulador / prod via MSSQL_* — mais folga
+MSSQL_DEFAULTS = {"login_timeout": 30, "timeout": 120}
 
 
-def connect(config: MssqlConfig | None = None, *, timeout: int = 300) -> pymssql.Connection:
-    cfg = config or load_mssql_config()
+def connect(
+    config: MssqlConfig | None = None,
+    *,
+    source: SourceKind = "mssql",
+    timeout: int | None = None,
+    login_timeout: int | None = None,
+) -> pymssql.Connection:
+    cfg = config or load_config(source)
+    defaults = Mereo_DEFAULTS if cfg.source == "mereo" else MSSQL_DEFAULTS
     return pymssql.connect(
         server=cfg.server,
         port=cfg.port,
         user=cfg.user,
         password=cfg.password,
         database="master",
-        login_timeout=30,
-        timeout=timeout,
+        login_timeout=login_timeout if login_timeout is not None else defaults["login_timeout"],
+        timeout=timeout if timeout is not None else defaults["timeout"],
         as_dict=True,
     )
 
@@ -40,3 +53,8 @@ def use_database(conn: pymssql.Connection, database: str) -> Iterator[None]:
     cur = conn.cursor()
     cur.execute(f"USE [{safe}]")
     yield
+
+
+def pause_between_databases(seconds: float) -> None:
+    if seconds > 0:
+        time.sleep(seconds)

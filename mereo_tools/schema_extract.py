@@ -9,8 +9,9 @@ from datetime import datetime, timezone
 from typing import Any
 
 from mereo_tools import db
+from mereo_tools.config import SourceKind
+from mereo_tools.db_list import load_database_list
 from mereo_tools.groups import get_group
-from mereo_tools.inventory import load_database_list
 
 COLUMNS_SQL = """
 SELECT
@@ -85,18 +86,26 @@ def extract_schema(conn, database: str) -> list[dict[str, Any]]:
 def run_schema_extract(
     group_name: str,
     *,
-    db_filter: str | None = None,
+    source: SourceKind = "mereo",
+    databases: list[str] | None = None,
+    use_sample: bool = False,
     limit: int | None = None,
     resume: bool = False,
+    pause: float = 2.0,
 ) -> int:
     group = get_group(group_name)
-    names = load_database_list(group, db_filter, limit)
+    names = load_database_list(
+        group,
+        databases=databases,
+        use_sample=use_sample,
+        limit=limit,
+    )
     schema_dir = group.output_dir / "schema" / "tables"
     schema_dir.mkdir(parents=True, exist_ok=True)
     log_path = group.output_dir / "run.log"
 
-    conn = db.connect()
-    print(f"Schema extract — {len(names)} banco(s)")
+    conn = db.connect(source=source)
+    print(f"Schema extract — {len(names)} banco(s), source={source}, pause={pause}s")
 
     try:
         for i, name in enumerate(names, 1):
@@ -117,9 +126,12 @@ def run_schema_extract(
                 out_file.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
                 print(f"OK ({len(tables)} tabelas)")
             except Exception as exc:
-                print(f"ERRO")
+                print("ERRO")
                 with log_path.open("a", encoding="utf-8") as log:
                     log.write(f"{datetime.now(timezone.utc).isoformat()} schema {name}: {exc}\n")
+
+            if i < len(names):
+                db.pause_between_databases(pause)
     finally:
         conn.close()
 
@@ -128,16 +140,19 @@ def run_schema_extract(
 
 
 def main(argv: list[str] | None = None) -> int:
-    from mereo_tools.cli import base_parser
+    from mereo_tools.cli import base_parser, resolve_source
 
     parser = base_parser("Extrai schema de todas as tabelas por banco")
     args = parser.parse_args(argv)
     try:
         return run_schema_extract(
             args.group,
-            db_filter=args.db,
+            source=resolve_source(args),
+            databases=args.databases,
+            use_sample=args.sample,
             limit=args.limit,
             resume=args.resume,
+            pause=max(args.pause, 2.0) if args.source == "mereo" else args.pause,
         )
     except Exception as exc:
         print(f"Erro: {exc}", file=sys.stderr)

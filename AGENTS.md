@@ -128,10 +128,42 @@ Após editar dbt/Dagster: `./k8s/sync-configmaps.sh`
 ## mereo_tools
 
 ```bash
-uv run python -m mereo_tools discover --group mereogr
-uv run python -m mereo_tools inventory --group mereogr
-uv run python -m mereo_tools schema --group mereogr [--resume]
-uv run python -m mereo_tools drift --group mereogr
+# 1. Fleet — lista + inventário (todos MereoGR-*)
+uv run python -m mereo_tools discover --source mereo
+uv run python -m mereo_tools inventory --source mereo --resume --pause 2
+
+# 2. Schema deep-dive — amostra curada (groups.toml mapping_sample)
+uv run python -m mereo_tools schema --source mereo --sample --resume --pause 3
+
+# 3. Drift vs referência + relatório COLABORADOR
+uv run python -m mereo_tools drift --group mereogr --reference-db MereoGR-Afya --detailed
+uv run python -m mereo_tools mapping-report --group mereogr
+
+# 4. Backup local prod → disco (schema + dados; conservador com prod)
+uv run python -m mereo_tools backup-local \
+  --databases MereoGR-Staging,MereoGR-Allos,MereoGR-Afya \
+  --batch-size 500 --pause-batch 0.25 --pause-table 0.4 --pause-db 15
+# retomar: ... backup-local --resume
+# Saída: output/backups/{database}/schema/schema.sql + data/*.jsonl.gz
+
+# 5. Clone prod → sim (restaurar no SQL Server teste — estratégia alternativa)
+kubectl port-forward -n mereo-sqlserver svc/mssql 11433:1433
+MSSQL_HOST=127.0.0.1 MSSQL_PORT=11433 uv run python -m mereo_tools clone-sim \
+  --databases MereoGR-Staging,MereoGR-Allos,MereoGR-Afya \
+  --enable-cdc --batch-size 500 --pause-batch 0.25 --pause-table 0.4 --pause-db 15
+
+./analytics/scripts/validate-pipeline.sh
+./analytics/scripts/dbt-via-dagster.sh
+```
+
+Credenciais no `.env`:
+- `MEREO_*` — cliente real (somente dev local: discover, schema, drift, seed origem)
+- `MSSQL_*` — simulador (dev) ou cliente real (prod via secrets K8s)
+
+Teste de conexão dual:
+```bash
+uv run python -m mereo_tools teste_query --source mereo --db MereoGR-Staging
+uv run python -m mereo_tools teste_query --source mssql --db MereoGR-Staging
 ```
 
 Saída: `output/groups/mereogr/` (gitignored). Contratos commitados: `analytics/catalog/entities/*.yaml`.

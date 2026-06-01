@@ -16,6 +16,7 @@ class DatabaseGroup:
     pattern: str
     reference_db: str
     exclude: tuple[str, ...] = ()
+    mapping_sample: tuple[str, ...] = ()
 
     @property
     def output_dir(self) -> Path:
@@ -42,11 +43,15 @@ def load_groups(path: Path | None = None) -> dict[str, DatabaseGroup]:
         exclude = section.get("exclude", [])
         if isinstance(exclude, str):
             exclude = [exclude]
+        sample = section.get("mapping_sample", [])
+        if isinstance(sample, str):
+            sample = [sample]
         groups[name] = DatabaseGroup(
             name=name,
             pattern=section["pattern"],
             reference_db=section.get("reference_db", ""),
             exclude=tuple(exclude),
+            mapping_sample=tuple(sample),
         )
     return groups
 

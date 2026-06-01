@@ -7,11 +7,12 @@ import sys
 from typing import Any
 
 from mereo_tools import db
+from mereo_tools.config import SourceKind
 from mereo_tools.groups import DatabaseGroup, get_group
 
 
-def discover_databases(group: DatabaseGroup) -> list[dict[str, Any]]:
-    conn = db.connect()
+def discover_databases(group: DatabaseGroup, *, source: SourceKind = "mereo") -> list[dict[str, Any]]:
+    conn = db.connect(source=source)
     try:
         rows = db.fetchall(
             conn,
@@ -35,11 +36,11 @@ def discover_databases(group: DatabaseGroup) -> list[dict[str, Any]]:
     return [r for r in rows if group.matches(r["name"])]
 
 
-def run_discover(group_name: str) -> int:
+def run_discover(group_name: str, *, source: SourceKind = "mereo") -> int:
     group = get_group(group_name)
-    print(f"Grupo: {group.name} (pattern: {group.pattern})")
+    print(f"Grupo: {group.name} (pattern: {group.pattern}, source: {source})")
 
-    rows = discover_databases(group)
+    rows = discover_databases(group, source=source)
     group.output_dir.mkdir(parents=True, exist_ok=True)
     group.databases_file.write_text(json.dumps(rows, indent=2, default=str), encoding="utf-8")
 
@@ -53,12 +54,12 @@ def run_discover(group_name: str) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    from mereo_tools.cli import base_parser
+    from mereo_tools.cli import base_parser, resolve_source
 
     parser = base_parser("Lista bancos do grupo no SQL Server")
     args = parser.parse_args(argv)
     try:
-        return run_discover(args.group)
+        return run_discover(args.group, source=resolve_source(args))
     except Exception as exc:
         print(f"Erro: {exc}", file=sys.stderr)
         return 1
