@@ -1,0 +1,26 @@
+
+# --- mereo-poc monorepo ---
+.env
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+output/
+kubeconfig.yaml
+kubeconfig*.yaml
+analytics/.ch-dbt-password
+analytics/dbt/profiles.yml
+analytics/dbt/target/
+analytics/dbt/dbt_packages/
+analytics/dbt/logs/
+analytics/dagster/.venv/
+analytics/dagster/dagster_home/
+analytics/control-plane/.run/
+analytics/control-plane/.generated/
+analytics/dagster/**/__pycache__/
+k8s/generated/
+.DS_Store
+analytics/dbt/.user.yml
+analytics/dagster/logs/

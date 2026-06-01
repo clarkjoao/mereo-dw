@@ -5,8 +5,8 @@
 #   1. pipeline.entity_watermarks ← MAX(_ts_ms) de raw.colaborador
 #      → indica "até quando temos dados em ClickHouse" para o entity.
 #   2. pipeline.consumer_lag_snapshots ← lag agregado do consumer
-#      `ch-raw-colaborador` (Kafka engine do ClickHouse), via
-#      system.kafka_consumers.
+#      `ch-raw-colaborador-v2` (Kafka engine do ClickHouse), via
+#      system.kafka_consumers (CH 24.3 — sem coluna `group`).
 #
 # Essas tabelas alimentam:
 #   - raw_freshness_sensor do Dagster (libera dbt build se há dados frescos).
@@ -43,10 +43,14 @@ spec:
                   SELECT 'colaborador', coalesce(max(_ts_ms), 0), now64(3) FROM raw.colaborador;
 
                   INSERT INTO pipeline.consumer_lag_snapshots (consumer_group, topic, lag, snapshot_at)
-                  SELECT group, table, coalesce(sum(num_messages - coalesce(offset, 0)), 0), now64(3)
+                  SELECT 'ch-raw-colaborador-v2', table,
+                    coalesce(sum(greatest(toInt64(0),
+                      toInt64(coalesce(assignments.current_offset[1], 0))
+                      - toInt64(coalesce(num_messages_read, 0)))), 0),
+                    now64(3)
                   FROM system.kafka_consumers
-                  WHERE group = 'ch-raw-colaborador'
-                  GROUP BY group, table;
+                  WHERE table = 'colaborador_kafka'
+                  GROUP BY table;
                   "
                   echo "pipeline snapshot OK"
               resources:

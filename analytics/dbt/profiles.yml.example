@@ -1,0 +1,21 @@
+mereo_clickhouse:
+  target: dev
+  outputs:
+    dev:
+      type: clickhouse
+      schema: gold
+      host: localhost
+      port: 18123
+      user: dbt
+      password: "{{ env_var('CH_DBT_PASSWORD') }}"
+      secure: false
+      verify: false
+    k8s:
+      type: clickhouse
+      schema: gold
+      host: clickhouse-mereo-clickhouse.mereo-clickhouse.svc.cluster.local
+      port: 8123
+      user: dbt
+      password: "{{ env_var('CH_DBT_PASSWORD') }}"
+      secure: false
+      verify: false

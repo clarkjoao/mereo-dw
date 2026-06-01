@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: colaborador_by_grupo
+    columns:
+      - name: tenant_slug
+        tests:
+          - not_null
+      - name: id_grupo_usuario
+        tests:
+          - not_null
+      - name: colaborador_count
+        tests:
+          - not_null

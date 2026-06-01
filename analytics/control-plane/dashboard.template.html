@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mereo POC — Control Plane</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --border: #2d3a4f;
+      --text: #e7ecf3;
+      --muted: #8b9cb3;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --ok: #22c55e;
+      --warn: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #151d2b 0%, var(--bg) 100%);
+    }
+    header h1 { margin: 0 0 0.25rem; font-size: 1.5rem; font-weight: 600; }
+    header p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+    main { max-width: 1100px; margin: 0 auto; padding: 1.5rem 2rem 3rem; }
+    .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .card-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+    .card h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
+    .badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.2rem 0.5rem;
+      border-radius: 999px;
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--ok);
+    }
+    .badge.off { background: rgba(245, 158, 11, 0.15); color: var(--warn); }
+    .desc { color: var(--muted); font-size: 0.85rem; margin: 0; }
+    .links { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    a.btn, button.btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    a.btn-primary, button.btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    a.btn-primary:hover { background: var(--accent-hover); }
+    button.btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    button.btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+    .creds {
+      background: #121820;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem;
+      font-size: 0.8rem;
+    }
+    .cred-row {
+      display: grid;
+      grid-template-columns: 5.5rem 1fr auto;
+      gap: 0.5rem;
+      align-items: center;
+      padding: 0.35rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .cred-row:last-child { border-bottom: none; }
+    .cred-row label { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; }
+    .cred-row code {
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 0.78rem;
+      word-break: break-all;
+    }
+    .cred-row .secret { filter: blur(4px); transition: filter 0.15s; }
+    .cred-row.revealed .secret { filter: none; }
+    .footer {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+    .footer code { color: var(--text); }
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: var(--ok);
+      color: #fff;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all 0.2s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Mereo POC — Control Plane</h1>
+    <p>Port-forwards, UIs e credenciais do stack <code>mereo-*</code></p>
+  </header>
+  <main>
+    <div class="grid" id="services"></div>
+    <div class="footer">
+      <p>Gerado em <span id="generated-at"></span> · Kubeconfig: <code id="kubeconfig"></code></p>
+      <p>Parar tudo: <code>./analytics/scripts/control-plane.sh stop</code></p>
+    </div>
+  </main>
+  <div class="toast" id="toast">Copiado!</div>
+  <script type="application/json" id="config">__CONFIG_JSON__</script>
+  <script>
+    const config = JSON.parse(document.getElementById("config").textContent);
+    document.getElementById("generated-at").textContent = config.generatedAt;
+    document.getElementById("kubeconfig").textContent = config.kubeconfig;
+
+    function toast(msg) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      setTimeout(() => el.classList.remove("show"), 1800);
+    }
+
+    function copy(text) {
+      navigator.clipboard.writeText(text).then(() => toast("Copiado!"));
+    }
+
+    function credRow(label, value, secret) {
+      const row = document.createElement("div");
+      row.className = "cred-row" + (secret ? "" : " revealed");
+      row.innerHTML = `
+        <label>${label}</label>
+        <code class="${secret ? "secret" : ""}">${value || "—"}</code>
+        <button class="btn btn-ghost" type="button">Copiar</button>
+      `;
+      const btn = row.querySelector("button");
+      btn.onclick = () => copy(value);
+      if (secret) {
+        row.querySelector("code").onclick = () => row.classList.toggle("revealed");
+        row.querySelector("code").style.cursor = "pointer";
+        row.querySelector("code").title = "Clique para revelar";
+      }
+      return row;
+    }
+
+    const grid = document.getElementById("services");
+    config.services.forEach((svc) => {
+      const card = document.createElement("article");
+      card.className = "card";
+      const links = (svc.links || [])
+        .map((l) => `<a class="btn btn-primary" href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`)
+        .join("");
+      card.innerHTML = `
+        <div class="card-head">
+          <h2>${svc.name}</h2>
+          <span class="badge ${svc.portForward ? "" : "off"}">${svc.portForward ? "PF :" + svc.localPort : "sem PF"}</span>
+        </div>
+        <p class="desc">${svc.description}</p>
+        <div class="links">${links}</div>
+        <div class="creds"></div>
+      `;
+      const creds = card.querySelector(".creds");
+      (svc.credentials || []).forEach((c) => creds.appendChild(credRow(c.label, c.value, c.secret)));
+      grid.appendChild(card);
+    });
+  </script>
+</body>
+</html>

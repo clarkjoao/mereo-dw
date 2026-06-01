@@ -1,0 +1,41 @@
+# Catálogo piloto — entidades MereoGR para POC pipeline
+# Derivado do inventário mereo_tools (output/groups/mereogr/)
+
+pilot:
+  wave: 1
+  tenants:
+    - database: MereoGR-Afya
+      slug: afya
+      connector: mereogr-afya-colaborador
+    - database: MereoGR-Staging
+      slug: staging
+      connector: mereogr-staging-colaborador
+    - database: MereoGR-Allos
+      slug: allos
+      connector: mereogr-allos-colaborador
+
+  entities:
+    - name: colaborador
+      kafka_topic: raw.colaborador
+      ch_table: raw.colaborador
+      ch_consumer_group: ch-raw-colaborador-v2
+      source:
+        schema: dbo
+        table: COLABORADOR
+        pk: ID
+      dbt:
+        staging: stg_colaborador
+        gold: colaborador_by_grupo
+      contract: analytics/catalog/entities/colaborador.yaml
+      notes: >
+        Presente nos 3 tenants piloto com PK; ~1.6k–37k rows.
+        Habilitar CDC em dbo.COLABORADOR antes do Debezium.
+
+  pk_policy:
+    require_pk: true
+    no_pk_action: exclude
+    inventory_pk_coverage: "~81%"
+
+  excluded_reasons:
+    no_pk: "Não ingerir sem estratégia (snapshot/full ou chave sintética)"
+    cdc_disabled: "Executar analytics/sql/cdc-enable-pilot.sql no SQL Server"
