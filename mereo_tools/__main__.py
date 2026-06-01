@@ -9,7 +9,7 @@ def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if not args or args[0] in ("-h", "--help"):
         print(__doc__)
-        print("\nComandos: discover, inventory, inventory-batches, schema, drift, mapping-report, teste_query, seed-sim, clone-sim, backup-local")
+        print("\nComandos: discover, inventory, inventory-batches, schema, drift, mapping-report, teste_query, seed-sim, clone-sim, backup-local, restore-local")
         print("Exemplo: uv run python -m mereo_tools teste_query --db MereoGR-Staging")
         return 0 if args else 1
 
@@ -52,13 +52,17 @@ def main(argv: list[str] | None = None) -> int:
         from mereo_tools.backup_local import main as backup_local_main
 
         return backup_local_main(rest)
+    if command == "restore-local":
+        from mereo_tools.restore_local import main as restore_local_main
+
+        return restore_local_main(rest)
     if command == "inventory-batches":
         from mereo_tools.run_inventory_batches import main as batches_main
 
         return batches_main(rest)
 
     print(f"Comando desconhecido: {command}", file=sys.stderr)
-    print("Comandos: discover, inventory, inventory-batches, schema, drift, mapping-report, teste_query, seed-sim, clone-sim, backup-local")
+    print("Comandos: discover, inventory, inventory-batches, schema, drift, mapping-report, teste_query, seed-sim, clone-sim, backup-local, restore-local")
     return 1
 
 
