@@ -7,7 +7,13 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-output/
+# output/ é gerado — exceto os contratos de schema dos tenants (insumo dos geradores da spec 001)
+output/*
+!output/groups/
+output/groups/*
+!output/groups/mereogr/
+output/groups/mereogr/*
+!output/groups/mereogr/schema/
 kubeconfig.yaml
 kubeconfig*.yaml
 analytics/.ch-dbt-password
