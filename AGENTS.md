@@ -156,7 +156,17 @@ kubectl port-forward -n mereo-sqlserver svc/mssql 11434:1433
 MSSQL_HOST=127.0.0.1 MSSQL_PORT=11434 uv run python -m mereo_tools restore-local \
   --databases MereoGR-Staging,MereoGR-Allos,MereoGR-Afya \
   --enable-cdc --batch-size 500 --resume
+# Wave 1 CDC mínimo (só COLABORADOR, sem reaplicar schema.sql inteiro):
+#   ... restore-local --tables dbo.COLABORADOR --skip-schema --skip-drop --enable-cdc
 # Saída: SQL Server sim populado; resumo em output/backups/restore_summary.json
+
+# 5b. ERP bulk → ClickHouse raw (modelagem dbt) — ver analytics/docs/erp-raw-full-spec.md
+./analytics/scripts/port-forward-ch.sh   # localhost:18123
+export CH_DBT_PASSWORD="$(cat analytics/.ch-dbt-password)"
+uv run python -m mereo_tools backup-to-ch \
+  --databases MereoGR-Staging,MereoGR-Allos,MereoGR-Afya \
+  --batch-size 5000 --resume
+# Depois: uv run python analytics/catalog/generate_raw_sources.py
 
 # 6. Clone prod → sim (alternativa direta prod→sim)
 kubectl port-forward -n mereo-sqlserver svc/mssql 11433:1433
@@ -188,7 +198,17 @@ Entidade `dbo.COLABORADOR` → `raw.colaborador`. Tenants: afya, staging, allos.
 
 **`COLABORADOR` não tem `ID_AREA`** — model `colaborador_by_area` removido.
 
-Models dbt: `stg_colaborador` (view), `colaborador_by_grupo` (table).
+Models dbt legado: `stg_colaborador`, `colaborador_by_grupo`. Silver por domínios: `colaborador.pessoa`, `metricas.meta`, etc.
+
+### Silver por domínios
+
+| Doc | Conteúdo |
+|-----|----------|
+| [`analytics/docs/silver-modeling-guide.md`](analytics/docs/silver-modeling-guide.md) | Guia ETL prata |
+| [`analytics/docs/silver-architecture-decisions.md`](analytics/docs/silver-architecture-decisions.md) | ADRs |
+| [`analytics/catalog/silver_domains.yaml`](analytics/catalog/silver_domains.yaml) | Mapa bronze → silver |
+
+Domínios CH: `colaborador`, `organizacao`, `metricas`, `avaliacao`, `remuneracao`, `referencia`. Build: `dbt build --select silver.colaborador.* silver.metricas.*`
 
 ---
 
@@ -208,7 +228,7 @@ Demo legada `cdc-*` — **desligada**, não evoluir.
 
 ## Scripts operacionais
 
-Scripts detectam layout **unified** (`mereo`) ou **legacy** (4 namespaces) via `analytics/scripts/lib/cluster-env.sh`.
+Scripts detectam layout via `analytics/scripts/lib/cluster-env.sh`: **unified** (`mereo`), **unified-split** (CH/Dagster em `mereo`, Kafka/Connect em `mereo-test-ns-cdc`) ou **legacy** (4 namespaces).
 
 ```bash
 ./analytics/scripts/control-plane.sh start   # hub localhost:8765
@@ -221,13 +241,14 @@ Scripts detectam layout **unified** (`mereo`) ou **legacy** (4 namespaces) via `
 
 ## Armadilhas
 
-1. Port-forward CH: porta **18123**, URL `http://127.0.0.1:18123` no Play
-2. Consumer group CH: **`ch-raw-colaborador-v2`** (v1 obsoleto)
-3. `system.kafka_consumers` no CH 24.3 **não tem coluna `group`** — usar `table = 'colaborador_kafka'`
-4. kubernetes-client 36.x: daemon precisa do sitecustomize auth fix
-5. Run jobs Dagster: cold-start ~90s (`pip install` em `python:3.12-slim`)
-6. Secrets: nunca commitar `.env`, `.ch-dbt-password`, `profiles.yml`
-7. ConfigMap model keys: `__` no lugar de `/` (ex.: `staging__stg_colaborador.sql`)
+1. Cluster **unified-split**: Debezium em `mereo-test-ns-cdc` deve usar `MSSQL_HOST=mssql.mereo-sqlserver.svc.cluster.local` — `./k8s/sync-secrets.sh` replica o secret nos dois namespaces
+2. Port-forward CH: porta **18123**, URL `http://127.0.0.1:18123` no Play
+3. Consumer group CH: **`ch-raw-colaborador-v2`** (v1 obsoleto)
+4. `system.kafka_consumers` no CH 24.3 **não tem coluna `group`** — usar `table = 'colaborador_kafka'`
+5. kubernetes-client 36.x: daemon precisa do sitecustomize auth fix
+6. Run jobs Dagster: cold-start ~90s (`pip install` em `python:3.12-slim`)
+7. Secrets: nunca commitar `.env`, `.ch-dbt-password`, `profiles.yml`
+8. ConfigMap model keys: `__` no lugar de `/` (ex.: `staging__stg_colaborador.sql`)
 
 ---
 
@@ -244,7 +265,8 @@ Scripts detectam layout **unified** (`mereo`) ou **legacy** (4 namespaces) via `
 
 ## Roadmap
 
-1. Validar pipeline no layout 2-ns (`mereo`)
-2. Wave 2: novas entidades via catálogo
+1. **ERP raw no CH (modelagem):** [`analytics/docs/erp-raw-full-spec.md`](analytics/docs/erp-raw-full-spec.md) — bulk `backup-to-ch` + SQL sim completo
+2. Validar pipeline CDC (`colaborador`) no layout unified-split
+3. Wave 2: novas entidades CDC via catálogo
 3. Imagem Docker custom para run jobs Dagster (eliminar pip install)
 4. ExternalSecrets + Wasabi Tier 3
