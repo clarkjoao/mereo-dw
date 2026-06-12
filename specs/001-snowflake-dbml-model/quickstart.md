@@ -53,8 +53,28 @@ Gaps documentados (FKs para alvos sem dim, raw sem PK): `contracts/generator_gap
 
 ## Performance do canvas (T111)
 
-_Registrar aqui após o smoke test manual: tempo de render, navegabilidade com
-1277 tabelas, se foi necessário filtrar por @group._
+Smoke test executado em 2026-06-11 (Chrome embutido, macOS):
+
+| Métrica | Valor |
+|---|---|
+| Import (clique → 1277 tabelas renderizadas) | ~6,0 s |
+| Status pós-import | `1277 tabela(s), 964 ref(s) — 2603 mapeamento(s) L2` |
+| Fit view com modelo completo | ~6 s (animação incluída) |
+| Heap JS após import | ~470–810 MB |
+| Navegação (busca, pan, zoom, seleção) | fluida após render inicial |
+
+Observações:
+
+- O canvas renderiza todas as 1277 tabelas sem virtualização; o primeiro
+  fit view/Organize é a operação mais pesada (~6 s), depois a navegação é fluida.
+- **Não** foi necessário filtrar por `@group`, mas para revisão dirigida é mais
+  confortável usar a busca de tabela + "Modo linhagem" (esmaece tudo fora da
+  cadeia da tabela selecionada) ou desligar camadas no painel (raw/staging/edw/mart).
+- O documento default do editor (`loja.cliente`/`loja.pedido`) é mantido no
+  import — deletar as 2 tabelas de exemplo após importar.
+- Linhagem verificada no canvas: `raw.dbo__COLABORADOR` →
+  `staging.stg_colaborador_colaborador` → `edw.dim_employee` (L1) + arestas de
+  campo (L2); `pipeline.schema_drift_log` presente.
 
 ## Próximo passo
 

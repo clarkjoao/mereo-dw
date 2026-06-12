@@ -39,7 +39,8 @@ npx tsx LocalDrawDB/scripts/check-sql-import.ts specs/001-snowflake-dbml-model/c
 - [x] T108 DEFER stubs (239, sem @origen) + MART verbatim (3) + `pipeline.schema_drift_log` — defer_==239; mart==3
 - [x] T109 `validate_dbml_full.py`: contagens derivadas da matriz em runtime; nenhum bloco edw com `@origen: raw.`; todo @map source existe no schema Afya; blocos curados presentes — `python3 analytics/catalog/validate_dbml_full.py` exit 0
 - [x] T110 `LocalDrawDB/scripts/check-sql-import.ts` (sqlToModel headless); triagem de warnings até 0 — `npx tsx LocalDrawDB/scripts/check-sql-import.ts <full.sql>` exit 0
-- [ ] T111 Import manual no UI (`cd LocalDrawDB && npm run dev` → Importar input/); registrar performance no quickstart.md — quickstart atualizado
+- [x] T111 Import manual no UI (`cd LocalDrawDB && npm run dev` → Importar input/); registrar performance no quickstart.md — quickstart atualizado
+  - 2026-06-11: import ~6s (1277 tabelas, 964 refs, 2603 L2), heap ~470–810 MB, navegação fluida; linhagem COLABORADOR→stg→dim_employee verificada no canvas; métricas na seção "Performance do canvas" do quickstart.md
 - [ ] T112 **Gate**: revisão humana do modelo no LocalDrawDB; commit "001 v1" — `git log --oneline | grep -q '001 v1'`
 
 ## Fase 3 — Rebuild físico → spec 002
@@ -55,6 +56,6 @@ Continua em `specs/002-edw-physical-rebuild/tasks.md` (T201–T217). Depende do 
 | `analytics/catalog/dbml_model.py` | ✅ T102–T103 |
 | `analytics/catalog/generate_dbml_stubs.py` | ✅ T104–T108 |
 | `contracts/mereo_snowflake_full.sql` | ✅ 1277 tabelas, 743KB |
-| `contracts/generator_gaps.md` | ✅ 175 gaps (57 FK-sem-dim, 118 raw sem PK) |
+| `contracts/generator_gaps.md` | ✅ 176 gaps (1 FK curado inválido, 57 FK-sem-dim, 118 raw sem PK) |
 | `analytics/catalog/validate_dbml_full.py` | ✅ exit 0 (2613 @map, 979 @fk resolvem) |
 | `LocalDrawDB/scripts/check-sql-import.ts` | ✅ 0 warnings, parse 3s |
