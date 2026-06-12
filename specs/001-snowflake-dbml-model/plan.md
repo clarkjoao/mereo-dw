@@ -58,14 +58,25 @@ Nenhuma alteração em `analytics/dbt/` nesta feature. Scripts de geração futu
 - Grains e SCD policy (SCD1 default dims conformed)
 - Matriz 616 em CSV
 
-## Phase 2 — Contracts
+## Phase 2 — Contracts (gerador + arquivo completo)
 
-- `mereo_snowflake_dimensional.sql`: spine completo dos 20 hubs + exemplos MART
-- Expansão futura: gerar stubs RAW restantes por domínio a partir da matriz
+- `mereo_snowflake_dimensional.sql`: spine curado dos hubs (52 blocos) — **intocado**, vira input do gerador
+- `mereo_snowflake_full.sql`: arquivo completo **gerado** com TODAS as tabelas nas 4 camadas, por `analytics/catalog/generate_dbml_stubs.py`:
+  - Inputs: `erp_mapping_matrix.csv` (quais objetos existem), `output/groups/mereogr/schema/tables/MereoGR-Afya.json` (colunas/tipos/PKs), `analytics/catalog/bronze_relationship_graph.json` (709 FKs), spine curado (blocos verbatim p/ staging/edw/mart dos hubs)
+  - RAW: 616 tabelas com colunas completas (hubs raw curados são absorvidos como override de `@note`/`@fk`)
+  - STAGING: 209 (DIM/FACT/BRIDGE/REF; DEFER não gera staging) com `@map` coluna a coluna
+  - EDW: 448 (nomes verbatim da coluna `edw_object` da matriz; surrogates `{entity}_key`; `@origen` SEMPRE staging)
+  - MART: 3 curados + `pipeline.schema_drift_log` (quarentena de drift de tenant)
+  - Gaps de FK/tipo: `contracts/generator_gaps.md`
+- Tasks granulares e resumíveis: [tasks.md](tasks.md) (T101–T112)
 
-## Phase 3 — Validation (manual)
+## Phase 3 — Validation (scriptada)
 
-1. `wc -l contracts/erp_mapping_matrix.csv` → 617 (header + 616)
-2. `grep -c '@layer: edw' contracts/mereo_snowflake_dimensional.sql`
-3. `grep '@origen: raw\.' contracts/mereo_snowflake_dimensional.sql` em blocos edw → 0
-4. Import LocalDrawDB conforme [quickstart.md](quickstart.md)
+1. `python3 analytics/catalog/validate_dbml_full.py` — contagens derivadas da matriz em runtime; nenhum bloco edw com `@origen: raw.`; todo `@map` source existe no schema Afya; blocos curados presentes
+2. `npx tsx LocalDrawDB/scripts/check-sql-import.ts contracts/mereo_snowflake_full.sql` — parser headless do LocalDrawDB, exit 0 com 0 warnings
+3. Import manual LocalDrawDB conforme [quickstart.md](quickstart.md) (smoke visual)
+4. Gate T112: revisão humana + commit "001 v1"
+
+## Phase 4 — Rebuild físico
+
+Em [specs/002-edw-physical-rebuild/](../002-edw-physical-rebuild/) (deleta silver/gold legados, constrói staging/edw/mart em dbt+ClickHouse a partir deste modelo). Fora do escopo desta spec (FR-007 mantido).

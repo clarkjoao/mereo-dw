@@ -314,8 +314,10 @@ CREATE TABLE IF NOT EXISTS staging.stg_organizacao_area (
 CREATE TABLE IF NOT EXISTS staging.stg_organizacao_cargo (
   tenant_slug STRING,
   job_id BIGINT,                -- @map <- raw.dbo__CARGO.ID
+  job_code STRING,              -- @map <- raw.dbo__CARGO.COD_CARGO
   job_desc STRING,              -- @map <- raw.dbo__CARGO.DESC_CARGO
-  is_active INT,                -- @map <- raw.dbo__CARGO.ATIVO
+  job_group_id BIGINT,          -- @map <- raw.dbo__CARGO.ID_GRUPO_CARGO
+  is_critical_job INT,          -- @map <- raw.dbo__CARGO.IsCriticalJob
   PRIMARY KEY (tenant_slug, job_id)
 ) USING DELTA;
 
@@ -537,8 +539,9 @@ CREATE TABLE IF NOT EXISTS edw.dim_org_job (
   job_key BIGINT,
   tenant_slug STRING,
   job_id BIGINT,
+  job_code STRING,
   job_desc STRING,
-  is_active INT,
+  is_critical_job INT,
   PRIMARY KEY (job_key)
 ) USING DELTA;
 

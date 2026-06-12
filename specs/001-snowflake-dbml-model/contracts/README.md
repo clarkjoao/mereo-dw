@@ -5,22 +5,19 @@
 | Arquivo | Descrição |
 |---------|-----------|
 | [erp_mapping_matrix.csv](erp_mapping_matrix.csv) | **616 linhas** — cada `erp_key` → camada, papel, objetos RAW/STAGING/EDW |
-| [mereo_snowflake_dimensional.sql](mereo_snowflake_dimensional.sql) | Spine SQL LocalDrawDB — hubs prioritários + marts; importar → DBML |
+| [mereo_snowflake_dimensional.sql](mereo_snowflake_dimensional.sql) | Spine **curado** (52 blocos) — hubs + marts; input do gerador, não importar sozinho |
+| `mereo_snowflake_full.sql` | **Artefato autoritativo gerado** — TODAS as tabelas nas 4 camadas; é este que se importa no LocalDrawDB |
+| `generator_gaps.md` | Gerado — inventário de gaps (FKs p/ alvos DEFER/EXCLUDE, tipos exóticos) |
 
-## Escopo do SQL spine
-
-O arquivo `mereo_snowflake_dimensional.sql` **não** contém 616 `CREATE TABLE` completos (artefato seria >500KB). Contém:
-
-1. **RAW** — hubs top 20 + amostras representativas
-2. **STAGING** — cadeias documentadas com `@map`
-3. **EDW** — dims/fatos/bridges conformed dos hubs
-4. **MART** — 3 reports cross-domain
-
-Tabelas restantes estão na matriz CSV; expansão futura via gerador:
+## Regeneração
 
 ```bash
-# Futuro: analytics/catalog/generate_dbml_stubs.py --from specs/.../erp_mapping_matrix.csv
+cd /Users/jvclark/www/mereo-dw
+python3 analytics/catalog/generate_dbml_stubs.py    # lê matriz + schema Afya + grafo FK + spine
+python3 analytics/catalog/validate_dbml_full.py     # valida o resultado
 ```
+
+O spine curado é absorvido pelo gerador: blocos STAGING/EDW/MART dos hubs entram **verbatim**; os blocos RAW curados (amostras abreviadas) viram override de `@note`/`@fk` sobre a RAW gerada com colunas completas.
 
 ## Regras de geração (expansão 616)
 
