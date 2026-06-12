@@ -1,0 +1,577 @@
+reference_db: MereoGR-Afya
+clients:
+- afya
+- allos
+table_count: 616
+role_counts:
+  EXCLUDE: 168
+  DIM: 129
+  DEFER: 239
+  FACT: 59
+  BRIDGE: 10
+  REF: 11
+hubs_top20:
+- table: dbo.COLABORADOR
+  bronze: dbo__COLABORADOR
+  degree: 164
+- table: dbo.META
+  bronze: dbo__META
+  degree: 30
+- table: dbo.LOG_IMP
+  bronze: dbo__LOG_IMP
+  degree: 28
+- table: competences.AVALIACAO
+  bronze: competences__AVALIACAO
+  degree: 27
+- table: dbo.AREA
+  bronze: dbo__AREA
+  degree: 24
+- table: dbo.SuccessionCycle
+  bronze: dbo__SuccessionCycle
+  degree: 21
+- table: competences.FORMULARIO_AVALIACAO
+  bronze: competences__FORMULARIO_AVALIACAO
+  degree: 18
+- table: dbo.PERIODO_APURACAO
+  bronze: dbo__PERIODO_APURACAO
+  degree: 18
+- table: dbo.PERIODO_GESTAO
+  bronze: dbo__PERIODO_GESTAO
+  degree: 17
+- table: competences.AVALIADO
+  bronze: competences__AVALIADO
+  degree: 15
+- table: competences.FUNCAO
+  bronze: competences__FUNCAO
+  degree: 14
+- table: dbo.ACAO
+  bronze: dbo__ACAO
+  degree: 14
+- table: dbo.AVALIADO_SUCESSAO
+  bronze: dbo__AVALIADO_SUCESSAO
+  degree: 13
+- table: dbo.FEEDBACK_CONTINUO
+  bronze: dbo__FEEDBACK_CONTINUO
+  degree: 13
+- table: competences.COMPETENCIA
+  bronze: competences__COMPETENCIA
+  degree: 12
+- table: dbo.INDICADOR
+  bronze: dbo__INDICADOR
+  degree: 12
+- table: dbo.ActionBase
+  bronze: dbo__ActionBase
+  degree: 11
+- table: dbo.Training
+  bronze: dbo__Training
+  degree: 11
+- table: core.Label
+  bronze: core__Label
+  degree: 10
+- table: dbo.CAUSA
+  bronze: dbo__CAUSA
+  degree: 10
+dim_candidates:
+- name: DIM_ACAO_SUGERIDA_PDI
+  erp_key: competences.ACAO_SUGERIDA_PDI
+  silver: pdi.acao_sugerida_pdi
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_AVALIACAO_CICLO
+  erp_key: competences.AVALIACAO
+  silver: avaliacao.avaliacao_ciclo
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_AVALIADO
+  erp_key: competences.AVALIADO
+  silver: avaliacao.avaliado
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_CATEGORIA_PDI_ACAO
+  erp_key: competences.CATEGORIA_PDI_ACAO
+  silver: pdi.categoria_pdi_acao
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_COMPETENCIA
+  erp_key: competences.COMPETENCIA
+  silver: avaliacao.competencia
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_CURVA_PONTUACAO_AVALIACAO
+  erp_key: competences.CURVA_PONTUACAO_AVALIACAO
+  silver: avaliacao.curva_pontuacao_avaliacao
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_COMPETENCE_TYPE_COMMENT
+  erp_key: competences.CompetenceTypeComment
+  silver: avaliacao.competence_type_comment
+  pk:
+  - Id
+  fk_degree: 0
+- name: DIM_FAIXA_CLASSIFICACAO_AVALIACAO
+  erp_key: competences.FAIXA_CLASSIFICACAO_AVALIACAO
+  silver: avaliacao.faixa_classificacao_avaliacao
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_FAIXA_CLASSIFICACAO_PERFORMANCE_AVALIACAO
+  erp_key: competences.FAIXA_CLASSIFICACAO_PERFORMANCE_AVALIACAO
+  silver: avaliacao.faixa_classificacao_performance_avaliacao
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_FATOR_AVALIACAO
+  erp_key: competences.FATOR_AVALIACAO
+  silver: avaliacao.fator_avaliacao
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_FUNCAO
+  erp_key: competences.FUNCAO
+  silver: avaliacao.funcao
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_METODO_CALCULO
+  erp_key: competences.METODO_CALCULO
+  silver: avaliacao.metodo_calculo
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_PESO_TIPO_AVALIADOR
+  erp_key: competences.PESO_TIPO_AVALIADOR
+  silver: avaliacao.peso_tipo_avaliador
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_TIPO_AVALIACAO
+  erp_key: competences.TIPO_AVALIACAO
+  silver: avaliacao.tipo_avaliacao
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_TIPO_AVALIADOR
+  erp_key: competences.TIPO_AVALIADOR
+  silver: avaliacao.tipo_avaliador
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_TOPICO_PERGUNTA_LIVRE
+  erp_key: competences.TOPICO_PERGUNTA_LIVRE
+  silver: avaliacao.topico_pergunta_livre
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_SETTINGS
+  erp_key: competences.settings
+  silver: avaliacao.settings
+  pk:
+  - id
+  fk_degree: 0
+- name: DIM_ADMINISTRADOR_LOCAL
+  erp_key: dbo.ADMINISTRADOR_LOCAL
+  silver: colaborador.administrador_local
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_ADMINISTRADOR_LOCAL_FILIAL
+  erp_key: dbo.ADMINISTRADOR_LOCAL_FILIAL
+  silver: organizacao.administrador_local_filial
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_AREA
+  erp_key: dbo.AREA
+  silver: organizacao.area
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_AREA_FORUM_SUCESSAO
+  erp_key: dbo.AREA_FORUM_SUCESSAO
+  silver: organizacao.area_forum_sucessao
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_AVALIADOR_FORUM_SUCESSAO
+  erp_key: dbo.AVALIADOR_FORUM_SUCESSAO
+  silver: colaborador.avaliador_forum_sucessao
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_AVALIADO_SUCESSAO
+  erp_key: dbo.AVALIADO_SUCESSAO
+  silver: colaborador.avaliado_sucessao
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_ACCEPT_AGREEMENT_SIGNATURE_ATTACHMENT
+  erp_key: dbo.AcceptAgreementSignatureAttachment
+  silver: colaborador.accept_agreement_signature_attachment
+  pk:
+  - Id
+  fk_degree: 0
+- name: DIM_ACTION_BASE_LABEL
+  erp_key: dbo.ActionBaseLabel
+  silver: acao.action_base_label
+  pk:
+  - ActionBase_Id
+  - Label_Id
+  fk_degree: 0
+- name: DIM_AREA_HISTORY_CONFIG
+  erp_key: dbo.AreaHistoryConfig
+  silver: metricas.area_history_config
+  pk:
+  - Id
+  fk_degree: 0
+- name: DIM_BIBLIOTECA
+  erp_key: dbo.BIBLIOTECA
+  silver: pdi.biblioteca
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_CARGO
+  erp_key: dbo.CARGO
+  silver: organizacao.cargo
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_CATCH_BALL
+  erp_key: dbo.CATCH_BALL
+  silver: acao.catch_ball
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_CAUSA
+  erp_key: dbo.CAUSA
+  silver: acao.causa
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_CODE_GENERATOR
+  erp_key: dbo.CODE_GENERATOR
+  silver: metricas.code_generator
+  pk:
+  - Id
+  fk_degree: 0
+- name: DIM_PESSOA
+  erp_key: dbo.COLABORADOR
+  silver: colaborador.pessoa
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_CONFIGURACOES_GERAIS_FEEDBACK_CONTINUO
+  erp_key: dbo.CONFIGURACOES_GERAIS_FEEDBACK_CONTINUO
+  silver: avaliacao.configuracoes_gerais_feedback_continuo
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_CURVA_MULTIPLO
+  erp_key: dbo.CURVA_MULTIPLO
+  silver: metricas.curva_multiplo
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_CURVA_PREMIACAO
+  erp_key: dbo.CURVA_PREMIACAO
+  silver: metricas.curva_premiacao
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_CALIBRATION_GROUP_DISCRETIONARY
+  erp_key: dbo.CalibrationGroupDiscretionary
+  silver: metricas.calibration_group_discretionary
+  pk:
+  - ID
+  fk_degree: 0
+- name: DIM_CAUSE_ANALYSIS_PERMISSION
+  erp_key: dbo.CauseAnalysisPermission
+  silver: colaborador.cause_analysis_permission
+  pk:
+  - Id
+  fk_degree: 0
+- name: DIM_CERTIFICATE
+  erp_key: dbo.Certificate
+  silver: colaborador.certificate
+  pk:
+  - Id
+  fk_degree: 0
+- name: DIM_CERTIFICATE_ATTACHMENT
+  erp_key: dbo.CertificateAttachment
+  silver: colaborador.certificate_attachment
+  pk:
+  - Id
+  fk_degree: 0
+- name: DIM_COMPANY
+  erp_key: dbo.Company
+  silver: organizacao.company
+  pk:
+  - Id
+  fk_degree: 0
+fact_candidates:
+- name: FACT_CALC_RESPOSTA
+  erp_key: competences.CALC_RESPOSTA
+  silver: avaliacao.calc_resposta
+  grain: tenant_slug, ID
+  row_count_afya: 50000
+  row_count_allos: 50000
+- name: FACT_CALC_RESULTADO_AVALIADOR_COMPETENCIA
+  erp_key: competences.CALC_RESULTADO_AVALIADOR_COMPETENCIA
+  silver: avaliacao.calc_resultado_avaliador_competencia
+  grain: tenant_slug, ID
+  row_count_afya: 50000
+  row_count_allos: 50000
+- name: FACT_CALC_RESULTADO_COMPETENCIA
+  erp_key: competences.CALC_RESULTADO_COMPETENCIA
+  silver: avaliacao.calc_resultado_competencia
+  grain: tenant_slug, ID
+  row_count_afya: 50000
+  row_count_allos: 50000
+- name: FACT_CALC_RESULTADO_FATOR_AVALIACAO
+  erp_key: competences.CALC_RESULTADO_FATOR_AVALIACAO
+  silver: avaliacao.calc_resultado_fator_avaliacao
+  grain: tenant_slug, ID
+  row_count_afya: 50000
+  row_count_allos: 50000
+- name: FACT_RESPOSTA
+  erp_key: competences.RESPOSTA_AVALIACAO
+  silver: avaliacao.resposta
+  grain: tenant_slug, ID
+  row_count_afya: 50000
+  row_count_allos: 50000
+- name: FACT_PARTICIPANT_AGGREGATED_EXTRACT
+  erp_key: dbo.ParticipantAggregatedExtract
+  silver: remuneracao.participant_aggregated_extract
+  grain: tenant_slug, Id
+  row_count_afya: 49080
+  row_count_allos: 50000
+- name: FACT_PARTICIPANT_EXTRACT
+  erp_key: dbo.ParticipantExtract
+  silver: remuneracao.participant_extract
+  grain: tenant_slug, Id
+  row_count_afya: 49080
+  row_count_allos: 50000
+- name: FACT_COMENTARIO_COMPETENCIA
+  erp_key: competences.COMENTARIO_COMPETENCIA
+  silver: avaliacao.comentario_competencia
+  grain: tenant_slug, ID
+  row_count_afya: 41080
+  row_count_allos: 50000
+- name: FACT_VALOR_META
+  erp_key: dbo.VALOR_META
+  silver: metricas.valor_meta
+  grain: tenant_slug, id_meta, id_periodo_apuracao
+  row_count_afya: 38293
+  row_count_allos: 50000
+- name: FACT_AVALIADOR
+  erp_key: competences.AVALIADOR
+  silver: avaliacao.avaliador
+  grain: tenant_slug, ID
+  row_count_afya: 47412
+  row_count_allos: 33556
+- name: FACT_FORMULARIO_AVALIACAO
+  erp_key: competences.FORMULARIO_AVALIACAO
+  silver: avaliacao.formulario_avaliacao
+  grain: tenant_slug, ID
+  row_count_afya: 47371
+  row_count_allos: 33351
+- name: FACT_RESPOSTA_LIVRE_AVALIACAO
+  erp_key: competences.RESPOSTA_LIVRE_AVALIACAO
+  silver: avaliacao.resposta_livre_avaliacao
+  grain: tenant_slug, ID
+  row_count_afya: 50000
+  row_count_allos: 29878
+- name: FACT_EXPRESSAO_CALCULO
+  erp_key: dbo.EXPRESSAO_CALCULO_META
+  silver: metricas.expressao_calculo
+  grain: tenant_slug, ID
+  row_count_afya: 27432
+  row_count_allos: 50000
+- name: FACT_CALC_RESULTADO_AVALIADOR
+  erp_key: competences.CALC_RESULTADO_AVALIADOR
+  silver: avaliacao.calc_resultado_avaliador
+  grain: tenant_slug, id_avaliador, id_competencia
+  row_count_afya: 42239
+  row_count_allos: 25188
+- name: FACT_NOTA_META
+  erp_key: dbo.NOTA_META
+  silver: metricas.nota_meta
+  grain: tenant_slug, id_meta, id_periodo_apuracao
+  row_count_afya: 11761
+  row_count_allos: 50000
+- name: FACT_CALC_RESULTADO_TIPO_AVALIADOR
+  erp_key: competences.CALC_RESULTADO_TIPO_AVALIADOR
+  silver: avaliacao.calc_resultado_tipo_avaliador
+  grain: tenant_slug, ID
+  row_count_afya: 31056
+  row_count_allos: 21729
+- name: FACT_LABEL_GOAL
+  erp_key: dbo.LabelGoal
+  silver: metricas.label_goal
+  grain: tenant_slug, IdLabel
+  row_count_afya: 0
+  row_count_allos: 50000
+- name: FACT_JOB_POSITION_LEVEL
+  erp_key: dbo.JobPositionLevel
+  silver: organizacao.job_position_level
+  grain: tenant_slug, JobPosition_Id
+  row_count_afya: 45193
+  row_count_allos: 126
+- name: FACT_CONTRAMEDIDA
+  erp_key: dbo.CONTRAMEDIDA
+  silver: acao.contramedida
+  grain: tenant_slug, ID
+  row_count_afya: 10748
+  row_count_allos: 23356
+- name: FACT_ACCEPT_AGREEMENT_HISTORY
+  erp_key: dbo.AcceptAgreementHistory
+  silver: colaborador.accept_agreement_history
+  grain: tenant_slug, Id
+  row_count_afya: 31098
+  row_count_allos: 1913
+- name: FACT_EVALUATION_CYCLE_CALC_RESULT_EVALUATED
+  erp_key: competences.EvaluationCycleCalcResultEvaluated
+  silver: avaliacao.evaluation_cycle_calc_result_evaluated
+  grain: tenant_slug, Id
+  row_count_afya: 14466
+  row_count_allos: 12585
+- name: FACT_INFO_NOTA_META
+  erp_key: dbo.INFO_NOTA_META
+  silver: metricas.info_nota_meta
+  grain: tenant_slug, ID
+  row_count_afya: 3805
+  row_count_allos: 20054
+- name: FACT_AREA_HISTORY
+  erp_key: dbo.AreaHistory
+  silver: organizacao.area_history
+  grain: tenant_slug, Id
+  row_count_afya: 11579
+  row_count_allos: 11037
+- name: FACT_ACTION_BASE
+  erp_key: dbo.ActionBase
+  silver: acao.action_base
+  grain: tenant_slug, Id
+  row_count_afya: 10762
+  row_count_allos: 10592
+- name: FACT_INDIVIDUAL_DEVELOPMENT_ACTION
+  erp_key: competences.IndividualDevelopmentAction
+  silver: pdi.individual_development_action
+  grain: tenant_slug, Id
+  row_count_afya: 10755
+  row_count_allos: 10564
+- name: FACT_PSW_COLABORADOR
+  erp_key: dbo.PSW_COLABORADOR
+  silver: colaborador.psw_colaborador
+  grain: tenant_slug, ID_COLABORADOR
+  row_count_afya: 12396
+  row_count_allos: 8307
+- name: FACT_CONSIDERACAO_FINAL
+  erp_key: competences.CONSIDERACAO_FINAL
+  silver: avaliacao.consideracao_final
+  grain: tenant_slug, ID
+  row_count_afya: 10078
+  row_count_allos: 9370
+- name: FACT_CALC_RESULTADO_COLABORADOR_PERFORMANCE
+  erp_key: competences.CALC_RESULTADO_COLABORADOR_PERFORMANCE
+  silver: avaliacao.calc_resultado_colaborador_performance
+  grain: tenant_slug, ID
+  row_count_afya: 17221
+  row_count_allos: 0
+- name: FACT_EVALUATION_CYCLE_INSTANCE_PARTICIPANT
+  erp_key: dbo.EvaluationCycleInstanceParticipant
+  silver: avaliacao.evaluation_cycle_instance_participant
+  grain: tenant_slug, Id
+  row_count_afya: 14997
+  row_count_allos: 0
+- name: FACT_HISTORY_SECTION
+  erp_key: dbo.HistorySection
+  silver: organizacao.history_section
+  grain: tenant_slug, Id
+  row_count_afya: 4090
+  row_count_allos: 10607
+- name: FACT_EMPLOYEE_ANALYTIC_RESULT
+  erp_key: dbo.EmployeeAnalyticResult
+  silver: remuneracao.employee_analytic_result
+  grain: tenant_slug, Id
+  row_count_afya: 4090
+  row_count_allos: 10254
+- name: FACT_SCORE_VALUES_RV
+  erp_key: dbo.ScoreValuesRV
+  silver: metricas.score_values_rv
+  grain: tenant_slug, Id
+  row_count_afya: 4090
+  row_count_allos: 9876
+- name: FACT_DISCRETIONARY_SCORE_IMPORT
+  erp_key: dbo.DiscretionaryScoreImport
+  silver: colaborador.discretionary_score_import
+  grain: tenant_slug, id
+  row_count_afya: 4251
+  row_count_allos: 9064
+- name: FACT_HISTORICO_CARGO
+  erp_key: dbo.HISTORICO_CARGO
+  silver: colaborador.historico_cargo
+  grain: tenant_slug, ID
+  row_count_afya: 2149
+  row_count_allos: 9891
+- name: FACT_NOTIFICACAO_FEEDBACK
+  erp_key: dbo.NOTIFICACAO_FEEDBACK_CONTINUO
+  silver: avaliacao.notificacao_feedback
+  grain: tenant_slug, Id
+  row_count_afya: 10086
+  row_count_allos: 1609
+- name: FACT_PARTICIPANT_EXTRACT_CONTROL
+  erp_key: dbo.ParticipantExtractControl
+  silver: remuneracao.participant_extract_control
+  grain: tenant_slug, Id
+  row_count_afya: 0
+  row_count_allos: 10602
+- name: FACT_NINE_BOX_CALIBRADOS
+  erp_key: dbo.NINE_BOX_CALIBRADOS
+  silver: colaborador.nine_box_calibrados
+  grain: tenant_slug, ID
+  row_count_afya: 8218
+  row_count_allos: 0
+- name: FACT_EMPLOYEE_MODIFIER_VALUE
+  erp_key: dbo.EmployeeModifierValue
+  silver: colaborador.employee_modifier_value
+  grain: tenant_slug, Id
+  row_count_afya: 2052
+  row_count_allos: 5019
+- name: FACT_ACTIVITY_HISTORY
+  erp_key: dbo.ActivityHistory
+  silver: colaborador.activity_history
+  grain: tenant_slug, Id
+  row_count_afya: 5667
+  row_count_allos: 21
+- name: FACT_EMPLOYEE_ACCESS_GROUP
+  erp_key: dbo.EmployeeAccessGroup
+  silver: colaborador.employee_access_group
+  grain: tenant_slug, Id
+  row_count_afya: 144
+  row_count_allos: 5496
+priority_facts:
+- name: FACT_GOAL_VALUE
+  sources:
+  - metricas.valor_meta
+  - metricas.nota_meta
+  - metricas.meta
+- name: FACT_RV
+  sources:
+  - remuneracao.participante_rv
+- name: FACT_EVAL_SCORE
+  sources:
+  - avaliacao.calc_resultado_avaliador
+  - avaliacao.resposta
+- name: FACT_MATRIX_CELL
+  sources:
+  - metricas.valor_matriz
+  note: staging-only volume; filter DtRef
+- name: FACT_ACTION
+  sources:
+  - acao.acao
+  - acao.reuniao

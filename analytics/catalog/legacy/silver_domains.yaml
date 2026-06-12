@@ -1,0 +1,3412 @@
+tenant_slugs:
+  MereoGR-Staging: staging
+  MereoGR-Allos: allos
+  MereoGR-Afya: afya
+exclude_bronze_patterns:
+- AUDIT_
+- IMP_
+- LOG_
+- HangFire
+- AbpEntity
+domains:
+- id: acao
+  ch_database: acao
+  description: Planos de ação, reuniões e contramedidas (ADR-013)
+  entities:
+  - silver_table: acao
+    bronze: dbo__ACAO
+    erp:
+      schema: dbo
+      table: ACAO
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: reuniao
+    bronze: dbo__REUNIAO
+    erp:
+      schema: dbo
+      table: REUNIAO
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: participante_reuniao
+    bronze: dbo__PARTICIPANTE_REUNIAO
+    erp:
+      schema: dbo
+      table: PARTICIPANTE_REUNIAO
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: contramedida
+    bronze: dbo__CONTRAMEDIDA
+    erp:
+      schema: dbo
+      table: CONTRAMEDIDA
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: topico_reuniao
+    bronze: dbo__TOPICO_REUNIAO
+    erp:
+      schema: dbo
+      table: TOPICO_REUNIAO
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: marcador_acao
+    bronze: dbo__MARCADOR_ACAO
+    erp:
+      schema: dbo
+      table: MARCADOR_ACAO
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: anexo_acao
+    bronze: dbo__ANEXO_ACAO
+    erp:
+      schema: dbo
+      table: ANEXO_ACAO
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: anexo_reuniao
+    bronze: dbo__ANEXO_REUNIAO
+    erp:
+      schema: dbo
+      table: ANEXO_REUNIAO
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: action_base
+    bronze: dbo__ActionBase
+    erp:
+      schema: dbo
+      table: ActionBase
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: action_base_label
+    bronze: dbo__ActionBaseLabel
+    erp:
+      schema: dbo
+      table: ActionBaseLabel
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: catch_ball
+    bronze: dbo__CATCH_BALL
+    erp:
+      schema: dbo
+      table: CATCH_BALL
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: causa
+    bronze: dbo__CAUSA
+    erp:
+      schema: dbo
+      table: CAUSA
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: diario_de_bordo
+    bronze: dbo__DIARIO_DE_BORDO
+    erp:
+      schema: dbo
+      table: DIARIO_DE_BORDO
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: efetividade_acao
+    bronze: dbo__EFETIVIDADE_ACAO
+    erp:
+      schema: dbo
+      table: EFETIVIDADE_ACAO
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: gestor_marcador_acao
+    bronze: dbo__GESTOR_MARCADOR_ACAO
+    erp:
+      schema: dbo
+      table: GESTOR_MARCADOR_ACAO
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: historico_perc_realizado
+    bronze: dbo__HISTORICO_PERC_REALIZADO
+    erp:
+      schema: dbo
+      table: HISTORICO_PERC_REALIZADO
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: historico_workflow_acao
+    bronze: dbo__HISTORICO_WORKFLOW_ACAO
+    erp:
+      schema: dbo
+      table: HISTORICO_WORKFLOW_ACAO
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: knowledge_management
+    bronze: dbo__KnowledgeManagement
+    erp:
+      schema: dbo
+      table: KnowledgeManagement
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: label_action
+    bronze: dbo__LabelAction
+    erp:
+      schema: dbo
+      table: LabelAction
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: marcador_acao_item
+    bronze: dbo__MARCADOR_ACAO_ITEM
+    erp:
+      schema: dbo
+      table: MARCADOR_ACAO_ITEM
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: notificacao
+    bronze: dbo__NOTIFICACAO
+    erp:
+      schema: dbo
+      table: NOTIFICACAO
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: quick_meeting
+    bronze: dbo__QUICK_MEETING
+    erp:
+      schema: dbo
+      table: QUICK_MEETING
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: recurring_job
+    bronze: dbo__RECURRING_JOB
+    erp:
+      schema: dbo
+      table: RECURRING_JOB
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: referencia_contramedida
+    bronze: dbo__REFERENCIA_CONTRAMEDIDA
+    erp:
+      schema: dbo
+      table: REFERENCIA_CONTRAMEDIDA
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: reuniao_pause
+    bronze: dbo__REUNIAO_PAUSE
+    erp:
+      schema: dbo
+      table: REUNIAO_PAUSE
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: votacao_causa
+    bronze: dbo__VOTACAO_CAUSA
+    erp:
+      schema: dbo
+      table: VOTACAO_CAUSA
+    pk:
+    - id
+    wave: 6
+    status: implemented
+- id: avaliacao
+  ch_database: avaliacao
+  description: Performance, competências e feedback contínuo (ADR-013)
+  entities:
+  - silver_table: avaliado
+    bronze: competences__AVALIADO
+    erp:
+      schema: competences
+      table: AVALIADO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: avaliador
+    bronze: competences__AVALIADOR
+    erp:
+      schema: competences
+      table: AVALIADOR
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: avaliacao_ciclo
+    bronze: competences__AVALIACAO
+    erp:
+      schema: competences
+      table: AVALIACAO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: competencia
+    bronze: competences__COMPETENCIA
+    erp:
+      schema: competences
+      table: COMPETENCIA
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: formulario_avaliacao
+    bronze: competences__FORMULARIO_AVALIACAO
+    erp:
+      schema: competences
+      table: FORMULARIO_AVALIACAO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: funcao
+    bronze: competences__FUNCAO
+    erp:
+      schema: competences
+      table: FUNCAO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: resposta
+    bronze: competences__RESPOSTA_AVALIACAO
+    erp:
+      schema: competences
+      table: RESPOSTA_AVALIACAO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: feedback_continuo
+    bronze: dbo__FEEDBACK_CONTINUO
+    erp:
+      schema: dbo
+      table: FEEDBACK_CONTINUO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: pulse_feedback
+    bronze: dbo__PULSE_FEEDBACK_CONTINUO
+    erp:
+      schema: dbo
+      table: PULSE_FEEDBACK_CONTINUO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: participante_pulse
+    bronze: dbo__PARTICIPANTE_PULSE_FEEDBACK_CONTINUO
+    erp:
+      schema: dbo
+      table: PARTICIPANTE_PULSE_FEEDBACK_CONTINUO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: timeline_feedback
+    bronze: dbo__TIMELINE_FEEDBACK_CONTINUO
+    erp:
+      schema: dbo
+      table: TIMELINE_FEEDBACK_CONTINUO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: notificacao_feedback
+    bronze: dbo__NOTIFICACAO_FEEDBACK_CONTINUO
+    erp:
+      schema: dbo
+      table: NOTIFICACAO_FEEDBACK_CONTINUO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: calc_resposta
+    bronze: competences__CALC_RESPOSTA
+    erp:
+      schema: competences
+      table: CALC_RESPOSTA
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: calc_resultado_avaliador
+    bronze: competences__CALC_RESULTADO_AVALIADOR
+    erp:
+      schema: competences
+      table: CALC_RESULTADO_AVALIADOR
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: calc_resultado_avaliador_competencia
+    bronze: competences__CALC_RESULTADO_AVALIADOR_COMPETENCIA
+    erp:
+      schema: competences
+      table: CALC_RESULTADO_AVALIADOR_COMPETENCIA
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: calc_resultado_colaborador_performance
+    bronze: competences__CALC_RESULTADO_COLABORADOR_PERFORMANCE
+    erp:
+      schema: competences
+      table: CALC_RESULTADO_COLABORADOR_PERFORMANCE
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: calc_resultado_competencia
+    bronze: competences__CALC_RESULTADO_COMPETENCIA
+    erp:
+      schema: competences
+      table: CALC_RESULTADO_COMPETENCIA
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: calc_resultado_fator_avaliacao
+    bronze: competences__CALC_RESULTADO_FATOR_AVALIACAO
+    erp:
+      schema: competences
+      table: CALC_RESULTADO_FATOR_AVALIACAO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: calc_resultado_tipo_avaliador
+    bronze: competences__CALC_RESULTADO_TIPO_AVALIADOR
+    erp:
+      schema: competences
+      table: CALC_RESULTADO_TIPO_AVALIADOR
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: comentario_avaliado_nine_box
+    bronze: competences__COMENTARIO_AVALIADO_NINE_BOX
+    erp:
+      schema: competences
+      table: COMENTARIO_AVALIADO_NINE_BOX
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: comentario_competencia
+    bronze: competences__COMENTARIO_COMPETENCIA
+    erp:
+      schema: competences
+      table: COMENTARIO_COMPETENCIA
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: consideracao_final
+    bronze: competences__CONSIDERACAO_FINAL
+    erp:
+      schema: competences
+      table: CONSIDERACAO_FINAL
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: curva_pontuacao_avaliacao
+    bronze: competences__CURVA_PONTUACAO_AVALIACAO
+    erp:
+      schema: competences
+      table: CURVA_PONTUACAO_AVALIACAO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: competence_type_comment
+    bronze: competences__CompetenceTypeComment
+    erp:
+      schema: competences
+      table: CompetenceTypeComment
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: evaluation_cycle_calc_result_evaluated
+    bronze: competences__EvaluationCycleCalcResultEvaluated
+    erp:
+      schema: competences
+      table: EvaluationCycleCalcResultEvaluated
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: faixa_classificacao_avaliacao
+    bronze: competences__FAIXA_CLASSIFICACAO_AVALIACAO
+    erp:
+      schema: competences
+      table: FAIXA_CLASSIFICACAO_AVALIACAO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: faixa_classificacao_performance_avaliacao
+    bronze: competences__FAIXA_CLASSIFICACAO_PERFORMANCE_AVALIACAO
+    erp:
+      schema: competences
+      table: FAIXA_CLASSIFICACAO_PERFORMANCE_AVALIACAO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: fator_avaliacao
+    bronze: competences__FATOR_AVALIACAO
+    erp:
+      schema: competences
+      table: FATOR_AVALIACAO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: funcao_competencia
+    bronze: competences__FUNCAO_COMPETENCIA
+    erp:
+      schema: competences
+      table: FUNCAO_COMPETENCIA
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: funcao_pergunta_livre
+    bronze: competences__FUNCAO_PERGUNTA_LIVRE
+    erp:
+      schema: competences
+      table: FUNCAO_PERGUNTA_LIVRE
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: itens_sender_to_release_appraisees_queue
+    bronze: competences__ItensSenderToReleaseAppraiseesQueue
+    erp:
+      schema: competences
+      table: ItensSenderToReleaseAppraiseesQueue
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: localidade_interesse_mudanca_avaliado
+    bronze: competences__LOCALIDADE_INTERESSE_MUDANCA_AVALIADO
+    erp:
+      schema: competences
+      table: LOCALIDADE_INTERESSE_MUDANCA_AVALIADO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: metodo_calculo
+    bronze: competences__METODO_CALCULO
+    erp:
+      schema: competences
+      table: METODO_CALCULO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: opcao_funcao_pergunta_livre
+    bronze: competences__OPCAO_FUNCAO_PERGUNTA_LIVRE
+    erp:
+      schema: competences
+      table: OPCAO_FUNCAO_PERGUNTA_LIVRE
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: peso_tipo_avaliador
+    bronze: competences__PESO_TIPO_AVALIADOR
+    erp:
+      schema: competences
+      table: PESO_TIPO_AVALIADOR
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: resposta_livre_avaliacao
+    bronze: competences__RESPOSTA_LIVRE_AVALIACAO
+    erp:
+      schema: competences
+      table: RESPOSTA_LIVRE_AVALIACAO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: tipo_avaliacao
+    bronze: competences__TIPO_AVALIACAO
+    erp:
+      schema: competences
+      table: TIPO_AVALIACAO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: tipo_avaliador
+    bronze: competences__TIPO_AVALIADOR
+    erp:
+      schema: competences
+      table: TIPO_AVALIADOR
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: topico_pergunta_livre
+    bronze: competences__TOPICO_PERGUNTA_LIVRE
+    erp:
+      schema: competences
+      table: TOPICO_PERGUNTA_LIVRE
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: settings
+    bronze: competences__settings
+    erp:
+      schema: competences
+      table: settings
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: avaliacao_continua
+    bronze: dbo__AVALIACAO_CONTINUA
+    erp:
+      schema: dbo
+      table: AVALIACAO_CONTINUA
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: calc_resultado_avaliador_tipo_competencia
+    bronze: dbo__CALC_RESULTADO_AVALIADOR_TIPO_COMPETENCIA
+    erp:
+      schema: dbo
+      table: CALC_RESULTADO_AVALIADOR_TIPO_COMPETENCIA
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: calc_resultado_impacto
+    bronze: dbo__CALC_RESULTADO_IMPACTO
+    erp:
+      schema: dbo
+      table: CALC_RESULTADO_IMPACTO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: calc_resultado_risco
+    bronze: dbo__CALC_RESULTADO_RISCO
+    erp:
+      schema: dbo
+      table: CALC_RESULTADO_RISCO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: calc_resultado_tipo_avaliador_tipo_competencia
+    bronze: dbo__CALC_RESULTADO_TIPO_AVALIADOR_TIPO_COMPETENCIA
+    erp:
+      schema: dbo
+      table: CALC_RESULTADO_TIPO_AVALIADOR_TIPO_COMPETENCIA
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: calibrados_performance
+    bronze: dbo__CALIBRADOS_PERFORMANCE
+    erp:
+      schema: dbo
+      table: CALIBRADOS_PERFORMANCE
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: comentario_avaliado_forum_sucessao
+    bronze: dbo__COMENTARIO_AVALIADO_FORUM_SUCESSAO
+    erp:
+      schema: dbo
+      table: COMENTARIO_AVALIADO_FORUM_SUCESSAO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: configuracoes_gerais_feedback_continuo
+    bronze: dbo__CONFIGURACOES_GERAIS_FEEDBACK_CONTINUO
+    erp:
+      schema: dbo
+      table: CONFIGURACOES_GERAIS_FEEDBACK_CONTINUO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: deliberation_option
+    bronze: dbo__DeliberationOption
+    erp:
+      schema: dbo
+      table: DeliberationOption
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: effectiveness_evaluation
+    bronze: dbo__EffectivenessEvaluation
+    erp:
+      schema: dbo
+      table: EffectivenessEvaluation
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: evaluation_cycle_instance
+    bronze: dbo__EvaluationCycleInstance
+    erp:
+      schema: dbo
+      table: EvaluationCycleInstance
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: evaluation_cycle_instance_participant
+    bronze: dbo__EvaluationCycleInstanceParticipant
+    erp:
+      schema: dbo
+      table: EvaluationCycleInstanceParticipant
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: evaluation_cycle_quadrant
+    bronze: dbo__EvaluationCycleQuadrant
+    erp:
+      schema: dbo
+      table: EvaluationCycleQuadrant
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: evaluation_cycle_quadrant_personalization
+    bronze: dbo__EvaluationCycleQuadrantPersonalization
+    erp:
+      schema: dbo
+      table: EvaluationCycleQuadrantPersonalization
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: formulario_avaliacao_aba
+    bronze: dbo__FORMULARIO_AVALIACAO_ABA
+    erp:
+      schema: dbo
+      table: FORMULARIO_AVALIACAO_ABA
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: formulario_avaliacao_aba_item
+    bronze: dbo__FORMULARIO_AVALIACAO_ABA_ITEM
+    erp:
+      schema: dbo
+      table: FORMULARIO_AVALIACAO_ABA_ITEM
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: formulario_feedback_aba
+    bronze: dbo__FORMULARIO_FEEDBACK_ABA
+    erp:
+      schema: dbo
+      table: FORMULARIO_FEEDBACK_ABA
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: formulario_feedback_aba_item
+    bronze: dbo__FORMULARIO_FEEDBACK_ABA_ITEM
+    erp:
+      schema: dbo
+      table: FORMULARIO_FEEDBACK_ABA_ITEM
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: feedback_history
+    bronze: dbo__FeedbackHistory
+    erp:
+      schema: dbo
+      table: FeedbackHistory
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: feedback_participant
+    bronze: dbo__FeedbackParticipant
+    erp:
+      schema: dbo
+      table: FeedbackParticipant
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: grupo_cargo_avaliacao
+    bronze: dbo__GRUPO_CARGO_AVALIACAO
+    erp:
+      schema: dbo
+      table: GRUPO_CARGO_AVALIACAO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: instancia_participante_competencia
+    bronze: dbo__INSTANCIA_PARTICIPANTE_COMPETENCIA
+    erp:
+      schema: dbo
+      table: INSTANCIA_PARTICIPANTE_COMPETENCIA
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: item_feedback
+    bronze: dbo__ITEM_FEEDBACK
+    erp:
+      schema: dbo
+      table: ITEM_FEEDBACK
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: item_lista_personalizada_feedback_continuo
+    bronze: dbo__ITEM_LISTA_PERSONALIZADA_FEEDBACK_CONTINUO
+    erp:
+      schema: dbo
+      table: ITEM_LISTA_PERSONALIZADA_FEEDBACK_CONTINUO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: job_evaluation_succession
+    bronze: dbo__JobEvaluationSuccession
+    erp:
+      schema: dbo
+      table: JobEvaluationSuccession
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: nine_box
+    bronze: dbo__NINE_BOX
+    erp:
+      schema: dbo
+      table: NINE_BOX
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: opcao_pulse_feedback_continuo
+    bronze: dbo__OPCAO_PULSE_FEEDBACK_CONTINUO
+    erp:
+      schema: dbo
+      table: OPCAO_PULSE_FEEDBACK_CONTINUO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: periodo_avaliacao_projeto
+    bronze: dbo__PERIODO_AVALIACAO_PROJETO
+    erp:
+      schema: dbo
+      table: PERIODO_AVALIACAO_PROJETO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: projeto_avaliacao
+    bronze: dbo__PROJETO_AVALIACAO
+    erp:
+      schema: dbo
+      table: PROJETO_AVALIACAO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: question
+    bronze: dbo__Question
+    erp:
+      schema: dbo
+      table: Question
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: questions_effectiveness_evaluations
+    bronze: dbo__QuestionsEffectivenessEvaluations
+    erp:
+      schema: dbo
+      table: QuestionsEffectivenessEvaluations
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: questions_reaction_evaluations
+    bronze: dbo__QuestionsReactionEvaluations
+    erp:
+      schema: dbo
+      table: QuestionsReactionEvaluations
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: resposta_avaliacao_sucessao
+    bronze: dbo__RESPOSTA_AVALIACAO_SUCESSAO
+    erp:
+      schema: dbo
+      table: RESPOSTA_AVALIACAO_SUCESSAO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: resposta_pulse_feedback_continuo
+    bronze: dbo__RESPOSTA_PULSE_FEEDBACK_CONTINUO
+    erp:
+      schema: dbo
+      table: RESPOSTA_PULSE_FEEDBACK_CONTINUO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: reaction_evaluation
+    bronze: dbo__ReactionEvaluation
+    erp:
+      schema: dbo
+      table: ReactionEvaluation
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: tag_feedback
+    bronze: dbo__TAG_FEEDBACK
+    erp:
+      schema: dbo
+      table: TAG_FEEDBACK
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: tag_feedback_continuo
+    bronze: dbo__TAG_FEEDBACK_CONTINUO
+    erp:
+      schema: dbo
+      table: TAG_FEEDBACK_CONTINUO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+  - silver_table: tipo_feedback_continuo
+    bronze: dbo__TIPO_FEEDBACK_CONTINUO
+    erp:
+      schema: dbo
+      table: TIPO_FEEDBACK_CONTINUO
+    pk:
+    - id
+    wave: 3
+    status: implemented
+- id: colaborador
+  ch_database: colaborador
+  description: Pessoas e vínculos do colaborador
+  entities:
+  - silver_table: pessoa
+    bronze: dbo__COLABORADOR
+    erp:
+      schema: dbo
+      table: COLABORADOR
+    pk:
+    - id
+    wave: 1
+    status: implemented
+  - silver_table: vinculo_area
+    bronze: dbo__COLABORADOR_AREA
+    erp:
+      schema: dbo
+      table: COLABORADOR_AREA
+    pk:
+    - id
+    wave: 1
+    status: implemented
+  - silver_table: historico_area
+    bronze: dbo__HISTORICO_COLABORADOR_AREA
+    erp:
+      schema: dbo
+      table: HISTORICO_COLABORADOR_AREA
+    pk:
+    - id
+    wave: 1
+    status: implemented
+  - silver_table: historico_cargo
+    bronze: dbo__HISTORICO_CARGO
+    erp:
+      schema: dbo
+      table: HISTORICO_CARGO
+    pk:
+    - id
+    wave: 1
+    status: implemented
+  - silver_table: pessoa_cdc
+    bronze: colaborador
+    erp:
+      schema: cdc
+      table: colaborador
+    pk:
+    - id
+    wave: 1
+    status: implemented
+    notes: ReplacingMergeTree CDC; subset de colunas
+  - silver_table: colaborador_funcao
+    bronze: competences__COLABORADOR_FUNCAO
+    erp:
+      schema: competences
+      table: COLABORADOR_FUNCAO
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: administrador_local
+    bronze: dbo__ADMINISTRADOR_LOCAL
+    erp:
+      schema: dbo
+      table: ADMINISTRADOR_LOCAL
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: avaliador_forum
+    bronze: dbo__AVALIADOR_FORUM
+    erp:
+      schema: dbo
+      table: AVALIADOR_FORUM
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: avaliador_forum_sucessao
+    bronze: dbo__AVALIADOR_FORUM_SUCESSAO
+    erp:
+      schema: dbo
+      table: AVALIADOR_FORUM_SUCESSAO
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: avaliado_sucessao
+    bronze: dbo__AVALIADO_SUCESSAO
+    erp:
+      schema: dbo
+      table: AVALIADO_SUCESSAO
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: absence
+    bronze: dbo__Absence
+    erp:
+      schema: dbo
+      table: Absence
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: accept_agreement_history
+    bronze: dbo__AcceptAgreementHistory
+    erp:
+      schema: dbo
+      table: AcceptAgreementHistory
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: accept_agreement_signature_attachment
+    bronze: dbo__AcceptAgreementSignatureAttachment
+    erp:
+      schema: dbo
+      table: AcceptAgreementSignatureAttachment
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: activity_history
+    bronze: dbo__ActivityHistory
+    erp:
+      schema: dbo
+      table: ActivityHistory
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: colaborador_data_extract
+    bronze: dbo__COLABORADOR_DATA_EXTRACT
+    erp:
+      schema: dbo
+      table: COLABORADOR_DATA_EXTRACT
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: cause_analysis_permission
+    bronze: dbo__CauseAnalysisPermission
+    erp:
+      schema: dbo
+      table: CauseAnalysisPermission
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: certificate
+    bronze: dbo__Certificate
+    erp:
+      schema: dbo
+      table: Certificate
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: certificate_attachment
+    bronze: dbo__CertificateAttachment
+    erp:
+      schema: dbo
+      table: CertificateAttachment
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: change_history
+    bronze: dbo__ChangeHistory
+    erp:
+      schema: dbo
+      table: ChangeHistory
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: consent_agreement
+    bronze: dbo__ConsentAgreement
+    erp:
+      schema: dbo
+      table: ConsentAgreement
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: curriculum_attachment
+    bronze: dbo__CurriculumAttachment
+    erp:
+      schema: dbo
+      table: CurriculumAttachment
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: demand
+    bronze: dbo__Demand
+    erp:
+      schema: dbo
+      table: Demand
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: demands_participants
+    bronze: dbo__DemandsParticipants
+    erp:
+      schema: dbo
+      table: DemandsParticipants
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: discretionary_score_import
+    bronze: dbo__DiscretionaryScoreImport
+    erp:
+      schema: dbo
+      table: DiscretionaryScoreImport
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: dreams
+    bronze: dbo__Dreams
+    erp:
+      schema: dbo
+      table: Dreams
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: education
+    bronze: dbo__Education
+    erp:
+      schema: dbo
+      table: Education
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: education_attachment
+    bronze: dbo__EducationAttachment
+    erp:
+      schema: dbo
+      table: EducationAttachment
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: employee_access_group
+    bronze: dbo__EmployeeAccessGroup
+    erp:
+      schema: dbo
+      table: EmployeeAccessGroup
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: employee_branch
+    bronze: dbo__EmployeeBranch
+    erp:
+      schema: dbo
+      table: EmployeeBranch
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: employee_modifier_value
+    bronze: dbo__EmployeeModifierValue
+    erp:
+      schema: dbo
+      table: EmployeeModifierValue
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: evaluation_discretionary
+    bronze: dbo__EvaluationDiscretionary
+    erp:
+      schema: dbo
+      table: EvaluationDiscretionary
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: forum_participante_sucessao
+    bronze: dbo__FORUM_PARTICIPANTE_SUCESSAO
+    erp:
+      schema: dbo
+      table: FORUM_PARTICIPANTE_SUCESSAO
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: forum_sync_log
+    bronze: dbo__ForumSyncLog
+    erp:
+      schema: dbo
+      table: ForumSyncLog
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: goal_attachment
+    bronze: dbo__GoalAttachment
+    erp:
+      schema: dbo
+      table: GoalAttachment
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: goal_audit_history
+    bronze: dbo__GoalAuditHistory
+    erp:
+      schema: dbo
+      table: GoalAuditHistory
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: goal_book_attachment
+    bronze: dbo__GoalBookAttachment
+    erp:
+      schema: dbo
+      table: GoalBookAttachment
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: goal_discussion
+    bronze: dbo__GoalDiscussion
+    erp:
+      schema: dbo
+      table: GoalDiscussion
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: group_of_employees
+    bronze: dbo__GroupOfEmployees
+    erp:
+      schema: dbo
+      table: GroupOfEmployees
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: group_of_employees_participants
+    bronze: dbo__GroupOfEmployeesParticipants
+    erp:
+      schema: dbo
+      table: GroupOfEmployeesParticipants
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: hobbies
+    bronze: dbo__Hobbies
+    erp:
+      schema: dbo
+      table: Hobbies
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: instancia_calibrados
+    bronze: dbo__INSTANCIA_CALIBRADOS
+    erp:
+      schema: dbo
+      table: INSTANCIA_CALIBRADOS
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: instancia_calibrados_performance
+    bronze: dbo__INSTANCIA_CALIBRADOS_PERFORMANCE
+    erp:
+      schema: dbo
+      table: INSTANCIA_CALIBRADOS_PERFORMANCE
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: instancia_comite
+    bronze: dbo__INSTANCIA_COMITE
+    erp:
+      schema: dbo
+      table: INSTANCIA_COMITE
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: instancia_comite_sucessao
+    bronze: dbo__INSTANCIA_COMITE_SUCESSAO
+    erp:
+      schema: dbo
+      table: INSTANCIA_COMITE_SUCESSAO
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: instancia_participante_sucessao
+    bronze: dbo__INSTANCIA_PARTICIPANTE_SUCESSAO
+    erp:
+      schema: dbo
+      table: INSTANCIA_PARTICIPANTE_SUCESSAO
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: job_evaluation_answer_succession
+    bronze: dbo__JobEvaluationAnswerSuccession
+    erp:
+      schema: dbo
+      table: JobEvaluationAnswerSuccession
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: kpi_stakeholder
+    bronze: dbo__KPIStakeholder
+    erp:
+      schema: dbo
+      table: KPIStakeholder
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: label_employee
+    bronze: dbo__LabelEmployee
+    erp:
+      schema: dbo
+      table: LabelEmployee
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: language_level
+    bronze: dbo__LanguageLevel
+    erp:
+      schema: dbo
+      table: LanguageLevel
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: meta_data_extract
+    bronze: dbo__META_DATA_EXTRACT
+    erp:
+      schema: dbo
+      table: META_DATA_EXTRACT
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: motivations
+    bronze: dbo__Motivations
+    erp:
+      schema: dbo
+      table: Motivations
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: nine_box_calibrados
+    bronze: dbo__NINE_BOX_CALIBRADOS
+    erp:
+      schema: dbo
+      table: NINE_BOX_CALIBRADOS
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: notificacao_lida
+    bronze: dbo__NOTIFICACAO_LIDA
+    erp:
+      schema: dbo
+      table: NOTIFICACAO_LIDA
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: need
+    bronze: dbo__Need
+    erp:
+      schema: dbo
+      table: Need
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: perfil_usuario
+    bronze: dbo__PERFIL_USUARIO
+    erp:
+      schema: dbo
+      table: PERFIL_USUARIO
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: permissao_dashboard
+    bronze: dbo__PERMISSAO_DASHBOARD
+    erp:
+      schema: dbo
+      table: PERMISSAO_DASHBOARD
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: processo
+    bronze: dbo__PROCESSO
+    erp:
+      schema: dbo
+      table: PROCESSO
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: psw_colaborador
+    bronze: dbo__PSW_COLABORADOR
+    erp:
+      schema: dbo
+      table: PSW_COLABORADOR
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: psw_colaborador_item
+    bronze: dbo__PSW_COLABORADOR_ITEM
+    erp:
+      schema: dbo
+      table: PSW_COLABORADOR_ITEM
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: permissao_financeira
+    bronze: dbo__PermissaoFinanceira
+    erp:
+      schema: dbo
+      table: PermissaoFinanceira
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: personal_characteristics
+    bronze: dbo__PersonalCharacteristics
+    erp:
+      schema: dbo
+      table: PersonalCharacteristics
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: presentation_favorite_slide
+    bronze: dbo__PresentationFavoriteSlide
+    erp:
+      schema: dbo
+      table: PresentationFavoriteSlide
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: professional_experience
+    bronze: dbo__ProfessionalExperience
+    erp:
+      schema: dbo
+      table: ProfessionalExperience
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: profile_edit_permission
+    bronze: dbo__ProfileEditPermission
+    erp:
+      schema: dbo
+      table: ProfileEditPermission
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: response
+    bronze: dbo__Response
+    erp:
+      schema: dbo
+      table: Response
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: server_cache_preferences_management_cycle
+    bronze: dbo__ServerCachePreferencesManagementCycle
+    erp:
+      schema: dbo
+      table: ServerCachePreferencesManagementCycle
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: sport
+    bronze: dbo__Sport
+    erp:
+      schema: dbo
+      table: Sport
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: stakeholder
+    bronze: dbo__Stakeholder
+    erp:
+      schema: dbo
+      table: Stakeholder
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: stakeholders_committees
+    bronze: dbo__StakeholdersCommittees
+    erp:
+      schema: dbo
+      table: StakeholdersCommittees
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: stakeholders_project
+    bronze: dbo__StakeholdersProject
+    erp:
+      schema: dbo
+      table: StakeholdersProject
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: system_knowledge
+    bronze: dbo__SystemKnowledge
+    erp:
+      schema: dbo
+      table: SystemKnowledge
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: termo_aceite_secao
+    bronze: dbo__TERMO_ACEITE_SECAO
+    erp:
+      schema: dbo
+      table: TERMO_ACEITE_SECAO
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: theme
+    bronze: dbo__Theme
+    erp:
+      schema: dbo
+      table: Theme
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: theme_history
+    bronze: dbo__ThemeHistory
+    erp:
+      schema: dbo
+      table: ThemeHistory
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: theme_share
+    bronze: dbo__ThemeShare
+    erp:
+      schema: dbo
+      table: ThemeShare
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: volunteer_experience
+    bronze: dbo__VolunteerExperience
+    erp:
+      schema: dbo
+      table: VolunteerExperience
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: volunteer_function
+    bronze: dbo__VolunteerFunction
+    erp:
+      schema: dbo
+      table: VolunteerFunction
+    pk:
+    - id
+    wave: 9
+    status: implemented
+  - silver_table: welcome_support_employee
+    bronze: dbo__WelcomeSupportEmployee
+    erp:
+      schema: dbo
+      table: WelcomeSupportEmployee
+    pk:
+    - id
+    wave: 9
+    status: implemented
+- id: metricas
+  ch_database: metricas
+  description: Metas, indicadores e apuração
+  entities:
+  - silver_table: meta
+    bronze: dbo__META
+    erp:
+      schema: dbo
+      table: META
+    pk:
+    - id
+    wave: 2
+    status: implemented
+    notes: Allos TOP 50k amostra
+  - silver_table: indicador
+    bronze: dbo__INDICADOR
+    erp:
+      schema: dbo
+      table: INDICADOR
+    pk:
+    - id
+    wave: 2
+    status: implemented
+  - silver_table: valor_meta
+    bronze: dbo__VALOR_META
+    erp:
+      schema: dbo
+      table: VALOR_META
+    pk:
+    - id
+    wave: 2
+    status: implemented
+  - silver_table: nota_meta
+    bronze: dbo__NOTA_META
+    erp:
+      schema: dbo
+      table: NOTA_META
+    pk:
+    - id
+    wave: 2
+    status: implemented
+  - silver_table: expressao_calculo
+    bronze: dbo__EXPRESSAO_CALCULO_META
+    erp:
+      schema: dbo
+      table: EXPRESSAO_CALCULO_META
+    pk:
+    - id
+    wave: 2
+    status: implemented
+  - silver_table: periodo_gestao
+    bronze: dbo__PERIODO_GESTAO
+    erp:
+      schema: dbo
+      table: PERIODO_GESTAO
+    pk:
+    - id
+    wave: 2
+    status: implemented
+  - silver_table: periodo_apuracao
+    bronze: dbo__PERIODO_APURACAO
+    erp:
+      schema: dbo
+      table: PERIODO_APURACAO
+    pk:
+    - id
+    wave: 2
+    status: implemented
+  - silver_table: valor_matriz
+    bronze: dbo__ValorMatriz
+    erp:
+      schema: dbo
+      table: ValorMatriz
+    pk:
+    - id
+    wave: 5
+    status: implemented
+    notes: Fato de células da matriz de performance (previsto/realizado pontual e
+      acumulado por DtRef × FkMatriz × MembroDimensao). ~5,9M rows só em staging —
+      ADR-010/014.
+  - silver_table: matriz
+    bronze: dbo__Matriz
+    erp:
+      schema: dbo
+      table: Matriz
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: membro_dimensao
+    bronze: dbo__MembroDimensao
+    erp:
+      schema: dbo
+      table: MembroDimensao
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: strategy_cycle
+    bronze: dbo__StrategyCycle
+    erp:
+      schema: dbo
+      table: StrategyCycle
+    pk:
+    - id
+    wave: 5
+    status: implemented
+    notes: Estratégia fundida em metricas (ADR-014)
+  - silver_table: objective
+    bronze: okr__Objective
+    erp:
+      schema: okr
+      table: Objective
+    pk:
+    - id
+    wave: 6
+    status: implemented
+    notes: OKR no CH database metricas (ADR-013); sem FK para dbo.META
+  - silver_table: key_result
+    bronze: okr__KeyResult
+    erp:
+      schema: okr
+      table: KeyResult
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: key_result_value
+    bronze: okr__KeyResultValue
+    erp:
+      schema: okr
+      table: KeyResultValue
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: key_result_progress
+    bronze: okr__KeyResultProgress
+    erp:
+      schema: okr
+      table: KeyResultProgress
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: objective_progress
+    bronze: okr__ObjectiveProgress
+    erp:
+      schema: okr
+      table: ObjectiveProgress
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: objective_tree
+    bronze: okr__ObjectiveTree
+    erp:
+      schema: okr
+      table: ObjectiveTree
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: employee_key_result
+    bronze: okr__EmployeeKeyResult
+    erp:
+      schema: okr
+      table: EmployeeKeyResult
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: to_do_kr
+    bronze: okr__ToDoKR
+    erp:
+      schema: okr
+      table: ToDoKR
+    pk:
+    - id
+    wave: 6
+    status: implemented
+  - silver_table: area_book
+    bronze: dbo__AREA_BOOK
+    erp:
+      schema: dbo
+      table: AREA_BOOK
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: advance_payment_config
+    bronze: dbo__AdvancePaymentConfig
+    erp:
+      schema: dbo
+      table: AdvancePaymentConfig
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: area_history_config
+    bronze: dbo__AreaHistoryConfig
+    erp:
+      schema: dbo
+      table: AreaHistoryConfig
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: areas_group
+    bronze: dbo__AreasGroup
+    erp:
+      schema: dbo
+      table: AreasGroup
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: arvore_membros_quebra
+    bronze: dbo__ArvoreMembrosQuebra
+    erp:
+      schema: dbo
+      table: ArvoreMembrosQuebra
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: code_generator
+    bronze: dbo__CODE_GENERATOR
+    erp:
+      schema: dbo
+      table: CODE_GENERATOR
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: colaborador_score
+    bronze: dbo__COLABORADOR_SCORE
+    erp:
+      schema: dbo
+      table: COLABORADOR_SCORE
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: curva_multiplo
+    bronze: dbo__CURVA_MULTIPLO
+    erp:
+      schema: dbo
+      table: CURVA_MULTIPLO
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: curva_pontuacao
+    bronze: dbo__CURVA_PONTUACAO
+    erp:
+      schema: dbo
+      table: CURVA_PONTUACAO
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: curva_premiacao
+    bronze: dbo__CURVA_PREMIACAO
+    erp:
+      schema: dbo
+      table: CURVA_PREMIACAO
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: calibration_group_discretionary
+    bronze: dbo__CalibrationGroupDiscretionary
+    erp:
+      schema: dbo
+      table: CalibrationGroupDiscretionary
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: category_analysis
+    bronze: dbo__CategoryAnalysis
+    erp:
+      schema: dbo
+      table: CategoryAnalysis
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: concept_discretionary
+    bronze: dbo__ConceptDiscretionary
+    erp:
+      schema: dbo
+      table: ConceptDiscretionary
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: diretriz
+    bronze: dbo__DIRETRIZ
+    erp:
+      schema: dbo
+      table: DIRETRIZ
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: dimensao
+    bronze: dbo__Dimensao
+    erp:
+      schema: dbo
+      table: Dimensao
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: extract_control
+    bronze: dbo__ExtractControl
+    erp:
+      schema: dbo
+      table: ExtractControl
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: faixa_classificacao
+    bronze: dbo__FAIXA_CLASSIFICACAO
+    erp:
+      schema: dbo
+      table: FAIXA_CLASSIFICACAO
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: faixa_classificacao_performance
+    bronze: dbo__FAIXA_CLASSIFICACAO_PERFORMANCE
+    erp:
+      schema: dbo
+      table: FAIXA_CLASSIFICACAO_PERFORMANCE
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: faixa_farol
+    bronze: dbo__FAIXA_FAROL
+    erp:
+      schema: dbo
+      table: FAIXA_FAROL
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: faixa_farol_item
+    bronze: dbo__FAIXA_FAROL_ITEM
+    erp:
+      schema: dbo
+      table: FAIXA_FAROL_ITEM
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: farol
+    bronze: dbo__FAROL
+    erp:
+      schema: dbo
+      table: FAROL
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: frequencia_acomp
+    bronze: dbo__FREQUENCIA_ACOMP
+    erp:
+      schema: dbo
+      table: FREQUENCIA_ACOMP
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: frequencia_visualizacao
+    bronze: dbo__FREQUENCIA_VISUALIZACAO
+    erp:
+      schema: dbo
+      table: FREQUENCIA_VISUALIZACAO
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: factor_trigger_configuration
+    bronze: dbo__FactorTriggerConfiguration
+    erp:
+      schema: dbo
+      table: FactorTriggerConfiguration
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: grupo_indicador_associado
+    bronze: dbo__GRUPO_INDICADOR_ASSOCIADO
+    erp:
+      schema: dbo
+      table: GRUPO_INDICADOR_ASSOCIADO
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: grupo_pagto
+    bronze: dbo__GRUPO_PAGTO
+    erp:
+      schema: dbo
+      table: GRUPO_PAGTO
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: goal_observation
+    bronze: dbo__GoalObservation
+    erp:
+      schema: dbo
+      table: GoalObservation
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: goal_pendency_value_import
+    bronze: dbo__GoalPendencyValueImport
+    erp:
+      schema: dbo
+      table: GoalPendencyValueImport
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: goal_workflow
+    bronze: dbo__GoalWorkflow
+    erp:
+      schema: dbo
+      table: GoalWorkflow
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: goal_workflow_custom_step
+    bronze: dbo__GoalWorkflowCustomStep
+    erp:
+      schema: dbo
+      table: GoalWorkflowCustomStep
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: goal_workflow_step
+    bronze: dbo__GoalWorkflowStep
+    erp:
+      schema: dbo
+      table: GoalWorkflowStep
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: indicador_tipometa
+    bronze: dbo__INDICADOR_TIPOMETA
+    erp:
+      schema: dbo
+      table: INDICADOR_TIPOMETA
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: indicador_tipometa_book
+    bronze: dbo__INDICADOR_TIPOMETA_BOOK
+    erp:
+      schema: dbo
+      table: INDICADOR_TIPOMETA_BOOK
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: info_nota_meta
+    bronze: dbo__INFO_NOTA_META
+    erp:
+      schema: dbo
+      table: INFO_NOTA_META
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: initiative
+    bronze: dbo__Initiative
+    erp:
+      schema: dbo
+      table: Initiative
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: item_swot_analysis
+    bronze: dbo__ItemSwotAnalysis
+    erp:
+      schema: dbo
+      table: ItemSwotAnalysis
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: item_swot_analysis_relationship
+    bronze: dbo__ItemSwotAnalysisRelationship
+    erp:
+      schema: dbo
+      table: ItemSwotAnalysisRelationship
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: item_swot_analysis_relationship_item_swot_analysis
+    bronze: dbo__ItemSwotAnalysisRelationshipItemSwotAnalysis
+    erp:
+      schema: dbo
+      table: ItemSwotAnalysisRelationshipItemSwotAnalysis
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: label_goal
+    bronze: dbo__LabelGoal
+    erp:
+      schema: dbo
+      table: LabelGoal
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: metabook
+    bronze: dbo__METABOOK
+    erp:
+      schema: dbo
+      table: METABOOK
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: monthly_goal
+    bronze: dbo__MonthlyGoal
+    erp:
+      schema: dbo
+      table: MonthlyGoal
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: nivel
+    bronze: dbo__NIVEL
+    erp:
+      schema: dbo
+      table: NIVEL
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: nota_book
+    bronze: dbo__NOTA_BOOK
+    erp:
+      schema: dbo
+      table: NOTA_BOOK
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: nota_meta_book
+    bronze: dbo__NOTA_META_BOOK
+    erp:
+      schema: dbo
+      table: NOTA_META_BOOK
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: nivel_membros
+    bronze: dbo__NivelMembros
+    erp:
+      schema: dbo
+      table: NivelMembros
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: normalization_curve_point
+    bronze: dbo__NormalizationCurvePoint
+    erp:
+      schema: dbo
+      table: NormalizationCurvePoint
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: perspective
+    bronze: dbo__Perspective
+    erp:
+      schema: dbo
+      table: Perspective
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: pool
+    bronze: dbo__Pool
+    erp:
+      schema: dbo
+      table: Pool
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: range_discretionary
+    bronze: dbo__RangeDiscretionary
+    erp:
+      schema: dbo
+      table: RangeDiscretionary
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: rel_upper_goal
+    bronze: dbo__RelUpperGoal
+    erp:
+      schema: dbo
+      table: RelUpperGoal
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: score_values_rv
+    bronze: dbo__ScoreValuesRV
+    erp:
+      schema: dbo
+      table: ScoreValuesRV
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: strategy_action
+    bronze: dbo__StrategyAction
+    erp:
+      schema: dbo
+      table: StrategyAction
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: strategy_analysis
+    bronze: dbo__StrategyAnalysis
+    erp:
+      schema: dbo
+      table: StrategyAnalysis
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: strategy_analysis_attachment
+    bronze: dbo__StrategyAnalysisAttachment
+    erp:
+      schema: dbo
+      table: StrategyAnalysisAttachment
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: strategy_goal
+    bronze: dbo__StrategyGoal
+    erp:
+      schema: dbo
+      table: StrategyGoal
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: strategy_goal_metric
+    bronze: dbo__StrategyGoalMetric
+    erp:
+      schema: dbo
+      table: StrategyGoalMetric
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: strategy_goal_metric_value
+    bronze: dbo__StrategyGoalMetricValue
+    erp:
+      schema: dbo
+      table: StrategyGoalMetricValue
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: strategy_goal_project
+    bronze: dbo__StrategyGoalProject
+    erp:
+      schema: dbo
+      table: StrategyGoalProject
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: strategy_goal_project_value
+    bronze: dbo__StrategyGoalProjectValue
+    erp:
+      schema: dbo
+      table: StrategyGoalProjectValue
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: swot_analysis
+    bronze: dbo__SwotAnalysis
+    erp:
+      schema: dbo
+      table: SwotAnalysis
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: termo_aceite
+    bronze: dbo__TERMO_ACEITE
+    erp:
+      schema: dbo
+      table: TERMO_ACEITE
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: trigger
+    bronze: dbo__Trigger
+    erp:
+      schema: dbo
+      table: Trigger
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: trigger_curve
+    bronze: dbo__TriggerCurve
+    erp:
+      schema: dbo
+      table: TriggerCurve
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: trigger_curve_item
+    bronze: dbo__TriggerCurveItem
+    erp:
+      schema: dbo
+      table: TriggerCurveItem
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: valor_meta_book
+    bronze: dbo__VALOR_META_BOOK
+    erp:
+      schema: dbo
+      table: VALOR_META_BOOK
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: visao
+    bronze: dbo__Visao
+    erp:
+      schema: dbo
+      table: Visao
+    pk:
+    - id
+    wave: 11
+    status: implemented
+  - silver_table: year_personal_goal
+    bronze: dbo__YearPersonalGoal
+    erp:
+      schema: dbo
+      table: YearPersonalGoal
+    pk:
+    - id
+    wave: 11
+    status: implemented
+- id: organizacao
+  ch_database: organizacao
+  description: Estrutura organizacional
+  entities:
+  - silver_table: area
+    bronze: dbo__AREA
+    erp:
+      schema: dbo
+      table: AREA
+    pk:
+    - id
+    wave: 1
+    status: implemented
+  - silver_table: cargo
+    bronze: dbo__CARGO
+    erp:
+      schema: dbo
+      table: CARGO
+    pk:
+    - id
+    wave: 1
+    status: implemented
+    notes: Allos/Afya TOP 50k amostra em CARGO
+  - silver_table: grupo_usuario
+    bronze: dbo__GRUPO_USUARIO
+    erp:
+      schema: dbo
+      table: GRUPO_USUARIO
+    pk:
+    - id
+    wave: 1
+    status: implemented
+  - silver_table: filial
+    bronze: dbo__FILIAL
+    erp:
+      schema: dbo
+      table: FILIAL
+    pk:
+    - id
+    wave: 1
+    status: implemented
+  - silver_table: perfil_area
+    bronze: dbo__PERFIL_AREA
+    erp:
+      schema: dbo
+      table: PERFIL_AREA
+    pk:
+    - id
+    wave: 1
+    status: implemented
+  - silver_table: area_interesse_mudanca_avaliado
+    bronze: competences__AREA_INTERESSE_MUDANCA_AVALIADO
+    erp:
+      schema: competences
+      table: AREA_INTERESSE_MUDANCA_AVALIADO
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: administrador_local_filial
+    bronze: dbo__ADMINISTRADOR_LOCAL_FILIAL
+    erp:
+      schema: dbo
+      table: ADMINISTRADOR_LOCAL_FILIAL
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: area_forum_sucessao
+    bronze: dbo__AREA_FORUM_SUCESSAO
+    erp:
+      schema: dbo
+      table: AREA_FORUM_SUCESSAO
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: area_history
+    bronze: dbo__AreaHistory
+    erp:
+      schema: dbo
+      table: AreaHistory
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: areas_group_item
+    bronze: dbo__AreasGroupItem
+    erp:
+      schema: dbo
+      table: AreasGroupItem
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: book
+    bronze: dbo__BOOK
+    erp:
+      schema: dbo
+      table: BOOK
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: company
+    bronze: dbo__Company
+    erp:
+      schema: dbo
+      table: Company
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: custom_grade_formation
+    bronze: dbo__CustomGradeFormation
+    erp:
+      schema: dbo
+      table: CustomGradeFormation
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: deliberacao_forum_avaliado
+    bronze: dbo__DELIBERACAO_FORUM_AVALIADO
+    erp:
+      schema: dbo
+      table: DELIBERACAO_FORUM_AVALIADO
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: funcao_area
+    bronze: dbo__FUNCAO_AREA
+    erp:
+      schema: dbo
+      table: FUNCAO_AREA
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: grupo_cargo
+    bronze: dbo__GRUPO_CARGO
+    erp:
+      schema: dbo
+      table: GRUPO_CARGO
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: grupo_funcionalidade
+    bronze: dbo__GRUPO_FUNCIONALIDADE
+    erp:
+      schema: dbo
+      table: GRUPO_FUNCIONALIDADE
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: goal_audit
+    bronze: dbo__GoalAudit
+    erp:
+      schema: dbo
+      table: GoalAudit
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: goal_workflow_area_employee_approver
+    bronze: dbo__GoalWorkflowAreaEmployeeApprover
+    erp:
+      schema: dbo
+      table: GoalWorkflowAreaEmployeeApprover
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: history_section
+    bronze: dbo__HistorySection
+    erp:
+      schema: dbo
+      table: HistorySection
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: job_position_core
+    bronze: dbo__JobPositionCore
+    erp:
+      schema: dbo
+      table: JobPositionCore
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: job_position_level
+    bronze: dbo__JobPositionLevel
+    erp:
+      schema: dbo
+      table: JobPositionLevel
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: job_position_succession
+    bronze: dbo__JobPositionSuccession
+    erp:
+      schema: dbo
+      table: JobPositionSuccession
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: locality
+    bronze: dbo__Locality
+    erp:
+      schema: dbo
+      table: Locality
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: manager_succession
+    bronze: dbo__ManagerSuccession
+    erp:
+      schema: dbo
+      table: ManagerSuccession
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: organization_identity
+    bronze: dbo__OrganizationIdentity
+    erp:
+      schema: dbo
+      table: OrganizationIdentity
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: perfil_grupo_usuario
+    bronze: dbo__PERFIL_GRUPO_USUARIO
+    erp:
+      schema: dbo
+      table: PERFIL_GRUPO_USUARIO
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: termo_aceite_assinatura
+    bronze: dbo__TERMO_ACEITE_ASSINATURA
+    erp:
+      schema: dbo
+      table: TERMO_ACEITE_ASSINATURA
+    pk:
+    - id
+    wave: 5
+    status: implemented
+  - silver_table: trigger_area
+    bronze: dbo__TriggerArea
+    erp:
+      schema: dbo
+      table: TriggerArea
+    pk:
+    - id
+    wave: 5
+    status: implemented
+- id: pdi
+  ch_database: pdi
+  description: Treinamento e plano de desenvolvimento individual (ADR-014)
+  entities:
+  - silver_table: training
+    bronze: dbo__Training
+    erp:
+      schema: dbo
+      table: Training
+    pk:
+    - id
+    wave: 8
+    status: implemented
+  - silver_table: training_class
+    bronze: dbo__TrainingClass
+    erp:
+      schema: dbo
+      table: TrainingClass
+    pk:
+    - id
+    wave: 8
+    status: implemented
+  - silver_table: training_class_participants
+    bronze: dbo__TrainingClassParticipants
+    erp:
+      schema: dbo
+      table: TrainingClassParticipants
+    pk:
+    - id
+    wave: 8
+    status: implemented
+  - silver_table: historico_pdi
+    bronze: dbo__HISTORICO_PDI
+    erp:
+      schema: dbo
+      table: HISTORICO_PDI
+    pk:
+    - id
+    wave: 8
+    status: implemented
+  - silver_table: acao_sugerida_pdi
+    bronze: competences__ACAO_SUGERIDA_PDI
+    erp:
+      schema: competences
+      table: ACAO_SUGERIDA_PDI
+    pk:
+    - id
+    wave: 8
+    status: implemented
+  - silver_table: categoria_pdi_acao
+    bronze: competences__CATEGORIA_PDI_ACAO
+    erp:
+      schema: competences
+      table: CATEGORIA_PDI_ACAO
+    pk:
+    - id
+    wave: 8
+    status: implemented
+  - silver_table: individual_development_action
+    bronze: competences__IndividualDevelopmentAction
+    erp:
+      schema: competences
+      table: IndividualDevelopmentAction
+    pk:
+    - id
+    wave: 8
+    status: implemented
+  - silver_table: biblioteca
+    bronze: dbo__BIBLIOTECA
+    erp:
+      schema: dbo
+      table: BIBLIOTECA
+    pk:
+    - id
+    wave: 8
+    status: implemented
+  - silver_table: labels_tag_trainings
+    bronze: dbo__LabelsTagTrainings
+    erp:
+      schema: dbo
+      table: LabelsTagTrainings
+    pk:
+    - id
+    wave: 8
+    status: implemented
+  - silver_table: necessary_resources_of_training
+    bronze: dbo__NecessaryResourcesOfTraining
+    erp:
+      schema: dbo
+      table: NecessaryResourcesOfTraining
+    pk:
+    - id
+    wave: 8
+    status: implemented
+  - silver_table: qualification_center_config
+    bronze: dbo__QualificationCenterConfig
+    erp:
+      schema: dbo
+      table: QualificationCenterConfig
+    pk:
+    - id
+    wave: 8
+    status: implemented
+  - silver_table: qualification_manager
+    bronze: dbo__QualificationManager
+    erp:
+      schema: dbo
+      table: QualificationManager
+    pk:
+    - id
+    wave: 8
+    status: implemented
+  - silver_table: qualification_managers_subordinates
+    bronze: dbo__QualificationManagersSubordinates
+    erp:
+      schema: dbo
+      table: QualificationManagersSubordinates
+    pk:
+    - id
+    wave: 8
+    status: implemented
+  - silver_table: skill_category
+    bronze: dbo__SkillCategory
+    erp:
+      schema: dbo
+      table: SkillCategory
+    pk:
+    - id
+    wave: 8
+    status: implemented
+  - silver_table: skill_knowledge
+    bronze: dbo__SkillKnowledge
+    erp:
+      schema: dbo
+      table: SkillKnowledge
+    pk:
+    - id
+    wave: 8
+    status: implemented
+  - silver_table: training_attachment
+    bronze: dbo__TrainingAttachment
+    erp:
+      schema: dbo
+      table: TrainingAttachment
+    pk:
+    - id
+    wave: 8
+    status: implemented
+  - silver_table: training_class_demands
+    bronze: dbo__TrainingClassDemands
+    erp:
+      schema: dbo
+      table: TrainingClassDemands
+    pk:
+    - id
+    wave: 8
+    status: implemented
+  - silver_table: training_class_participants_confirmed
+    bronze: dbo__TrainingClassParticipantsConfirmed
+    erp:
+      schema: dbo
+      table: TrainingClassParticipantsConfirmed
+    pk:
+    - id
+    wave: 8
+    status: implemented
+  - silver_table: training_class_time_weekly
+    bronze: dbo__TrainingClassTimeWeekly
+    erp:
+      schema: dbo
+      table: TrainingClassTimeWeekly
+    pk:
+    - id
+    wave: 8
+    status: implemented
+  - silver_table: training_draft
+    bronze: dbo__TrainingDraft
+    erp:
+      schema: dbo
+      table: TrainingDraft
+    pk:
+    - id
+    wave: 8
+    status: implemented
+  - silver_table: training_package
+    bronze: dbo__TrainingPackage
+    erp:
+      schema: dbo
+      table: TrainingPackage
+    pk:
+    - id
+    wave: 8
+    status: implemented
+  - silver_table: training_packages_trainings
+    bronze: dbo__TrainingPackagesTrainings
+    erp:
+      schema: dbo
+      table: TrainingPackagesTrainings
+    pk:
+    - id
+    wave: 8
+    status: implemented
+- id: referencia
+  ch_database: referencia
+  description: Dimensões compartilhadas
+  entities:
+  - silver_table: unidade_medida
+    bronze: dbo__UNIDADE_MEDIDA
+    erp:
+      schema: dbo
+      table: UNIDADE_MEDIDA
+    pk:
+    - id
+    wave: 2
+    status: implemented
+  - silver_table: cotacao_moeda
+    bronze: dbo__COTACAO_MOEDA
+    erp:
+      schema: dbo
+      table: COTACAO_MOEDA
+    pk:
+    - id
+    wave: 10
+    status: implemented
+  - silver_table: customer_bound_translate_tag
+    bronze: dbo__CustomerBoundTranslateTag
+    erp:
+      schema: dbo
+      table: CustomerBoundTranslateTag
+    pk:
+    - id
+    wave: 10
+    status: implemented
+  - silver_table: grandeza
+    bronze: dbo__GRANDEZA
+    erp:
+      schema: dbo
+      table: GRANDEZA
+    pk:
+    - id
+    wave: 10
+    status: implemented
+  - silver_table: grupo_indicador
+    bronze: dbo__GRUPO_INDICADOR
+    erp:
+      schema: dbo
+      table: GRUPO_INDICADOR
+    pk:
+    - id
+    wave: 10
+    status: implemented
+  - silver_table: idioma
+    bronze: dbo__IDIOMA
+    erp:
+      schema: dbo
+      table: IDIOMA
+    pk:
+    - id
+    wave: 10
+    status: implemented
+  - silver_table: indicador_book
+    bronze: dbo__INDICADOR_BOOK
+    erp:
+      schema: dbo
+      table: INDICADOR_BOOK
+    pk:
+    - id
+    wave: 10
+    status: implemented
+  - silver_table: mail_config
+    bronze: dbo__MAIL_CONFIG
+    erp:
+      schema: dbo
+      table: MAIL_CONFIG
+    pk:
+    - id
+    wave: 10
+    status: implemented
+  - silver_table: plugin_info
+    bronze: dbo__PLUGIN_INFO
+    erp:
+      schema: dbo
+      table: PLUGIN_INFO
+    pk:
+    - id
+    wave: 10
+    status: implemented
+  - silver_table: system_config
+    bronze: dbo__SYSTEM_CONFIG
+    erp:
+      schema: dbo
+      table: SYSTEM_CONFIG
+    pk:
+    - id
+    wave: 10
+    status: implemented
+  - silver_table: tipo_acumulacao
+    bronze: dbo__TipoAcumulacao
+    erp:
+      schema: dbo
+      table: TipoAcumulacao
+    pk:
+    - id
+    wave: 10
+    status: implemented
+  - silver_table: translate_tag_culture
+    bronze: dbo__TranslateTagCulture
+    erp:
+      schema: dbo
+      table: TranslateTagCulture
+    pk:
+    - id
+    wave: 10
+    status: implemented
+  - silver_table: translate_tag_handle
+    bronze: dbo__TranslateTagHandle
+    erp:
+      schema: dbo
+      table: TranslateTagHandle
+    pk:
+    - id
+    wave: 10
+    status: implemented
+  - silver_table: versao
+    bronze: dbo__VERSAO
+    erp:
+      schema: dbo
+      table: VERSAO
+    pk:
+    - id
+    wave: 10
+    status: implemented
+- id: remuneracao
+  ch_database: remuneracao
+  description: Variável e RV
+  entities:
+  - silver_table: participante_rv
+    bronze: dbo__PARTICIPANTE_RV
+    erp:
+      schema: dbo
+      table: PARTICIPANTE_RV
+    pk:
+    - id
+    wave: 4
+    status: implemented
+  - silver_table: cotacao_moeda_item
+    bronze: dbo__COTACAO_MOEDA_ITEM
+    erp:
+      schema: dbo
+      table: COTACAO_MOEDA_ITEM
+    pk:
+    - id
+    wave: 4
+    status: implemented
+  - silver_table: eligible_discretionary
+    bronze: dbo__EligibleDiscretionary
+    erp:
+      schema: dbo
+      table: EligibleDiscretionary
+    pk:
+    - id
+    wave: 4
+    status: implemented
+  - silver_table: employee_analytic_result
+    bronze: dbo__EmployeeAnalyticResult
+    erp:
+      schema: dbo
+      table: EmployeeAnalyticResult
+    pk:
+    - id
+    wave: 4
+    status: implemented
+  - silver_table: extract_employee_options
+    bronze: dbo__ExtractEmployeeOptions
+    erp:
+      schema: dbo
+      table: ExtractEmployeeOptions
+    pk:
+    - id
+    wave: 4
+    status: implemented
+  - silver_table: modifier
+    bronze: dbo__Modifier
+    erp:
+      schema: dbo
+      table: Modifier
+    pk:
+    - id
+    wave: 4
+    status: implemented
+  - silver_table: modifier_item
+    bronze: dbo__ModifierItem
+    erp:
+      schema: dbo
+      table: ModifierItem
+    pk:
+    - id
+    wave: 4
+    status: implemented
+  - silver_table: participant_advance_payment
+    bronze: dbo__ParticipantAdvancePayment
+    erp:
+      schema: dbo
+      table: ParticipantAdvancePayment
+    pk:
+    - id
+    wave: 4
+    status: implemented
+  - silver_table: participant_advance_payment_discount
+    bronze: dbo__ParticipantAdvancePaymentDiscount
+    erp:
+      schema: dbo
+      table: ParticipantAdvancePaymentDiscount
+    pk:
+    - id
+    wave: 4
+    status: implemented
+  - silver_table: participant_aggregated_advance_payment
+    bronze: dbo__ParticipantAggregatedAdvancePayment
+    erp:
+      schema: dbo
+      table: ParticipantAggregatedAdvancePayment
+    pk:
+    - id
+    wave: 4
+    status: implemented
+  - silver_table: participant_aggregated_extract
+    bronze: dbo__ParticipantAggregatedExtract
+    erp:
+      schema: dbo
+      table: ParticipantAggregatedExtract
+    pk:
+    - id
+    wave: 4
+    status: implemented
+  - silver_table: participant_extract
+    bronze: dbo__ParticipantExtract
+    erp:
+      schema: dbo
+      table: ParticipantExtract
+    pk:
+    - id
+    wave: 4
+    status: implemented
+  - silver_table: participant_extract_control
+    bronze: dbo__ParticipantExtractControl
+    erp:
+      schema: dbo
+      table: ParticipantExtractControl
+    pk:
+    - id
+    wave: 4
+    status: implemented
+  - silver_table: simulation_rv_cache
+    bronze: dbo__SimulationRVCache
+    erp:
+      schema: dbo
+      table: SimulationRVCache
+    pk:
+    - id
+    wave: 4
+    status: implemented
+- id: sucessao
+  ch_database: sucessao
+  description: Ciclos de sucessão e fóruns (ADR-013)
+  entities:
+  - silver_table: succession_cycle
+    bronze: dbo__SuccessionCycle
+    erp:
+      schema: dbo
+      table: SuccessionCycle
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: succession_cycle_settings
+    bronze: dbo__SuccessionCycleSettings
+    erp:
+      schema: dbo
+      table: SuccessionCycleSettings
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: succession_nomination
+    bronze: dbo__SuccessionNomination
+    erp:
+      schema: dbo
+      table: SuccessionNomination
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: succession_results
+    bronze: dbo__SuccessionResults
+    erp:
+      schema: dbo
+      table: SuccessionResults
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: instancia_sucessao
+    bronze: dbo__INSTANCIA_SUCESSAO
+    erp:
+      schema: dbo
+      table: INSTANCIA_SUCESSAO
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: classification_impact_of_loss
+    bronze: dbo__ClassificationImpactOfLoss
+    erp:
+      schema: dbo
+      table: ClassificationImpactOfLoss
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: classification_risk_of_loss
+    bronze: dbo__ClassificationRiskOfLoss
+    erp:
+      schema: dbo
+      table: ClassificationRiskOfLoss
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: formulario_avaliacao_sucessao
+    bronze: dbo__FORMULARIO_AVALIACAO_SUCESSAO
+    erp:
+      schema: dbo
+      table: FORMULARIO_AVALIACAO_SUCESSAO
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: forum_calibragem_sucessao
+    bronze: dbo__FORUM_CALIBRAGEM_SUCESSAO
+    erp:
+      schema: dbo
+      table: FORUM_CALIBRAGEM_SUCESSAO
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: forum_quadrante_sucessao_modelo
+    bronze: dbo__FORUM_QUADRANTE_SUCESSAO_MODELO
+    erp:
+      schema: dbo
+      table: FORUM_QUADRANTE_SUCESSAO_MODELO
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: funcao_forum_sucessao
+    bronze: dbo__FUNCAO_FORUM_SUCESSAO
+    erp:
+      schema: dbo
+      table: FUNCAO_FORUM_SUCESSAO
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: funcao_impacto_sucessao
+    bronze: dbo__FUNCAO_IMPACTO_SUCESSAO
+    erp:
+      schema: dbo
+      table: FUNCAO_IMPACTO_SUCESSAO
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: funcao_potencial_sucessao
+    bronze: dbo__FUNCAO_POTENCIAL_SUCESSAO
+    erp:
+      schema: dbo
+      table: FUNCAO_POTENCIAL_SUCESSAO
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: funcao_risco_sucessao
+    bronze: dbo__FUNCAO_RISCO_SUCESSAO
+    erp:
+      schema: dbo
+      table: FUNCAO_RISCO_SUCESSAO
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: funcao_sucessao
+    bronze: dbo__FUNCAO_SUCESSAO
+    erp:
+      schema: dbo
+      table: FUNCAO_SUCESSAO
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: impacto
+    bronze: dbo__IMPACTO
+    erp:
+      schema: dbo
+      table: IMPACTO
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: potencial
+    bronze: dbo__POTENCIAL
+    erp:
+      schema: dbo
+      table: POTENCIAL
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: risco
+    bronze: dbo__RISCO
+    erp:
+      schema: dbo
+      table: RISCO
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: readiness
+    bronze: dbo__Readiness
+    erp:
+      schema: dbo
+      table: Readiness
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: score_curve_impact_succession
+    bronze: dbo__ScoreCurveImpactSuccession
+    erp:
+      schema: dbo
+      table: ScoreCurveImpactSuccession
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: score_curve_risk_succession
+    bronze: dbo__ScoreCurveRiskSuccession
+    erp:
+      schema: dbo
+      table: ScoreCurveRiskSuccession
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: score_curve_succession
+    bronze: dbo__ScoreCurveSuccession
+    erp:
+      schema: dbo
+      table: ScoreCurveSuccession
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: succession_job_position_readiness
+    bronze: dbo__SuccessionJobPositionReadiness
+    erp:
+      schema: dbo
+      table: SuccessionJobPositionReadiness
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: succession_scores_details
+    bronze: dbo__SuccessionScoresDetails
+    erp:
+      schema: dbo
+      table: SuccessionScoresDetails
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: x_axis_classification
+    bronze: dbo__XAxisClassification
+    erp:
+      schema: dbo
+      table: XAxisClassification
+    pk:
+    - id
+    wave: 7
+    status: implemented
+  - silver_table: y_axis_classification
+    bronze: dbo__YAxisClassification
+    erp:
+      schema: dbo
+      table: YAxisClassification
+    pk:
+    - id
+    wave: 7
+    status: implemented

@@ -58,5 +58,25 @@ landing_columns:
     type: UInt8
 
 dbt:
+  bronze_source: dbo__COLABORADOR
+  silver_domain: colaborador
+  silver: pessoa
+  silver_cdc: pessoa_cdc
+  silver_vinculo: vinculo_area
   staging: stg_colaborador
-  gold: colaborador_by_grupo
+
+dagster:
+  observability_job: raw_ingestion_observability
+  observability_schedule: "*/5 * * * *"
+  freshness_sensor: raw_freshness_sensor
+  dbt_job: dbt_build
+  pilot_entity_env: MEREPO_PILOT_ENTITY
+
+pipeline:
+  kafka_engine_table: colaborador_kafka
+  raw_table: raw.colaborador
+  consumer_group: ch-raw-colaborador-v2
+  kafka_topic: raw.colaborador
+  ingestion_snapshots_entity: colaborador
+  watermark_query: "SELECT max(_ts_ms) FROM raw.colaborador"
+  lag_kafka_table_filter: colaborador_kafka

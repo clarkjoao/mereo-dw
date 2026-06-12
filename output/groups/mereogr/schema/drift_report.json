@@ -1,0 +1,1011 @@
+{
+  "summary": {
+    "reference_db": "MereoGR-Afya",
+    "databases_compared": 14,
+    "unique_tables": 619,
+    "total_diffs": 125,
+    "databases_with_diffs": 13
+  },
+  "diffs": [
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.Breakdown",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.Breakdown",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "dbo.Breakdown",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.BreakdownValue",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.BreakdownValue",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "dbo.BreakdownValue",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.BreakdownValueOption",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.BreakdownValueOption",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "dbo.BreakdownValueOption",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.BrfGoalSyncLog",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.BrfGoalSyncLog",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "dbo.BrfGoalSyncLog",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.EmployeePerformances",
+      "diff_type": "extra_table",
+      "expected": "missing",
+      "actual": "exists",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.FEEDBACK_CONTINUO",
+      "diff_type": "column_type_mismatch",
+      "expected": "TEXTO nvarchar(2048)",
+      "actual": "TEXTO nvarchar(1024)",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.Goal",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.Goal",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "dbo.Goal",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.GoalResponsible",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.GoalResponsible",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "dbo.GoalResponsible",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.GoalValue",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.GoalValue",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "dbo.GoalValue",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "dbo.IMP_EXPRESSAO_CALCULO_META",
+      "diff_type": "column_type_mismatch",
+      "expected": "PESO_META_REF decimal(28,8)",
+      "actual": "PESO_META_REF float",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.KPI",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.KPI",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "dbo.KPI",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.KPIBreakdown",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.KPIBreakdown",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "dbo.KPIBreakdown",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.KPIGrouping",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.KPIGrouping",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "dbo.KPIGrouping",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.ManagementCycle",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.ManagementCycle",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "dbo.ManagementCycle",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.RELACAOUSUARIOS",
+      "diff_type": "extra_table",
+      "expected": "missing",
+      "actual": "exists",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.RELACAOUSUARIOS",
+      "diff_type": "extra_table",
+      "expected": "missing",
+      "actual": "exists",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.ScoreCurveImpactSuccession",
+      "diff_type": "column_type_mismatch",
+      "expected": "Criteria nvarchar(3000)",
+      "actual": "Criteria nvarchar(4000)",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.ScoreCurveImpactSuccession",
+      "diff_type": "column_type_mismatch",
+      "expected": "Meaning nvarchar(3000)",
+      "actual": "Meaning nvarchar(4000)",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Magalu",
+      "table": "dbo.ScoreCurveImpactSuccession",
+      "diff_type": "column_type_mismatch",
+      "expected": "Criteria nvarchar(3000)",
+      "actual": "Criteria nvarchar(4000)",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Magalu",
+      "table": "dbo.ScoreCurveImpactSuccession",
+      "diff_type": "column_type_mismatch",
+      "expected": "Meaning nvarchar(3000)",
+      "actual": "Meaning nvarchar(4000)",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.ScoreCurveImpactSuccession",
+      "diff_type": "column_type_mismatch",
+      "expected": "Criteria nvarchar(3000)",
+      "actual": "Criteria nvarchar(4000)",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.ScoreCurveImpactSuccession",
+      "diff_type": "column_type_mismatch",
+      "expected": "Meaning nvarchar(3000)",
+      "actual": "Meaning nvarchar(4000)",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.ScoreCurveRiskSuccession",
+      "diff_type": "column_type_mismatch",
+      "expected": "Criteria nvarchar(3000)",
+      "actual": "Criteria nvarchar(4000)",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.ScoreCurveRiskSuccession",
+      "diff_type": "column_type_mismatch",
+      "expected": "Meaning nvarchar(3000)",
+      "actual": "Meaning nvarchar(4000)",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Magalu",
+      "table": "dbo.ScoreCurveRiskSuccession",
+      "diff_type": "column_type_mismatch",
+      "expected": "Criteria nvarchar(3000)",
+      "actual": "Criteria nvarchar(4000)",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Magalu",
+      "table": "dbo.ScoreCurveRiskSuccession",
+      "diff_type": "column_type_mismatch",
+      "expected": "Meaning nvarchar(3000)",
+      "actual": "Meaning nvarchar(4000)",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.ScoreCurveRiskSuccession",
+      "diff_type": "column_type_mismatch",
+      "expected": "Criteria nvarchar(3000)",
+      "actual": "Criteria nvarchar(4000)",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.ScoreCurveRiskSuccession",
+      "diff_type": "column_type_mismatch",
+      "expected": "Meaning nvarchar(3000)",
+      "actual": "Meaning nvarchar(4000)",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.ScoreCurveSuccession",
+      "diff_type": "column_type_mismatch",
+      "expected": "Criteria nvarchar(3000)",
+      "actual": "Criteria nvarchar(4000)",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.ScoreCurveSuccession",
+      "diff_type": "column_type_mismatch",
+      "expected": "Meaning nvarchar(3000)",
+      "actual": "Meaning nvarchar(4000)",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Magalu",
+      "table": "dbo.ScoreCurveSuccession",
+      "diff_type": "column_type_mismatch",
+      "expected": "Criteria nvarchar(3000)",
+      "actual": "Criteria nvarchar(4000)",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Magalu",
+      "table": "dbo.ScoreCurveSuccession",
+      "diff_type": "column_type_mismatch",
+      "expected": "Meaning nvarchar(3000)",
+      "actual": "Meaning nvarchar(4000)",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.ScoreCurveSuccession",
+      "diff_type": "column_type_mismatch",
+      "expected": "Criteria nvarchar(3000)",
+      "actual": "Criteria nvarchar(4000)",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.ScoreCurveSuccession",
+      "diff_type": "column_type_mismatch",
+      "expected": "Meaning nvarchar(3000)",
+      "actual": "Meaning nvarchar(4000)",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.VW_AREA_QUEUE",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.VW_AREA_QUEUE",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "dbo.VW_AREA_QUEUE",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.VW_AUDIT_AREA_QUEUE",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.VW_AUDIT_AREA_QUEUE",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "dbo.VW_AUDIT_AREA_QUEUE",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.VW_AUDIT_COLABORADOR_QUEUE",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.VW_AUDIT_COLABORADOR_QUEUE",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "dbo.VW_AUDIT_COLABORADOR_QUEUE",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.VW_COLABORADOR_INATIVADO_QUEUE",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.VW_COLABORADOR_INATIVADO_QUEUE",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "dbo.VW_COLABORADOR_INATIVADO_QUEUE",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.VW_COLABORADOR_QUEUE",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.VW_COLABORADOR_QUEUE",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "dbo.VW_COLABORADOR_QUEUE",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.VW_GOAL_RESPONSIBLE",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.VW_GOAL_RESPONSIBLE",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "dbo.VW_GOAL_RESPONSIBLE",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.VW_GOAL_WEIGHT",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.VW_GOAL_WEIGHT",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "dbo.VW_GOAL_WEIGHT",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.VW_KPI",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.VW_KPI",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "dbo.VW_KPI",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.VW_MANAGEMENT_CYCLE",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.VW_MANAGEMENT_CYCLE",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "dbo.VW_MANAGEMENT_CYCLE",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Magalu",
+      "table": "dbo.gcp_datastream_truncation_safeguard",
+      "diff_type": "extra_table",
+      "expected": "missing",
+      "actual": "exists",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "dbo.vw_goal",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "dbo.vw_goal",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "dbo.vw_goal",
+      "diff_type": "missing_table",
+      "expected": "exists",
+      "actual": "missing",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Allos",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "AreaCompensationsResult decimal(18,6)",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Allos",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "Id bigint",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Allos",
+      "table": "stg.VCExtract",
+      "diff_type": "extra_column",
+      "expected": "",
+      "actual": "id bigint",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-GrupoDirecional",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "AreaCompensationsResult decimal(18,6)",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-GrupoDirecional",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "Id bigint",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-GrupoDirecional",
+      "table": "stg.VCExtract",
+      "diff_type": "extra_column",
+      "expected": "",
+      "actual": "id bigint",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-HMLAfya",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "Id bigint",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-HMLAfya",
+      "table": "stg.VCExtract",
+      "diff_type": "extra_column",
+      "expected": "",
+      "actual": "id bigint",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "AreaCompensationsResult decimal(18,6)",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "Id bigint",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Klabin",
+      "table": "stg.VCExtract",
+      "diff_type": "extra_column",
+      "expected": "",
+      "actual": "id bigint",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Magalu",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "AreaCompensationsResult decimal(18,6)",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Magalu",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "Id bigint",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Magalu",
+      "table": "stg.VCExtract",
+      "diff_type": "extra_column",
+      "expected": "",
+      "actual": "id bigint",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "AreaCompensationsResult decimal(18,6)",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "Id bigint",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Mrv",
+      "table": "stg.VCExtract",
+      "diff_type": "extra_column",
+      "expected": "",
+      "actual": "id bigint",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Picpay",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "AreaCompensationsResult decimal(18,6)",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Picpay",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "Id bigint",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Picpay",
+      "table": "stg.VCExtract",
+      "diff_type": "extra_column",
+      "expected": "",
+      "actual": "id bigint",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Sereducacional",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "AreaCompensationsResult decimal(18,6)",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Sereducacional",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "Id bigint",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Sereducacional",
+      "table": "stg.VCExtract",
+      "diff_type": "extra_column",
+      "expected": "",
+      "actual": "id bigint",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "AreaCompensationsResult decimal(18,6)",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "Id bigint",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Staging",
+      "table": "stg.VCExtract",
+      "diff_type": "extra_column",
+      "expected": "",
+      "actual": "id bigint",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Vibra",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "AreaCompensationsResult decimal(18,6)",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Vibra",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "Id bigint",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-Vibra",
+      "table": "stg.VCExtract",
+      "diff_type": "extra_column",
+      "expected": "",
+      "actual": "id bigint",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-comercialtrial",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "AreaCompensationsResult decimal(18,6)",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-comercialtrial",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "Id bigint",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-comercialtrial",
+      "table": "stg.VCExtract",
+      "diff_type": "extra_column",
+      "expected": "",
+      "actual": "id bigint",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-constance-poc",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "AreaCompensationsResult decimal(18,6)",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-constance-poc",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "Id bigint",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-constance-poc",
+      "table": "stg.VCExtract",
+      "diff_type": "extra_column",
+      "expected": "",
+      "actual": "id bigint",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-implantacao",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "AreaCompensationsResult decimal(18,6)",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-implantacao",
+      "table": "stg.VCExtract",
+      "diff_type": "missing_column",
+      "expected": "Id bigint",
+      "actual": "",
+      "reference_db": "MereoGR-Afya"
+    },
+    {
+      "database": "MereoGR-implantacao",
+      "table": "stg.VCExtract",
+      "diff_type": "extra_column",
+      "expected": "",
+      "actual": "id bigint",
+      "reference_db": "MereoGR-Afya"
+    }
+  ]
+}

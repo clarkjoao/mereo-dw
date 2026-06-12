@@ -1,0 +1,209 @@
+reference_db: MereoGR-Afya
+staging_db: MereoGR-Staging
+afya_table_count: 616
+staging_table_count: 595
+missing_tables_in_staging:
+- dbo.Breakdown
+- dbo.BreakdownValue
+- dbo.BreakdownValueOption
+- dbo.BrfGoalSyncLog
+- dbo.Goal
+- dbo.GoalResponsible
+- dbo.GoalValue
+- dbo.KPI
+- dbo.KPIBreakdown
+- dbo.KPIGrouping
+- dbo.ManagementCycle
+- dbo.VW_AREA_QUEUE
+- dbo.VW_AUDIT_AREA_QUEUE
+- dbo.VW_AUDIT_COLABORADOR_QUEUE
+- dbo.VW_COLABORADOR_INATIVADO_QUEUE
+- dbo.VW_COLABORADOR_QUEUE
+- dbo.VW_GOAL_RESPONSIBLE
+- dbo.VW_GOAL_WEIGHT
+- dbo.VW_KPI
+- dbo.VW_MANAGEMENT_CYCLE
+- dbo.vw_goal
+missing_table_count: 21
+extra_tables_in_staging: []
+stg_schema_tables:
+- stg.ConsolidatedScoreView
+- stg.GoalReportView
+- stg.GoalView
+- stg.VCExtract
+- stg.vcExtractLastLastUpdate
+drift_diff_count: 25
+colaborador_id_overlap:
+  count_staging: 824
+  count_afya: 12408
+  count_allos: 8765
+  staging_intersect_afya: 820
+  staging_intersect_allos: 817
+  staging_intersect_afya_pct: 99.51
+  staging_intersect_allos_pct: 99.15
+  conclusion: mixed_client_data
+email_samples:
+  staging:
+  - noreply@mereo.com
+  - noreply@mereo.com
+  - noreply@mereo.com
+  - 212@mereo.com
+  - noreply@mereo.com
+  afya:
+  - suporte@mereo.com
+  - implantacao@mereo.com
+  - vitoria.oliveira@mereo.com
+  - lennon.gonzaga@mereo.com
+  - abhner.silva@afya.com.br
+  allos:
+  - suporte@mereo.com
+  - dpmetas@fake.com
+  - ursula.silva@mereo.com
+  - marina.calvao@allos.com.br
+  - fernanda.melo@allos.com.br
+clickhouse_overlap:
+  stg_cnt: '824'
+  afya_cnt: '12408'
+  allos_cnt: '8765'
+  id_overlap_stg_afya: '820'
+staging_only_populated_count: 170
+staging_only_populated_top:
+- Tasks.ToDo
+- competences.AREA_INTERESSE_MUDANCA_AVALIADO
+- competences.ItensSenderToReleaseAppraiseesQueue
+- competences.LOCALIDADE_INTERESSE_MUDANCA_AVALIADO
+- dbo.ANEXO_REUNIAO
+- dbo.AREA_BOOK
+- dbo.AVALIACAO_CONTINUA
+- dbo.Absence
+- dbo.AdvancePaymentConfig
+- dbo.AreasGroup
+- dbo.AreasGroupItem
+- dbo.ArvoreMembrosQuebra
+- dbo.BOOK
+- dbo.CALC_RESULTADO_AVALIADOR_TIPO_COMPETENCIA
+- dbo.CALC_RESULTADO_IMPACTO
+- dbo.CALC_RESULTADO_RISCO
+- dbo.CALC_RESULTADO_TIPO_AVALIADOR_TIPO_COMPETENCIA
+- dbo.CALIBRADOS_PERFORMANCE
+- dbo.COLABORADOR_DATA_EXTRACT
+- dbo.COLABORADOR_SCORE
+- dbo.COMENTARIO_AVALIADO_FORUM_SUCESSAO
+- dbo.COTACAO_MOEDA
+- dbo.COTACAO_MOEDA_ITEM
+- dbo.CURVA_PONTUACAO
+- dbo.CategoryAnalysis
+top_staging_volume_tables:
+- &id001
+  erp_key: dbo.ValorMatriz
+  bronze: dbo__ValorMatriz
+  diff_type: present_both
+  rows_staging: 5894028
+  rows_afya: 0
+  rows_allos: 0
+  staging_only_data: 'yes'
+- erp_key: dbo.AbpEntityPropertyChanges
+  bronze: dbo__AbpEntityPropertyChanges
+  diff_type: present_both
+  rows_staging: 252557
+  rows_afya: 50000
+  rows_allos: 50000
+  staging_only_data: 'no'
+- erp_key: dbo.AbpEntityChanges
+  bronze: dbo__AbpEntityChanges
+  diff_type: present_both
+  rows_staging: 75463
+  rows_afya: 50000
+  rows_allos: 50000
+  staging_only_data: 'no'
+- erp_key: dbo.AUDIT_META
+  bronze: dbo__AUDIT_META
+  diff_type: present_both
+  rows_staging: 71946
+  rows_afya: 50000
+  rows_allos: 50000
+  staging_only_data: 'no'
+- erp_key: dbo.AUDIT_VALOR_META
+  bronze: dbo__AUDIT_VALOR_META
+  diff_type: present_both
+  rows_staging: 62690
+  rows_afya: 50000
+  rows_allos: 50000
+  staging_only_data: 'no'
+- erp_key: dbo.AbpEntityChangeSets
+  bronze: dbo__AbpEntityChangeSets
+  diff_type: present_both
+  rows_staging: 38130
+  rows_afya: 50000
+  rows_allos: 50000
+  staging_only_data: 'no'
+- erp_key: dbo.ActivityHistory
+  bronze: dbo__ActivityHistory
+  diff_type: present_both
+  rows_staging: 32867
+  rows_afya: 5667
+  rows_allos: 21
+  staging_only_data: 'no'
+- erp_key: dbo.AUDIT_AREA
+  bronze: dbo__AUDIT_AREA
+  diff_type: present_both
+  rows_staging: 32354
+  rows_afya: 50000
+  rows_allos: 45200
+  staging_only_data: 'no'
+- erp_key: audit.AuditLogs
+  bronze: audit__AuditLogs
+  diff_type: present_both
+  rows_staging: 25530
+  rows_afya: 50000
+  rows_allos: 50000
+  staging_only_data: 'no'
+- erp_key: dbo.PERFIL_AREA
+  bronze: dbo__PERFIL_AREA
+  diff_type: present_both
+  rows_staging: 25316
+  rows_afya: 9714
+  rows_allos: 12231
+  staging_only_data: 'no'
+- erp_key: dbo.LOG_LOGIN
+  bronze: dbo__LOG_LOGIN
+  diff_type: present_both
+  rows_staging: 25007
+  rows_afya: 50000
+  rows_allos: 50000
+  staging_only_data: 'no'
+- erp_key: dbo.Item
+  bronze: dbo__Item
+  diff_type: present_both
+  rows_staging: 19084
+  rows_afya: 0
+  rows_allos: 0
+  staging_only_data: 'yes'
+- erp_key: dbo.AUDIT_COLABORADOR_AREA
+  bronze: dbo__AUDIT_COLABORADOR_AREA
+  diff_type: present_both
+  rows_staging: 18954
+  rows_afya: 50000
+  rows_allos: 50000
+  staging_only_data: 'no'
+- erp_key: dbo.LOG_EMAIL
+  bronze: dbo__LOG_EMAIL
+  diff_type: present_both
+  rows_staging: 14940
+  rows_afya: 38449
+  rows_allos: 50000
+  staging_only_data: 'no'
+- erp_key: dbo.VALOR_META
+  bronze: dbo__VALOR_META
+  diff_type: present_both
+  rows_staging: 13314
+  rows_afya: 38293
+  rows_allos: 50000
+  staging_only_data: 'no'
+valor_matriz: *id001
+staging_role_options:
+  exclude_from_marts: Marts só tenant_slug cliente; staging fora de KPIs
+  flag_is_internal: Incluir com is_internal=true para QA
+  separate_bronze_path: raw_internal.* ou database separado
+recommendation: Staging é ambiente interno sintético/QA — não mistura IDs de Afya/Allos;
+  excluir de marts de produção até decisão explícita; ValorMatriz é sandbox de volume.

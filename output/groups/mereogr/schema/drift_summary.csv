@@ -1,0 +1,126 @@
+database,table,diff_type,expected,actual,reference_db
+MereoGR-Klabin,dbo.Breakdown,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Mrv,dbo.Breakdown,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Staging,dbo.Breakdown,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Klabin,dbo.BreakdownValue,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Mrv,dbo.BreakdownValue,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Staging,dbo.BreakdownValue,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Klabin,dbo.BreakdownValueOption,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Mrv,dbo.BreakdownValueOption,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Staging,dbo.BreakdownValueOption,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Klabin,dbo.BrfGoalSyncLog,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Mrv,dbo.BrfGoalSyncLog,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Staging,dbo.BrfGoalSyncLog,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Mrv,dbo.EmployeePerformances,extra_table,missing,exists,MereoGR-Afya
+MereoGR-Mrv,dbo.FEEDBACK_CONTINUO,column_type_mismatch,TEXTO nvarchar(2048),TEXTO nvarchar(1024),MereoGR-Afya
+MereoGR-Klabin,dbo.Goal,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Mrv,dbo.Goal,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Staging,dbo.Goal,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Klabin,dbo.GoalResponsible,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Mrv,dbo.GoalResponsible,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Staging,dbo.GoalResponsible,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Klabin,dbo.GoalValue,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Mrv,dbo.GoalValue,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Staging,dbo.GoalValue,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Staging,dbo.IMP_EXPRESSAO_CALCULO_META,column_type_mismatch,"PESO_META_REF decimal(28,8)",PESO_META_REF float,MereoGR-Afya
+MereoGR-Klabin,dbo.KPI,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Mrv,dbo.KPI,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Staging,dbo.KPI,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Klabin,dbo.KPIBreakdown,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Mrv,dbo.KPIBreakdown,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Staging,dbo.KPIBreakdown,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Klabin,dbo.KPIGrouping,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Mrv,dbo.KPIGrouping,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Staging,dbo.KPIGrouping,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Klabin,dbo.ManagementCycle,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Mrv,dbo.ManagementCycle,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Staging,dbo.ManagementCycle,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Klabin,dbo.RELACAOUSUARIOS,extra_table,missing,exists,MereoGR-Afya
+MereoGR-Mrv,dbo.RELACAOUSUARIOS,extra_table,missing,exists,MereoGR-Afya
+MereoGR-Klabin,dbo.ScoreCurveImpactSuccession,column_type_mismatch,Criteria nvarchar(3000),Criteria nvarchar(4000),MereoGR-Afya
+MereoGR-Klabin,dbo.ScoreCurveImpactSuccession,column_type_mismatch,Meaning nvarchar(3000),Meaning nvarchar(4000),MereoGR-Afya
+MereoGR-Magalu,dbo.ScoreCurveImpactSuccession,column_type_mismatch,Criteria nvarchar(3000),Criteria nvarchar(4000),MereoGR-Afya
+MereoGR-Magalu,dbo.ScoreCurveImpactSuccession,column_type_mismatch,Meaning nvarchar(3000),Meaning nvarchar(4000),MereoGR-Afya
+MereoGR-Mrv,dbo.ScoreCurveImpactSuccession,column_type_mismatch,Criteria nvarchar(3000),Criteria nvarchar(4000),MereoGR-Afya
+MereoGR-Mrv,dbo.ScoreCurveImpactSuccession,column_type_mismatch,Meaning nvarchar(3000),Meaning nvarchar(4000),MereoGR-Afya
+MereoGR-Klabin,dbo.ScoreCurveRiskSuccession,column_type_mismatch,Criteria nvarchar(3000),Criteria nvarchar(4000),MereoGR-Afya
+MereoGR-Klabin,dbo.ScoreCurveRiskSuccession,column_type_mismatch,Meaning nvarchar(3000),Meaning nvarchar(4000),MereoGR-Afya
+MereoGR-Magalu,dbo.ScoreCurveRiskSuccession,column_type_mismatch,Criteria nvarchar(3000),Criteria nvarchar(4000),MereoGR-Afya
+MereoGR-Magalu,dbo.ScoreCurveRiskSuccession,column_type_mismatch,Meaning nvarchar(3000),Meaning nvarchar(4000),MereoGR-Afya
+MereoGR-Mrv,dbo.ScoreCurveRiskSuccession,column_type_mismatch,Criteria nvarchar(3000),Criteria nvarchar(4000),MereoGR-Afya
+MereoGR-Mrv,dbo.ScoreCurveRiskSuccession,column_type_mismatch,Meaning nvarchar(3000),Meaning nvarchar(4000),MereoGR-Afya
+MereoGR-Klabin,dbo.ScoreCurveSuccession,column_type_mismatch,Criteria nvarchar(3000),Criteria nvarchar(4000),MereoGR-Afya
+MereoGR-Klabin,dbo.ScoreCurveSuccession,column_type_mismatch,Meaning nvarchar(3000),Meaning nvarchar(4000),MereoGR-Afya
+MereoGR-Magalu,dbo.ScoreCurveSuccession,column_type_mismatch,Criteria nvarchar(3000),Criteria nvarchar(4000),MereoGR-Afya
+MereoGR-Magalu,dbo.ScoreCurveSuccession,column_type_mismatch,Meaning nvarchar(3000),Meaning nvarchar(4000),MereoGR-Afya
+MereoGR-Mrv,dbo.ScoreCurveSuccession,column_type_mismatch,Criteria nvarchar(3000),Criteria nvarchar(4000),MereoGR-Afya
+MereoGR-Mrv,dbo.ScoreCurveSuccession,column_type_mismatch,Meaning nvarchar(3000),Meaning nvarchar(4000),MereoGR-Afya
+MereoGR-Klabin,dbo.VW_AREA_QUEUE,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Mrv,dbo.VW_AREA_QUEUE,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Staging,dbo.VW_AREA_QUEUE,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Klabin,dbo.VW_AUDIT_AREA_QUEUE,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Mrv,dbo.VW_AUDIT_AREA_QUEUE,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Staging,dbo.VW_AUDIT_AREA_QUEUE,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Klabin,dbo.VW_AUDIT_COLABORADOR_QUEUE,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Mrv,dbo.VW_AUDIT_COLABORADOR_QUEUE,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Staging,dbo.VW_AUDIT_COLABORADOR_QUEUE,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Klabin,dbo.VW_COLABORADOR_INATIVADO_QUEUE,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Mrv,dbo.VW_COLABORADOR_INATIVADO_QUEUE,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Staging,dbo.VW_COLABORADOR_INATIVADO_QUEUE,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Klabin,dbo.VW_COLABORADOR_QUEUE,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Mrv,dbo.VW_COLABORADOR_QUEUE,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Staging,dbo.VW_COLABORADOR_QUEUE,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Klabin,dbo.VW_GOAL_RESPONSIBLE,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Mrv,dbo.VW_GOAL_RESPONSIBLE,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Staging,dbo.VW_GOAL_RESPONSIBLE,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Klabin,dbo.VW_GOAL_WEIGHT,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Mrv,dbo.VW_GOAL_WEIGHT,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Staging,dbo.VW_GOAL_WEIGHT,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Klabin,dbo.VW_KPI,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Mrv,dbo.VW_KPI,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Staging,dbo.VW_KPI,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Klabin,dbo.VW_MANAGEMENT_CYCLE,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Mrv,dbo.VW_MANAGEMENT_CYCLE,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Staging,dbo.VW_MANAGEMENT_CYCLE,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Magalu,dbo.gcp_datastream_truncation_safeguard,extra_table,missing,exists,MereoGR-Afya
+MereoGR-Klabin,dbo.vw_goal,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Mrv,dbo.vw_goal,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Staging,dbo.vw_goal,missing_table,exists,missing,MereoGR-Afya
+MereoGR-Allos,stg.VCExtract,missing_column,"AreaCompensationsResult decimal(18,6)",,MereoGR-Afya
+MereoGR-Allos,stg.VCExtract,missing_column,Id bigint,,MereoGR-Afya
+MereoGR-Allos,stg.VCExtract,extra_column,,id bigint,MereoGR-Afya
+MereoGR-GrupoDirecional,stg.VCExtract,missing_column,"AreaCompensationsResult decimal(18,6)",,MereoGR-Afya
+MereoGR-GrupoDirecional,stg.VCExtract,missing_column,Id bigint,,MereoGR-Afya
+MereoGR-GrupoDirecional,stg.VCExtract,extra_column,,id bigint,MereoGR-Afya
+MereoGR-HMLAfya,stg.VCExtract,missing_column,Id bigint,,MereoGR-Afya
+MereoGR-HMLAfya,stg.VCExtract,extra_column,,id bigint,MereoGR-Afya
+MereoGR-Klabin,stg.VCExtract,missing_column,"AreaCompensationsResult decimal(18,6)",,MereoGR-Afya
+MereoGR-Klabin,stg.VCExtract,missing_column,Id bigint,,MereoGR-Afya
+MereoGR-Klabin,stg.VCExtract,extra_column,,id bigint,MereoGR-Afya
+MereoGR-Magalu,stg.VCExtract,missing_column,"AreaCompensationsResult decimal(18,6)",,MereoGR-Afya
+MereoGR-Magalu,stg.VCExtract,missing_column,Id bigint,,MereoGR-Afya
+MereoGR-Magalu,stg.VCExtract,extra_column,,id bigint,MereoGR-Afya
+MereoGR-Mrv,stg.VCExtract,missing_column,"AreaCompensationsResult decimal(18,6)",,MereoGR-Afya
+MereoGR-Mrv,stg.VCExtract,missing_column,Id bigint,,MereoGR-Afya
+MereoGR-Mrv,stg.VCExtract,extra_column,,id bigint,MereoGR-Afya
+MereoGR-Picpay,stg.VCExtract,missing_column,"AreaCompensationsResult decimal(18,6)",,MereoGR-Afya
+MereoGR-Picpay,stg.VCExtract,missing_column,Id bigint,,MereoGR-Afya
+MereoGR-Picpay,stg.VCExtract,extra_column,,id bigint,MereoGR-Afya
+MereoGR-Sereducacional,stg.VCExtract,missing_column,"AreaCompensationsResult decimal(18,6)",,MereoGR-Afya
+MereoGR-Sereducacional,stg.VCExtract,missing_column,Id bigint,,MereoGR-Afya
+MereoGR-Sereducacional,stg.VCExtract,extra_column,,id bigint,MereoGR-Afya
+MereoGR-Staging,stg.VCExtract,missing_column,"AreaCompensationsResult decimal(18,6)",,MereoGR-Afya
+MereoGR-Staging,stg.VCExtract,missing_column,Id bigint,,MereoGR-Afya
+MereoGR-Staging,stg.VCExtract,extra_column,,id bigint,MereoGR-Afya
+MereoGR-Vibra,stg.VCExtract,missing_column,"AreaCompensationsResult decimal(18,6)",,MereoGR-Afya
+MereoGR-Vibra,stg.VCExtract,missing_column,Id bigint,,MereoGR-Afya
+MereoGR-Vibra,stg.VCExtract,extra_column,,id bigint,MereoGR-Afya
+MereoGR-comercialtrial,stg.VCExtract,missing_column,"AreaCompensationsResult decimal(18,6)",,MereoGR-Afya
+MereoGR-comercialtrial,stg.VCExtract,missing_column,Id bigint,,MereoGR-Afya
+MereoGR-comercialtrial,stg.VCExtract,extra_column,,id bigint,MereoGR-Afya
+MereoGR-constance-poc,stg.VCExtract,missing_column,"AreaCompensationsResult decimal(18,6)",,MereoGR-Afya
+MereoGR-constance-poc,stg.VCExtract,missing_column,Id bigint,,MereoGR-Afya
+MereoGR-constance-poc,stg.VCExtract,extra_column,,id bigint,MereoGR-Afya
+MereoGR-implantacao,stg.VCExtract,missing_column,"AreaCompensationsResult decimal(18,6)",,MereoGR-Afya
+MereoGR-implantacao,stg.VCExtract,missing_column,Id bigint,,MereoGR-Afya
+MereoGR-implantacao,stg.VCExtract,extra_column,,id bigint,MereoGR-Afya

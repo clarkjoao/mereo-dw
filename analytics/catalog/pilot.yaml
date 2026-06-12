@@ -2,7 +2,9 @@
 # Derivado do inventário mereo_tools (output/groups/mereogr/)
 
 pilot:
+  # wave 1 = CDC piloto (1 entidade). Corpus ERP no CH: analytics/docs/erp-raw-full-spec.md
   wave: 1
+  erp_raw_bulk_spec: analytics/docs/erp-raw-full-spec.md
   tenants:
     - database: MereoGR-Afya
       slug: afya
@@ -14,11 +16,26 @@ pilot:
       slug: allos
       connector: mereogr-allos-colaborador
 
+  dagster:
+    observability_job: raw_ingestion_observability
+    observability_schedule: "*/5 * * * *"
+    freshness_sensor: raw_freshness_sensor
+    dbt_job: dbt_build
+    env:
+      MEREPO_PILOT_ENTITY: colaborador
+      CH_RAW_CONSUMER_GROUP: ch-raw-colaborador-v2
+      CH_HOST: clickhouse-mereo-clickhouse
+      FRESHNESS_MAX_LAG: "100"
+    ingestion_map: analytics/docs/dagster-raw-ingestion-map.md
+
   entities:
     - name: colaborador
       kafka_topic: raw.colaborador
       ch_table: raw.colaborador
       ch_consumer_group: ch-raw-colaborador-v2
+      ch_kafka_engine_table: raw.colaborador_kafka
+      ch_mv: raw.colaborador_mv
+      pipeline_entity: colaborador
       source:
         schema: dbo
         table: COLABORADOR
@@ -27,6 +44,10 @@ pilot:
         staging: stg_colaborador
         gold: colaborador_by_grupo
       contract: analytics/catalog/entities/colaborador.yaml
+      dagster:
+        observability_job: raw_ingestion_observability
+        freshness_sensor: raw_freshness_sensor
+        lag_kafka_table_filter: colaborador_kafka
       notes: >
         Presente nos 3 tenants piloto com PK; ~1.6k–37k rows.
         Habilitar CDC em dbo.COLABORADOR antes do Debezium.

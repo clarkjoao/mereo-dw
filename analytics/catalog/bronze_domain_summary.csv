@@ -1,0 +1,16 @@
+domain,tables,rows,pct_rows,implemented,excluded
+metricas,86,6335448,54.3,86,False
+avaliacao,78,1145707,9.82,78,False
+colaborador,78,333844,2.86,78,False
+plataforma,50,869228,7.45,0,True
+organizacao,29,240857,2.06,29,False
+audit,27,1181788,10.13,0,True
+acao,26,72904,0.62,26,False
+sucessao,26,1632,0.01,26,False
+import,22,885323,7.59,0,True
+pdi,22,23069,0.2,22,False
+referencia,14,653,0.01,14,False
+remuneracao,14,303329,2.6,14,False
+logs,8,246472,2.11,0,True
+views_stg,4,2218,0.02,0,True
+config,2,24099,0.21,0,False
