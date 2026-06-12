@@ -54,9 +54,15 @@ if [[ "${CONNECTOR_LINES:-0}" -ge 3 ]]; then
   else
     fail "${READY_COUNT:-0}/3 connectors Ready — kubectl get kafkaconnector -n $NS_KAFKA"
     kubectl get kafkaconnector -n "$NS_KAFKA" 2>/dev/null || true
+    for c in mereogr-afya-colaborador mereogr-staging-colaborador mereogr-allos-colaborador; do
+      kubectl get kafkaconnector "$c" -n "$NS_KAFKA" -o jsonpath='{.status.conditions[?(@.type=="NotReady")].message}' 2>/dev/null \
+        | head -c 200
+      echo ""
+    done
   fi
 else
-  fail "Esperados >=3 KafkaConnector, encontrados: ${CONNECTOR_LINES:-0}"
+  fail "Esperados >=3 KafkaConnector em $NS_KAFKA, encontrados: ${CONNECTOR_LINES:-0}"
+  echo "  Dica: layout=${CLUSTER_LAYOUT} — Kafka pode estar em mereo-test-ns-cdc" >&2
 fi
 
 section "3/7 Kafka — mensagens em raw.colaborador"
@@ -109,32 +115,32 @@ else
   fail "Pod ClickHouse não disponível para checar lag"
 fi
 
-section "6/7 Gold colaborador_by_grupo"
+section "6/7 pipeline.ingestion_snapshots (observability)"
 if kubectl get pod "$CH_POD" -n "$NS_CH" >/dev/null 2>&1; then
-  GOLD_EXISTS=$(kubectl exec -n "$NS_CH" "$CH_POD" -- clickhouse-client -q \
-    "SELECT count() FROM system.tables WHERE database = 'gold' AND name = 'colaborador_by_grupo'" 2>/dev/null || echo "0")
-  if [[ "${GOLD_EXISTS:-0}" -eq 1 ]]; then
-    GOLD_ROWS=$(kubectl exec -n "$NS_CH" "$CH_POD" -- clickhouse-client -q \
-      "SELECT count() FROM gold.colaborador_by_grupo" 2>/dev/null || echo "0")
-    if [[ "${GOLD_ROWS:-0}" -gt 0 ]]; then
-      ok "gold.colaborador_by_grupo: ${GOLD_ROWS} linhas agregadas"
+  SNAP_EXISTS=$(kubectl exec -n "$NS_CH" "$CH_POD" -- clickhouse-client -q \
+    "SELECT count() FROM system.tables WHERE database = 'pipeline' AND name = 'ingestion_snapshots'" 2>/dev/null || echo "0")
+  if [[ "${SNAP_EXISTS:-0}" -eq 1 ]]; then
+    SNAP_ROWS=$(kubectl exec -n "$NS_CH" "$CH_POD" -- clickhouse-client -q \
+      "SELECT count() FROM pipeline.ingestion_snapshots WHERE entity = 'colaborador' AND row_count > 0 AND snapshot_at > now64(3) - INTERVAL 1 HOUR" 2>/dev/null || echo "0")
+    if [[ "${SNAP_ROWS:-0}" -gt 0 ]]; then
+      ok "pipeline.ingestion_snapshots: ${SNAP_ROWS} linhas recentes (colaborador)"
       kubectl exec -n "$NS_CH" "$CH_POD" -- clickhouse-client -q \
-        "SELECT tenant_slug, id_grupo_usuario, colaborador_count, colaborador_ativos FROM gold.colaborador_by_grupo ORDER BY tenant_slug, id_grupo_usuario LIMIT 20" 2>/dev/null || true
+        "SELECT tenant_slug, row_count, kafka_lag, snapshot_at FROM pipeline.ingestion_snapshots WHERE entity = 'colaborador' ORDER BY snapshot_at DESC LIMIT 6" 2>/dev/null || true
     else
-      fail "gold.colaborador_by_grupo vazia — dispare dbt_build: ./analytics/scripts/dbt-via-dagster.sh"
+      fail "Sem snapshots recentes — aguarde job raw_ingestion_observability ou dispare manualmente na UI Dagster"
     fi
   else
-    fail "Tabela gold.colaborador_by_grupo não existe — rode dbt via Dagster"
+    fail "Tabela pipeline.ingestion_snapshots ausente — aplique k8s/mereo/07-clickhouse-init-sql.yaml"
   fi
 else
   fail "Pod ClickHouse não disponível"
 fi
 
-section "7/7 Dagster user code"
+section "7/7 Dagster user code + observability"
 if kubectl get deployment "$ANALYTICS_DEP" -n "$NS_DAGSTER" >/dev/null 2>&1; then
   RUNNING=$(kubectl get deployment "$ANALYTICS_DEP" -n "$NS_DAGSTER" -o jsonpath='{.status.readyReplicas}' 2>/dev/null || echo "0")
   if [[ "${RUNNING:-0}" -ge 1 ]]; then
-    ok "${ANALYTICS_DEP} Ready — sensor raw_freshness_sensor na UI Dagster"
+    ok "${ANALYTICS_DEP} Ready — jobs raw_ingestion_observability + sensor raw_freshness_sensor na UI Dagster"
   else
     fail "${ANALYTICS_DEP} não Ready"
   fi

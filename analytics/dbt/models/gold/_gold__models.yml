@@ -1,14 +1,58 @@
 version: 2
 
 models:
-  - name: colaborador_by_grupo
+  - name: gl_colaborador_by_grupo
+    description: >
+      Ouro — mart colaboradores por grupo (multi-tenant).
+      CH gold.gl_colaborador_by_grupo
+    meta:
+      layer: gold
+      snowflake_style: GL_COLABORADOR_BY_GRUPO
+      silver_refs: [pessoa]
     columns:
       - name: tenant_slug
-        tests:
-          - not_null
+        tests: [not_null]
       - name: id_grupo_usuario
-        tests:
-          - not_null
+        tests: [not_null]
       - name: colaborador_count
-        tests:
-          - not_null
+        tests: [not_null]
+
+  - name: colaborador_by_grupo
+    description: Alias legado → gl_colaborador_by_grupo (compat validate-pipeline / latency-track).
+
+  - name: dim_employee
+    description: DIM_EMPLOYEE — colaborador conformed (ADR-016, só afya/allos).
+    meta:
+      layer: gold
+      snowflake_style: DIM_EMPLOYEE
+      silver_refs: [pessoa]
+
+  - name: dim_org_area
+    description: DIM_ORG_AREA — hierarquia de áreas.
+    meta:
+      snowflake_style: DIM_ORG_AREA
+      silver_refs: [area]
+
+  - name: dim_goal
+    description: DIM_GOAL — metas/KPIs de gestão.
+    meta:
+      snowflake_style: DIM_GOAL
+      silver_refs: [meta]
+
+  - name: fact_goal_value
+    description: FACT_GOAL_VALUE — grain tenant_slug × id_meta × dt_ref.
+    meta:
+      snowflake_style: FACT_GOAL_VALUE
+      silver_refs: [valor_meta, meta]
+
+  - name: fact_rv
+    description: FACT_RV — remuneração variável por participante.
+    meta:
+      snowflake_style: FACT_RV
+      silver_refs: [participante_rv]
+
+  - name: fact_eval_score
+    description: FACT_EVAL_SCORE — notas de avaliação por competência.
+    meta:
+      snowflake_style: FACT_EVAL_SCORE
+      silver_refs: [calc_resultado_avaliador_competencia]

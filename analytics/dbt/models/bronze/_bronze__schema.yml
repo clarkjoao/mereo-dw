@@ -1,0 +1,4 @@
+version: 2
+
+# Camada bronze — sources em _bronze__sources.yml (gerado).
+# Spec: analytics/docs/medallion-etl-spec.md

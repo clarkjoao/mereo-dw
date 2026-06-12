@@ -13,7 +13,7 @@ mereo_clickhouse:
     k8s:
       type: clickhouse
       schema: gold
-      host: clickhouse-mereo-clickhouse.mereo-clickhouse.svc.cluster.local
+      host: clickhouse-mereo-clickhouse
       port: 8123
       user: dbt
       password: "{{ env_var('CH_DBT_PASSWORD') }}"

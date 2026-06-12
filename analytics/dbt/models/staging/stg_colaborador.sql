@@ -1,9 +1,11 @@
 {{
   config(
-    materialized='view'
+    materialized='view',
+    tags=['staging', 'legacy-alias'],
   )
 }}
 
+/* Legado: staging.stg_colaborador → silver.sl_colaborador_cdc (CDC) */
 select
     id,
     tenant_slug,
@@ -13,5 +15,4 @@ select
     ativo,
     _ts_ms,
     _deleted
-from {{ source('raw', 'colaborador') }} final
-where _deleted = 0
+from {{ ref('pessoa_cdc') }}

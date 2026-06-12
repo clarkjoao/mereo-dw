@@ -1,0 +1,982 @@
+version: 2
+
+sources:
+  - name: bronze
+    description: Camada bronze (landing CH raw) — bulk ERP + CDC
+    database: raw
+    schema: raw
+    meta:
+      layer: bronze
+    tables:
+      - name: HangFire__AggregatedCounter
+        description: "~147 rows (bulk)"
+      - name: HangFire__Hash
+        description: "~265 rows (bulk)"
+      - name: HangFire__Job
+        description: "~721 rows (bulk)"
+      - name: HangFire__JobParameter
+        description: "~2,967 rows (bulk)"
+      - name: HangFire__Schema
+        description: "~3 rows (bulk)"
+      - name: HangFire__Server
+        description: "~24 rows (bulk)"
+      - name: HangFire__Set
+        description: "~30 rows (bulk)"
+      - name: HangFire__State
+        description: "~12,293 rows (bulk)"
+      - name: Tasks__ToDo
+        description: "~20 rows (bulk)"
+      - name: audit__AuditLogs
+        description: "~125,530 rows (bulk)"
+      - name: auth__UserSideBarMenu
+        description: "~23,823 rows (bulk)"
+      - name: cache__CONTEXT
+        description: "~74,640 rows (bulk)"
+      - name: cache__FILTER
+        description: "~5,355 rows (bulk)"
+      - name: cache__USER_PROFILE
+        description: "~13,189 rows (bulk)"
+      - name: colaborador
+        description: "~2,844 rows (bulk)"
+      - name: competences__ACAO_SUGERIDA_PDI
+        description: "~308 rows (bulk)"
+      - name: competences__AREA_INTERESSE_MUDANCA_AVALIADO
+        description: "~11 rows (bulk)"
+      - name: competences__AVALIACAO
+        description: "~327 rows (bulk)"
+      - name: competences__AVALIADO
+        description: "~33,683 rows (bulk)"
+      - name: competences__AVALIADOR
+        description: "~83,943 rows (bulk)"
+      - name: competences__CALC_RESPOSTA
+        description: "~106,921 rows (bulk)"
+      - name: competences__CALC_RESULTADO_AVALIADOR
+        description: "~67,846 rows (bulk)"
+      - name: competences__CALC_RESULTADO_AVALIADOR_COMPETENCIA
+        description: "~101,729 rows (bulk)"
+      - name: competences__CALC_RESULTADO_COLABORADOR_PERFORMANCE
+        description: "~17,259 rows (bulk)"
+      - name: competences__CALC_RESULTADO_COMPETENCIA
+        description: "~101,520 rows (bulk)"
+      - name: competences__CALC_RESULTADO_FATOR_AVALIACAO
+        description: "~102,487 rows (bulk)"
+      - name: competences__CALC_RESULTADO_TIPO_AVALIADOR
+        description: "~53,234 rows (bulk)"
+      - name: competences__CATEGORIA_PDI_ACAO
+        description: "~36 rows (bulk)"
+      - name: competences__COLABORADOR_FUNCAO
+        description: "~33,381 rows (bulk)"
+      - name: competences__COMENTARIO_AVALIADO_NINE_BOX
+        description: "~1,754 rows (bulk)"
+      - name: competences__COMENTARIO_COMPETENCIA
+        description: "~91,534 rows (bulk)"
+      - name: competences__COMPETENCIA
+        description: "~2,200 rows (bulk)"
+      - name: competences__CONSIDERACAO_FINAL
+        description: "~19,545 rows (bulk)"
+      - name: competences__CURVA_PONTUACAO_AVALIACAO
+        description: "~2,329 rows (bulk)"
+      - name: competences__CompetenceTypeComment
+        description: "~278 rows (bulk)"
+      - name: competences__EvaluationCycleCalcResultEvaluated
+        description: "~27,284 rows (bulk)"
+      - name: competences__FAIXA_CLASSIFICACAO_AVALIACAO
+        description: "~728 rows (bulk)"
+      - name: competences__FAIXA_CLASSIFICACAO_PERFORMANCE_AVALIACAO
+        description: "~422 rows (bulk)"
+      - name: competences__FATOR_AVALIACAO
+        description: "~4,042 rows (bulk)"
+      - name: competences__FORMULARIO_AVALIACAO
+        description: "~82,045 rows (bulk)"
+      - name: competences__FUNCAO
+        description: "~818 rows (bulk)"
+      - name: competences__FUNCAO_COMPETENCIA
+        description: "~7,413 rows (bulk)"
+      - name: competences__FUNCAO_PERGUNTA_LIVRE
+        description: "~2,180 rows (bulk)"
+      - name: competences__IndividualDevelopmentAction
+        description: "~21,437 rows (bulk)"
+      - name: competences__ItensSenderToReleaseAppraiseesQueue
+        description: "~19 rows (bulk)"
+      - name: competences__LOCALIDADE_INTERESSE_MUDANCA_AVALIADO
+        description: "~5 rows (bulk)"
+      - name: competences__METODO_CALCULO
+        description: "~718 rows (bulk)"
+      - name: competences__OPCAO_FUNCAO_PERGUNTA_LIVRE
+        description: "~4,594 rows (bulk)"
+      - name: competences__PESO_TIPO_AVALIADOR
+        description: "~669 rows (bulk)"
+      - name: competences__RESPOSTA_AVALIACAO
+        description: "~105,122 rows (bulk)"
+      - name: competences__RESPOSTA_LIVRE_AVALIACAO
+        description: "~80,347 rows (bulk)"
+      - name: competences__TIPO_AVALIACAO
+        description: "~32 rows (bulk)"
+      - name: competences__TIPO_AVALIADOR
+        description: "~21 rows (bulk)"
+      - name: competences__TOPICO_PERGUNTA_LIVRE
+        description: "~15 rows (bulk)"
+      - name: competences__settings
+        description: "~1 rows (bulk)"
+      - name: core__Label
+        description: "~137 rows (bulk)"
+      - name: core__ThemeSettings
+        description: "~3 rows (bulk)"
+      - name: dashboards__AccessLog
+        description: "~482 rows (bulk)"
+      - name: dashboards__Dashboard
+        description: "~21 rows (bulk)"
+      - name: dbo__ACAO
+        description: "~2,992 rows (bulk)"
+      - name: dbo__ADMINISTRADOR_LOCAL
+        description: "~21 rows (bulk)"
+      - name: dbo__ADMINISTRADOR_LOCAL_FILIAL
+        description: "~153 rows (bulk)"
+      - name: dbo__ANEXO_ACAO
+        description: "~2,039 rows (bulk)"
+      - name: dbo__ANEXO_REUNIAO
+        description: "~3 rows (bulk)"
+      - name: dbo__API_CONFIG
+        description: "~9 rows (bulk)"
+      - name: dbo__AREA
+        description: "~40,613 rows (bulk)"
+      - name: dbo__AREA_BOOK
+        description: "~27 rows (bulk)"
+      - name: dbo__AREA_FORUM_SUCESSAO
+        description: "~15 rows (bulk)"
+      - name: dbo__AUDIT_ACAO
+        description: "~24,896 rows (bulk)"
+      - name: dbo__AUDIT_AREA
+        description: "~127,554 rows (bulk)"
+      - name: dbo__AUDIT_AREA_HISTORY
+        description: "~317 rows (bulk)"
+      - name: dbo__AUDIT_COLABORADOR
+        description: "~102,348 rows (bulk)"
+      - name: dbo__AUDIT_COLABORADOR_AREA
+        description: "~118,954 rows (bulk)"
+      - name: dbo__AUDIT_COLABORADOR_FUNCAO
+        description: "~12,282 rows (bulk)"
+      - name: dbo__AUDIT_CURVA_PREMIACAO
+        description: "~3,403 rows (bulk)"
+      - name: dbo__AUDIT_DIRETRIZ
+        description: "~1,419 rows (bulk)"
+      - name: dbo__AUDIT_EMPLOYEEACCESSGROUP
+        description: "~11,893 rows (bulk)"
+      - name: dbo__AUDIT_FAIXA_FAROL
+        description: "~276 rows (bulk)"
+      - name: dbo__AUDIT_FAIXA_FAROL_ITEM
+        description: "~811 rows (bulk)"
+      - name: dbo__AUDIT_FILIAL
+        description: "~406 rows (bulk)"
+      - name: dbo__AUDIT_FUNCAO_COMPETENCIA
+        description: "~6,732 rows (bulk)"
+      - name: dbo__AUDIT_FUNCAO_PERGUNTA_LIVRE
+        description: "~3,262 rows (bulk)"
+      - name: dbo__AUDIT_GRANDEZA
+        description: "~39 rows (bulk)"
+      - name: dbo__AUDIT_HISTORICO_CARGO
+        description: "~88,641 rows (bulk)"
+      - name: dbo__AUDIT_INDICADOR
+        description: "~3,607 rows (bulk)"
+      - name: dbo__AUDIT_META
+        description: "~171,946 rows (bulk)"
+      - name: dbo__AUDIT_NOTA_META
+        description: "~75,961 rows (bulk)"
+      - name: dbo__AUDIT_PERIODO_APURACAO
+        description: "~1,118 rows (bulk)"
+      - name: dbo__AUDIT_PERIODO_GESTAO
+        description: "~1,720 rows (bulk)"
+      - name: dbo__AUDIT_PSW_COLABORADOR
+        description: "~26,192 rows (bulk)"
+      - name: dbo__AUDIT_SYSTEM_CONFIG
+        description: "~238 rows (bulk)"
+      - name: dbo__AUDIT_TERMO_ACEITE_ASSINATURA
+        description: "~109,211 rows (bulk)"
+      - name: dbo__AUDIT_UNIDADE_MEDIDA
+        description: "~342 rows (bulk)"
+      - name: dbo__AUDIT_VALOR_META
+        description: "~162,690 rows (bulk)"
+      - name: dbo__AVALIACAO_CONTINUA
+        description: "~10 rows (bulk)"
+      - name: dbo__AVALIADOR_FORUM
+        description: "~5,548 rows (bulk)"
+      - name: dbo__AVALIADOR_FORUM_SUCESSAO
+        description: "~14 rows (bulk)"
+      - name: dbo__AVALIADO_SUCESSAO
+        description: "~43 rows (bulk)"
+      - name: dbo__AbpEntityChangeSets
+        description: "~138,130 rows (bulk)"
+      - name: dbo__AbpEntityChanges
+        description: "~175,463 rows (bulk)"
+      - name: dbo__AbpEntityPropertyChanges
+        description: "~352,557 rows (bulk)"
+      - name: dbo__AbpSettings
+        description: "~13,337 rows (bulk)"
+      - name: dbo__Absence
+        description: "~1 rows (bulk)"
+      - name: dbo__AcceptAgreementHistory
+        description: "~34,072 rows (bulk)"
+      - name: dbo__AcceptAgreementSignatureAttachment
+        description: "~3 rows (bulk)"
+      - name: dbo__ActionBase
+        description: "~21,512 rows (bulk)"
+      - name: dbo__ActionBaseLabel
+        description: "~29 rows (bulk)"
+      - name: dbo__ActivityHistory
+        description: "~38,555 rows (bulk)"
+      - name: dbo__Addon
+        description: "~3 rows (bulk)"
+      - name: dbo__AdminPasswordResetToken
+        description: "~25 rows (bulk)"
+      - name: dbo__AdvancePaymentConfig
+        description: "~3 rows (bulk)"
+      - name: dbo__AreaHistory
+        description: "~25,305 rows (bulk)"
+      - name: dbo__AreaHistoryConfig
+        description: "~12 rows (bulk)"
+      - name: dbo__AreasGroup
+        description: "~2 rows (bulk)"
+      - name: dbo__AreasGroupItem
+        description: "~2 rows (bulk)"
+      - name: dbo__ArvoreMembrosQuebra
+        description: "~124 rows (bulk)"
+      - name: dbo__AspNetPreviousPassword
+        description: "~2,515 rows (bulk)"
+      - name: dbo__AspNetUsers
+        description: "~21,517 rows (bulk)"
+      - name: dbo__BIBLIOTECA
+        description: "~3 rows (bulk)"
+      - name: dbo__BOOK
+        description: "~7 rows (bulk)"
+      - name: dbo__BackgroundJobManagement
+        description: "~8,411 rows (bulk)"
+      - name: dbo__CALC_RESULTADO_AVALIADOR_TIPO_COMPETENCIA
+        description: "~55 rows (bulk)"
+      - name: dbo__CALC_RESULTADO_IMPACTO
+        description: "~17 rows (bulk)"
+      - name: dbo__CALC_RESULTADO_RISCO
+        description: "~17 rows (bulk)"
+      - name: dbo__CALC_RESULTADO_TIPO_AVALIADOR_TIPO_COMPETENCIA
+        description: "~55 rows (bulk)"
+      - name: dbo__CALIBRADOS_PERFORMANCE
+        description: "~42 rows (bulk)"
+      - name: dbo__CARGO
+        description: "~50,120 rows (bulk)"
+      - name: dbo__CATCH_BALL
+        description: "~4 rows (bulk)"
+      - name: dbo__CAUSA
+        description: "~329 rows (bulk)"
+      - name: dbo__CODE_GENERATOR
+        description: "~189 rows (bulk)"
+      - name: dbo__COLABORADOR
+        description: "~21,997 rows (bulk)"
+      - name: dbo__COLABORADOR_AREA
+        description: "~64,279 rows (bulk)"
+      - name: dbo__COLABORADOR_DATA_EXTRACT
+        description: "~216 rows (bulk)"
+      - name: dbo__COLABORADOR_SCORE
+        description: "~245 rows (bulk)"
+      - name: dbo__COMENTARIO_AVALIADO_FORUM_SUCESSAO
+        description: "~4 rows (bulk)"
+      - name: dbo__CONFIGURACOES_GERAIS_FEEDBACK_CONTINUO
+        description: "~3 rows (bulk)"
+      - name: dbo__CONTRAMEDIDA
+        description: "~34,716 rows (bulk)"
+      - name: dbo__COTACAO_MOEDA
+        description: "~2 rows (bulk)"
+      - name: dbo__COTACAO_MOEDA_ITEM
+        description: "~24 rows (bulk)"
+      - name: dbo__CURVA_MULTIPLO
+        description: "~481 rows (bulk)"
+      - name: dbo__CURVA_PONTUACAO
+        description: "~3 rows (bulk)"
+      - name: dbo__CURVA_PREMIACAO
+        description: "~1,274 rows (bulk)"
+      - name: dbo__CalibrationGroupDiscretionary
+        description: "~54 rows (bulk)"
+      - name: dbo__CategoryAnalysis
+        description: "~11 rows (bulk)"
+      - name: dbo__CauseAnalysisPermission
+        description: "~10 rows (bulk)"
+      - name: dbo__Certificate
+        description: "~330 rows (bulk)"
+      - name: dbo__CertificateAttachment
+        description: "~251 rows (bulk)"
+      - name: dbo__ChangeHistory
+        description: "~81 rows (bulk)"
+      - name: dbo__ClassificationImpactOfLoss
+        description: "~42 rows (bulk)"
+      - name: dbo__ClassificationRiskOfLoss
+        description: "~50 rows (bulk)"
+      - name: dbo__Company
+        description: "~206 rows (bulk)"
+      - name: dbo__ConceptDiscretionary
+        description: "~20 rows (bulk)"
+      - name: dbo__ConsentAgreement
+        description: "~3 rows (bulk)"
+      - name: dbo__CurriculumAttachment
+        description: "~102 rows (bulk)"
+      - name: dbo__CustomGradeFormation
+        description: "~73 rows (bulk)"
+      - name: dbo__CustomMessages
+        description: "~540 rows (bulk)"
+      - name: dbo__CustomerBoundTranslateTag
+        description: "~164 rows (bulk)"
+      - name: dbo__DELIBERACAO_FORUM_AVALIADO
+        description: "~2 rows (bulk)"
+      - name: dbo__DIARIO_DE_BORDO
+        description: "~122 rows (bulk)"
+      - name: dbo__DIRETRIZ
+        description: "~512 rows (bulk)"
+      - name: dbo__DashboardLayoutMatrix
+        description: "~16 rows (bulk)"
+      - name: dbo__DeliberationOption
+        description: "~43 rows (bulk)"
+      - name: dbo__Demand
+        description: "~72 rows (bulk)"
+      - name: dbo__DemandsParticipants
+        description: "~533 rows (bulk)"
+      - name: dbo__Dimensao
+        description: "~7 rows (bulk)"
+      - name: dbo__DiscretionaryScoreImport
+        description: "~13,315 rows (bulk)"
+      - name: dbo__Dreams
+        description: "~360 rows (bulk)"
+      - name: dbo__EFETIVIDADE_ACAO
+        description: "~313 rows (bulk)"
+      - name: dbo__EXPRESSAO_CALCULO_META
+        description: "~81,688 rows (bulk)"
+      - name: dbo__Education
+        description: "~1,037 rows (bulk)"
+      - name: dbo__EducationAttachment
+        description: "~341 rows (bulk)"
+      - name: dbo__EffectivenessEvaluation
+        description: "~45 rows (bulk)"
+      - name: dbo__EligibleDiscretionary
+        description: "~4,134 rows (bulk)"
+      - name: dbo__EmployeeAccessGroup
+        description: "~7,136 rows (bulk)"
+      - name: dbo__EmployeeAnalyticResult
+        description: "~14,364 rows (bulk)"
+      - name: dbo__EmployeeBranch
+        description: "~281 rows (bulk)"
+      - name: dbo__EmployeeModifierValue
+        description: "~7,093 rows (bulk)"
+      - name: dbo__EvaluationCycleInstance
+        description: "~539 rows (bulk)"
+      - name: dbo__EvaluationCycleInstanceParticipant
+        description: "~15,117 rows (bulk)"
+      - name: dbo__EvaluationCycleQuadrant
+        description: "~1,181 rows (bulk)"
+      - name: dbo__EvaluationCycleQuadrantPersonalization
+        description: "~126 rows (bulk)"
+      - name: dbo__EvaluationDiscretionary
+        description: "~4,062 rows (bulk)"
+      - name: dbo__ExtractControl
+        description: "~12 rows (bulk)"
+      - name: dbo__ExtractEmployeeOptions
+        description: "~2 rows (bulk)"
+      - name: dbo__FAIXA_CLASSIFICACAO
+        description: "~3 rows (bulk)"
+      - name: dbo__FAIXA_CLASSIFICACAO_PERFORMANCE
+        description: "~3 rows (bulk)"
+      - name: dbo__FAIXA_FAROL
+        description: "~51 rows (bulk)"
+      - name: dbo__FAIXA_FAROL_ITEM
+        description: "~175 rows (bulk)"
+      - name: dbo__FAROL
+        description: "~24 rows (bulk)"
+      - name: dbo__FEEDBACK_CONTINUO
+        description: "~473 rows (bulk)"
+      - name: dbo__FILIAL
+        description: "~196 rows (bulk)"
+      - name: dbo__FORMULARIO_AVALIACAO_ABA
+        description: "~4 rows (bulk)"
+      - name: dbo__FORMULARIO_AVALIACAO_ABA_ITEM
+        description: "~4 rows (bulk)"
+      - name: dbo__FORMULARIO_AVALIACAO_SUCESSAO
+        description: "~32 rows (bulk)"
+      - name: dbo__FORMULARIO_FEEDBACK_ABA
+        description: "~31 rows (bulk)"
+      - name: dbo__FORMULARIO_FEEDBACK_ABA_ITEM
+        description: "~31 rows (bulk)"
+      - name: dbo__FORUM_CALIBRAGEM_SUCESSAO
+        description: "~12 rows (bulk)"
+      - name: dbo__FORUM_PARTICIPANTE_SUCESSAO
+        description: "~16 rows (bulk)"
+      - name: dbo__FORUM_QUADRANTE_SUCESSAO_MODELO
+        description: "~169 rows (bulk)"
+      - name: dbo__FREQUENCIA_ACOMP
+        description: "~27 rows (bulk)"
+      - name: dbo__FREQUENCIA_VISUALIZACAO
+        description: "~39 rows (bulk)"
+      - name: dbo__FUNCAO_AREA
+        description: "~7 rows (bulk)"
+      - name: dbo__FUNCAO_FORUM_SUCESSAO
+        description: "~13 rows (bulk)"
+      - name: dbo__FUNCAO_IMPACTO_SUCESSAO
+        description: "~58 rows (bulk)"
+      - name: dbo__FUNCAO_POTENCIAL_SUCESSAO
+        description: "~203 rows (bulk)"
+      - name: dbo__FUNCAO_RISCO_SUCESSAO
+        description: "~115 rows (bulk)"
+      - name: dbo__FUNCAO_SUCESSAO
+        description: "~34 rows (bulk)"
+      - name: dbo__FUNCIONALIDADE
+        description: "~708 rows (bulk)"
+      - name: dbo__FactorTriggerConfiguration
+        description: "~27 rows (bulk)"
+      - name: dbo__FeedbackHistory
+        description: "~16 rows (bulk)"
+      - name: dbo__FeedbackParticipant
+        description: "~486 rows (bulk)"
+      - name: dbo__ForumSyncLog
+        description: "~9 rows (bulk)"
+      - name: dbo__GESTOR_MARCADOR_ACAO
+        description: "~5 rows (bulk)"
+      - name: dbo__GRANDEZA
+        description: "~19 rows (bulk)"
+      - name: dbo__GRUPO_CARGO
+        description: "~184 rows (bulk)"
+      - name: dbo__GRUPO_CARGO_AVALIACAO
+        description: "~6 rows (bulk)"
+      - name: dbo__GRUPO_FUNCIONALIDADE
+        description: "~219 rows (bulk)"
+      - name: dbo__GRUPO_INDICADOR
+        description: "~6 rows (bulk)"
+      - name: dbo__GRUPO_INDICADOR_ASSOCIADO
+        description: "~21 rows (bulk)"
+      - name: dbo__GRUPO_PAGTO
+        description: "~188 rows (bulk)"
+      - name: dbo__GRUPO_USUARIO
+        description: "~36 rows (bulk)"
+      - name: dbo__GoalAttachment
+        description: "~1,710 rows (bulk)"
+      - name: dbo__GoalAudit
+        description: "~132 rows (bulk)"
+      - name: dbo__GoalAuditHistory
+        description: "~356 rows (bulk)"
+      - name: dbo__GoalBookAttachment
+        description: "~5 rows (bulk)"
+      - name: dbo__GoalDiscussion
+        description: "~156 rows (bulk)"
+      - name: dbo__GoalObservation
+        description: "~12 rows (bulk)"
+      - name: dbo__GoalPendencyValueImport
+        description: "~306 rows (bulk)"
+      - name: dbo__GoalWorkflow
+        description: "~69 rows (bulk)"
+      - name: dbo__GoalWorkflowAreaEmployeeApprover
+        description: "~25 rows (bulk)"
+      - name: dbo__GoalWorkflowCustomStep
+        description: "~22 rows (bulk)"
+      - name: dbo__GoalWorkflowStep
+        description: "~122 rows (bulk)"
+      - name: dbo__GroupOfEmployees
+        description: "~5 rows (bulk)"
+      - name: dbo__GroupOfEmployeesParticipants
+        description: "~9 rows (bulk)"
+      - name: dbo__HISTORICO_CARGO
+        description: "~12,815 rows (bulk)"
+      - name: dbo__HISTORICO_COLABORADOR_AREA
+        description: "~21,292 rows (bulk)"
+      - name: dbo__HISTORICO_PDI
+        description: "~19 rows (bulk)"
+      - name: dbo__HISTORICO_PERC_REALIZADO
+        description: "~307 rows (bulk)"
+      - name: dbo__HISTORICO_WORKFLOW_ACAO
+        description: "~1,234 rows (bulk)"
+      - name: dbo__HistorySection
+        description: "~14,721 rows (bulk)"
+      - name: dbo__Hobbies
+        description: "~373 rows (bulk)"
+      - name: dbo__IDIOMA
+        description: "~36 rows (bulk)"
+      - name: dbo__IMPACTO
+        description: "~57 rows (bulk)"
+      - name: dbo__IMP_ACAO
+        description: "~4,524 rows (bulk)"
+      - name: dbo__IMP_AREA
+        description: "~58,555 rows (bulk)"
+      - name: dbo__IMP_CARGO
+        description: "~50,023 rows (bulk)"
+      - name: dbo__IMP_COLABORADOR
+        description: "~81,851 rows (bulk)"
+      - name: dbo__IMP_EMPLOYEEMODIFIERVALUE
+        description: "~40,915 rows (bulk)"
+      - name: dbo__IMP_EMPLOYEE_ACCESS_GROUP
+        description: "~6,745 rows (bulk)"
+      - name: dbo__IMP_EXPRESSAO_CALCULO_META
+        description: "~8,016 rows (bulk)"
+      - name: dbo__IMP_HISTORICO_AREA
+        description: "~47,289 rows (bulk)"
+      - name: dbo__IMP_HISTORICO_CARGO
+        description: "~71,661 rows (bulk)"
+      - name: dbo__IMP_INDICADOR
+        description: "~128 rows (bulk)"
+      - name: dbo__IMP_JOB_POSITION_LEVEL
+        description: "~50,000 rows (bulk)"
+      - name: dbo__IMP_MARCADOR_ACAO_ITEM
+        description: "~60,904 rows (bulk)"
+      - name: dbo__IMP_META
+        description: "~100,378 rows (bulk)"
+      - name: dbo__IMP_MUDA_RESPONSAVEL_AREA
+        description: "~555 rows (bulk)"
+      - name: dbo__IMP_NOTA_META
+        description: "~86,942 rows (bulk)"
+      - name: dbo__IMP_PARTICIPANTE_RV
+        description: "~76,297 rows (bulk)"
+      - name: dbo__IMP_PERFIL_AREA
+        description: "~13,131 rows (bulk)"
+      - name: dbo__IMP_RESPONSAVEL_AREA
+        description: "~13,081 rows (bulk)"
+      - name: dbo__IMP_RESPONSAVEL_AREA_DEL
+        description: "~718 rows (bulk)"
+      - name: dbo__IMP_UPPER_GOAL
+        description: "~3,259 rows (bulk)"
+      - name: dbo__IMP_VALOR_META
+        description: "~325 rows (bulk)"
+      - name: dbo__INDICADOR
+        description: "~629 rows (bulk)"
+      - name: dbo__INDICADOR_BOOK
+        description: "~24 rows (bulk)"
+      - name: dbo__INDICADOR_TIPOMETA
+        description: "~8 rows (bulk)"
+      - name: dbo__INDICADOR_TIPOMETA_BOOK
+        description: "~1 rows (bulk)"
+      - name: dbo__INFO_NOTA_META
+        description: "~25,117 rows (bulk)"
+      - name: dbo__INSTANCIA_CALIBRADOS
+        description: "~21 rows (bulk)"
+      - name: dbo__INSTANCIA_CALIBRADOS_PERFORMANCE
+        description: "~21 rows (bulk)"
+      - name: dbo__INSTANCIA_COMITE
+        description: "~767 rows (bulk)"
+      - name: dbo__INSTANCIA_COMITE_SUCESSAO
+        description: "~14 rows (bulk)"
+      - name: dbo__INSTANCIA_PARTICIPANTE_COMPETENCIA
+        description: "~9 rows (bulk)"
+      - name: dbo__INSTANCIA_PARTICIPANTE_SUCESSAO
+        description: "~30 rows (bulk)"
+      - name: dbo__INSTANCIA_SUCESSAO
+        description: "~12 rows (bulk)"
+      - name: dbo__ITEM_FEEDBACK
+        description: "~60 rows (bulk)"
+      - name: dbo__ITEM_LISTA_PERSONALIZADA_FEEDBACK_CONTINUO
+        description: "~24 rows (bulk)"
+      - name: dbo__Identity
+        description: "~1,509 rows (bulk)"
+      - name: dbo__ImagePanelImages
+        description: "~3 rows (bulk)"
+      - name: dbo__ImagePanelImagesAttachment
+        description: "~3 rows (bulk)"
+      - name: dbo__ImportLog
+        description: "~53 rows (bulk)"
+      - name: dbo__ImportLogError
+        description: "~2,033 rows (bulk)"
+      - name: dbo__InitialDashboardLayout
+        description: "~7 rows (bulk)"
+      - name: dbo__Initiative
+        description: "~18 rows (bulk)"
+      - name: dbo__Item
+        description: "~19,084 rows (bulk)"
+      - name: dbo__ItemSwotAnalysis
+        description: "~36 rows (bulk)"
+      - name: dbo__ItemSwotAnalysisRelationship
+        description: "~7 rows (bulk)"
+      - name: dbo__ItemSwotAnalysisRelationshipItemSwotAnalysis
+        description: "~14 rows (bulk)"
+      - name: dbo__JobEvaluationAnswerSuccession
+        description: "~2 rows (bulk)"
+      - name: dbo__JobEvaluationSuccession
+        description: "~17 rows (bulk)"
+      - name: dbo__JobPositionCore
+        description: "~149 rows (bulk)"
+      - name: dbo__JobPositionLevel
+        description: "~45,398 rows (bulk)"
+      - name: dbo__JobPositionSuccession
+        description: "~397 rows (bulk)"
+      - name: dbo__KPIStakeholder
+        description: "~2 rows (bulk)"
+      - name: dbo__KnowledgeManagement
+        description: "~73 rows (bulk)"
+      - name: dbo__LOG_DATA_EXTRACT
+        description: "~10,581 rows (bulk)"
+      - name: dbo__LOG_DATA_EXTRACT_ITEM
+        description: "~121 rows (bulk)"
+      - name: dbo__LOG_EMAIL
+        description: "~103,389 rows (bulk)"
+      - name: dbo__LOG_EMAIL_ACAO_VENCER
+        description: "~21 rows (bulk)"
+      - name: dbo__LOG_IMP
+        description: "~7,113 rows (bulk)"
+      - name: dbo__LOG_IMP_ITEM
+        description: "~110,026 rows (bulk)"
+      - name: dbo__LOG_LOGIN
+        description: "~125,007 rows (bulk)"
+      - name: dbo__LOG_TASK
+        description: "~138 rows (bulk)"
+      - name: dbo__LOG_TASK_ITEM
+        description: "~102 rows (bulk)"
+      - name: dbo__LabelAction
+        description: "~3,480 rows (bulk)"
+      - name: dbo__LabelEmployee
+        description: "~11 rows (bulk)"
+      - name: dbo__LabelGoal
+        description: "~50,598 rows (bulk)"
+      - name: dbo__LabelsTagTrainings
+        description: "~56 rows (bulk)"
+      - name: dbo__LanguageLevel
+        description: "~301 rows (bulk)"
+      - name: dbo__Locality
+        description: "~59 rows (bulk)"
+      - name: dbo__MAIL_CONFIG
+        description: "~168 rows (bulk)"
+      - name: dbo__MARCADOR_ACAO
+        description: "~12 rows (bulk)"
+      - name: dbo__MARCADOR_ACAO_ITEM
+        description: "~2,277 rows (bulk)"
+      - name: dbo__MENU
+        description: "~511 rows (bulk)"
+      - name: dbo__META
+        description: "~89,486 rows (bulk)"
+      - name: dbo__METABOOK
+        description: "~23 rows (bulk)"
+      - name: dbo__META_DATA_EXTRACT
+        description: "~264 rows (bulk)"
+      - name: dbo__ManagerSuccession
+        description: "~17 rows (bulk)"
+      - name: dbo__Matriz
+        description: "~4 rows (bulk)"
+      - name: dbo__MembroDimensao
+        description: "~260 rows (bulk)"
+      - name: dbo__Modifier
+        description: "~379 rows (bulk)"
+      - name: dbo__ModifierItem
+        description: "~167 rows (bulk)"
+      - name: dbo__Modules
+        description: "~33 rows (bulk)"
+      - name: dbo__MonthlyGoal
+        description: "~48 rows (bulk)"
+      - name: dbo__Motivations
+        description: "~302 rows (bulk)"
+      - name: dbo__NINE_BOX
+        description: "~539 rows (bulk)"
+      - name: dbo__NINE_BOX_CALIBRADOS
+        description: "~8,260 rows (bulk)"
+      - name: dbo__NIVEL
+        description: "~224 rows (bulk)"
+      - name: dbo__NOTA
+        description: "~5,015 rows (bulk)"
+      - name: dbo__NOTA_BOOK
+        description: "~77 rows (bulk)"
+      - name: dbo__NOTA_META
+        description: "~65,625 rows (bulk)"
+      - name: dbo__NOTA_META_BOOK
+        description: "~51 rows (bulk)"
+      - name: dbo__NOTIFICACAO
+        description: "~238 rows (bulk)"
+      - name: dbo__NOTIFICACAO_FEEDBACK_CONTINUO
+        description: "~12,314 rows (bulk)"
+      - name: dbo__NOTIFICACAO_LIDA
+        description: "~13 rows (bulk)"
+      - name: dbo__NecessaryResourcesOfTraining
+        description: "~59 rows (bulk)"
+      - name: dbo__Need
+        description: "~20 rows (bulk)"
+      - name: dbo__NivelMembros
+        description: "~189 rows (bulk)"
+      - name: dbo__NormalizationCurvePoint
+        description: "~14 rows (bulk)"
+      - name: dbo__OPCAO_PULSE_FEEDBACK_CONTINUO
+        description: "~115 rows (bulk)"
+      - name: dbo__OrganizationIdentity
+        description: "~5 rows (bulk)"
+      - name: dbo__PARTICIPANTE_PULSE_FEEDBACK_CONTINUO
+        description: "~9,011 rows (bulk)"
+      - name: dbo__PARTICIPANTE_REUNIAO
+        description: "~1,494 rows (bulk)"
+      - name: dbo__PARTICIPANTE_RV
+        description: "~72,170 rows (bulk)"
+      - name: dbo__PERFIL_AREA
+        description: "~47,261 rows (bulk)"
+      - name: dbo__PERFIL_GRUPO_USUARIO
+        description: "~8,414 rows (bulk)"
+      - name: dbo__PERFIL_USUARIO
+        description: "~74 rows (bulk)"
+      - name: dbo__PERIODO_APURACAO
+        description: "~33 rows (bulk)"
+      - name: dbo__PERIODO_AVALIACAO_PROJETO
+        description: "~2 rows (bulk)"
+      - name: dbo__PERIODO_GESTAO
+        description: "~56 rows (bulk)"
+      - name: dbo__PERMISSAO_DASHBOARD
+        description: "~4 rows (bulk)"
+      - name: dbo__PLUGIN_INFO
+        description: "~9 rows (bulk)"
+      - name: dbo__POTENCIAL
+        description: "~178 rows (bulk)"
+      - name: dbo__PROCESSO
+        description: "~6 rows (bulk)"
+      - name: dbo__PROJETO_AVALIACAO
+        description: "~4 rows (bulk)"
+      - name: dbo__PSW_COLABORADOR
+        description: "~21,516 rows (bulk)"
+      - name: dbo__PSW_COLABORADOR_ITEM
+        description: "~21,732 rows (bulk)"
+      - name: dbo__PULSE_FEEDBACK_CONTINUO
+        description: "~31 rows (bulk)"
+      - name: dbo__ParticipantAdvancePayment
+        description: "~18 rows (bulk)"
+      - name: dbo__ParticipantAdvancePaymentDiscount
+        description: "~6 rows (bulk)"
+      - name: dbo__ParticipantAggregatedAdvancePayment
+        description: "~12 rows (bulk)"
+      - name: dbo__ParticipantAggregatedExtract
+        description: "~102,084 rows (bulk)"
+      - name: dbo__ParticipantExtract
+        description: "~99,300 rows (bulk)"
+      - name: dbo__ParticipantExtractControl
+        description: "~10,666 rows (bulk)"
+      - name: dbo__PermissaoFinanceira
+        description: "~2,706 rows (bulk)"
+      - name: dbo__PersonalCharacteristics
+        description: "~320 rows (bulk)"
+      - name: dbo__Perspective
+        description: "~5 rows (bulk)"
+      - name: dbo__Pool
+        description: "~11 rows (bulk)"
+      - name: dbo__PresentationFavoriteSlide
+        description: "~3 rows (bulk)"
+      - name: dbo__PresentationTemplate
+        description: "~48 rows (bulk)"
+      - name: dbo__PresentationTemplateHistory
+        description: "~110 rows (bulk)"
+      - name: dbo__PresentationTemplateShare
+        description: "~53 rows (bulk)"
+      - name: dbo__PresentationTemplateSlide
+        description: "~91 rows (bulk)"
+      - name: dbo__PresentationTemplateVersion
+        description: "~62 rows (bulk)"
+      - name: dbo__ProfessionalExperience
+        description: "~242 rows (bulk)"
+      - name: dbo__ProfileEditPermission
+        description: "~23 rows (bulk)"
+      - name: dbo__QUICK_MEETING
+        description: "~114 rows (bulk)"
+      - name: dbo__QualificationCenterConfig
+        description: "~22 rows (bulk)"
+      - name: dbo__QualificationManager
+        description: "~183 rows (bulk)"
+      - name: dbo__QualificationManagersSubordinates
+        description: "~447 rows (bulk)"
+      - name: dbo__Question
+        description: "~12 rows (bulk)"
+      - name: dbo__QuestionsEffectivenessEvaluations
+        description: "~90 rows (bulk)"
+      - name: dbo__QuestionsReactionEvaluations
+        description: "~147 rows (bulk)"
+      - name: dbo__RECURRING_JOB
+        description: "~51 rows (bulk)"
+      - name: dbo__REFERENCIA_CONTRAMEDIDA
+        description: "~11 rows (bulk)"
+      - name: dbo__RESPOSTA_AVALIACAO_SUCESSAO
+        description: "~286 rows (bulk)"
+      - name: dbo__RESPOSTA_PULSE_FEEDBACK_CONTINUO
+        description: "~49 rows (bulk)"
+      - name: dbo__REUNIAO
+        description: "~460 rows (bulk)"
+      - name: dbo__REUNIAO_PAUSE
+        description: "~31 rows (bulk)"
+      - name: dbo__RISCO
+        description: "~100 rows (bulk)"
+      - name: dbo__RangeDiscretionary
+        description: "~12 rows (bulk)"
+      - name: dbo__ReactionEvaluation
+        description: "~45 rows (bulk)"
+      - name: dbo__Readiness
+        description: "~55 rows (bulk)"
+      - name: dbo__RelUpperGoal
+        description: "~4,704 rows (bulk)"
+      - name: dbo__Response
+        description: "~99 rows (bulk)"
+      - name: dbo__SQL_TRACE
+        description: "~12,778 rows (bulk)"
+      - name: dbo__SYSTEM_CONFIG
+        description: "~3 rows (bulk)"
+      - name: dbo__ScoreCurveImpactSuccession
+        description: "~47 rows (bulk)"
+      - name: dbo__ScoreCurveRiskSuccession
+        description: "~51 rows (bulk)"
+      - name: dbo__ScoreCurveSuccession
+        description: "~65 rows (bulk)"
+      - name: dbo__ScoreValuesRV
+        description: "~14,219 rows (bulk)"
+      - name: dbo__ServerCachePreferencesManagementCycle
+        description: "~32 rows (bulk)"
+      - name: dbo__SidebarItem
+        description: "~255 rows (bulk)"
+      - name: dbo__SidebarItemFavorite
+        description: "~235 rows (bulk)"
+      - name: dbo__SimulationRVCache
+        description: "~3 rows (bulk)"
+      - name: dbo__SkillCategory
+        description: "~13 rows (bulk)"
+      - name: dbo__SkillKnowledge
+        description: "~6 rows (bulk)"
+      - name: dbo__Sport
+        description: "~540 rows (bulk)"
+      - name: dbo__Stakeholder
+        description: "~14 rows (bulk)"
+      - name: dbo__StakeholdersCommittees
+        description: "~7 rows (bulk)"
+      - name: dbo__StakeholdersProject
+        description: "~5 rows (bulk)"
+      - name: dbo__StrategyAction
+        description: "~8 rows (bulk)"
+      - name: dbo__StrategyAnalysis
+        description: "~15 rows (bulk)"
+      - name: dbo__StrategyAnalysisAttachment
+        description: "~1 rows (bulk)"
+      - name: dbo__StrategyCycle
+        description: "~7 rows (bulk)"
+      - name: dbo__StrategyGoal
+        description: "~19 rows (bulk)"
+      - name: dbo__StrategyGoalMetric
+        description: "~7 rows (bulk)"
+      - name: dbo__StrategyGoalMetricValue
+        description: "~6 rows (bulk)"
+      - name: dbo__StrategyGoalProject
+        description: "~12 rows (bulk)"
+      - name: dbo__StrategyGoalProjectValue
+        description: "~305 rows (bulk)"
+      - name: dbo__SuccessionCycle
+        description: "~27 rows (bulk)"
+      - name: dbo__SuccessionCycleSettings
+        description: "~27 rows (bulk)"
+      - name: dbo__SuccessionJobPositionReadiness
+        description: "~32 rows (bulk)"
+      - name: dbo__SuccessionNomination
+        description: "~68 rows (bulk)"
+      - name: dbo__SuccessionResults
+        description: "~43 rows (bulk)"
+      - name: dbo__SuccessionScoresDetails
+        description: "~18 rows (bulk)"
+      - name: dbo__SwotAnalysis
+        description: "~3 rows (bulk)"
+      - name: dbo__SystemKnowledge
+        description: "~38 rows (bulk)"
+      - name: dbo__TAG_FEEDBACK
+        description: "~535 rows (bulk)"
+      - name: dbo__TAG_FEEDBACK_CONTINUO
+        description: "~65 rows (bulk)"
+      - name: dbo__TERMO_ACEITE
+        description: "~23 rows (bulk)"
+      - name: dbo__TERMO_ACEITE_ASSINATURA
+        description: "~4,715 rows (bulk)"
+      - name: dbo__TERMO_ACEITE_SECAO
+        description: "~50 rows (bulk)"
+      - name: dbo__TIMELINE_FEEDBACK_CONTINUO
+        description: "~949 rows (bulk)"
+      - name: dbo__TIPO_FEEDBACK_CONTINUO
+        description: "~34 rows (bulk)"
+      - name: dbo__TOPICO_REUNIAO
+        description: "~1,040 rows (bulk)"
+      - name: dbo__TaskLog
+        description: "~478 rows (bulk)"
+      - name: dbo__Theme
+        description: "~35 rows (bulk)"
+      - name: dbo__ThemeHistory
+        description: "~121 rows (bulk)"
+      - name: dbo__ThemeShare
+        description: "~3,458 rows (bulk)"
+      - name: dbo__TipoAcumulacao
+        description: "~6 rows (bulk)"
+      - name: dbo__Training
+        description: "~53 rows (bulk)"
+      - name: dbo__TrainingAttachment
+        description: "~19 rows (bulk)"
+      - name: dbo__TrainingClass
+        description: "~45 rows (bulk)"
+      - name: dbo__TrainingClassDemands
+        description: "~35 rows (bulk)"
+      - name: dbo__TrainingClassParticipants
+        description: "~213 rows (bulk)"
+      - name: dbo__TrainingClassParticipantsConfirmed
+        description: "~104 rows (bulk)"
+      - name: dbo__TrainingClassTimeWeekly
+        description: "~2 rows (bulk)"
+      - name: dbo__TrainingDraft
+        description: "~1 rows (bulk)"
+      - name: dbo__TrainingPackage
+        description: "~3 rows (bulk)"
+      - name: dbo__TrainingPackagesTrainings
+        description: "~5 rows (bulk)"
+      - name: dbo__TranslateTagCulture
+        description: "~6 rows (bulk)"
+      - name: dbo__TranslateTagHandle
+        description: "~138 rows (bulk)"
+      - name: dbo__Trigger
+        description: "~125 rows (bulk)"
+      - name: dbo__TriggerArea
+        description: "~2,415 rows (bulk)"
+      - name: dbo__TriggerCurve
+        description: "~125 rows (bulk)"
+      - name: dbo__TriggerCurveItem
+        description: "~366 rows (bulk)"
+      - name: dbo__UNIDADE_MEDIDA
+        description: "~57 rows (bulk)"
+      - name: dbo__VALOR_META
+        description: "~101,607 rows (bulk)"
+      - name: dbo__VALOR_META_BOOK
+        description: "~168 rows (bulk)"
+      - name: dbo__VERSAO
+        description: "~15 rows (bulk)"
+      - name: dbo__VOTACAO_CAUSA
+        description: "~18 rows (bulk)"
+      - name: dbo__ValorMatriz
+        description: "~5,894,028 rows (bulk)"
+      - name: dbo__Visao
+        description: "~8 rows (bulk)"
+      - name: dbo__VolunteerExperience
+        description: "~37 rows (bulk)"
+      - name: dbo__VolunteerFunction
+        description: "~22 rows (bulk)"
+      - name: dbo__WelcomeSupportEmployee
+        description: "~5 rows (bulk)"
+      - name: dbo__XAxisClassification
+        description: "~65 rows (bulk)"
+      - name: dbo__YAxisClassification
+        description: "~59 rows (bulk)"
+      - name: dbo__YearPersonalGoal
+        description: "~283 rows (bulk)"
+      - name: dbo____MigrationHistory
+        description: "~3,609 rows (bulk)"
+      - name: dbo__dual
+        description: "~3 rows (bulk)"
+      - name: notification__MailSettings
+        description: "~3 rows (bulk)"
+      - name: okr__EmployeeKeyResult
+        description: "~163 rows (bulk)"
+      - name: okr__KeyResult
+        description: "~138 rows (bulk)"
+      - name: okr__KeyResultProgress
+        description: "~138 rows (bulk)"
+      - name: okr__KeyResultValue
+        description: "~415 rows (bulk)"
+      - name: okr__Objective
+        description: "~69 rows (bulk)"
+      - name: okr__ObjectiveProgress
+        description: "~138 rows (bulk)"
+      - name: okr__ObjectiveTree
+        description: "~29 rows (bulk)"
+      - name: okr__ToDoKR
+        description: "~20 rows (bulk)"
+      - name: stg__ConsolidatedScoreView
+        description: "~60 rows (bulk)"
+      - name: stg__GoalView
+        description: "~13 rows (bulk)"
+      - name: stg__VCExtract
+        description: "~2,144 rows (bulk)"
+      - name: stg__vcExtractLastLastUpdate
+        description: "~1 rows (bulk)"

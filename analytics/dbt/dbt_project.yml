@@ -17,11 +17,54 @@ clean-targets:
 
 models:
   mereo_analytics:
+    bronze:
+      +tags: [bronze]
+    silver:
+      +materialized: view
+      +tags: [silver]
+      colaborador:
+        +schema: colaborador
+      organizacao:
+        +schema: organizacao
+      metricas:
+        +schema: metricas
+      avaliacao:
+        +schema: avaliacao
+      remuneracao:
+        +schema: remuneracao
+      referencia:
+        +schema: referencia
+      acao:
+        +schema: acao
+      sucessao:
+        +schema: sucessao
+      pdi:
+        +schema: pdi
+    gold:
+      +schema: gold
+      +materialized: table
+      +tags: [gold]
+      dim:
+        +materialized: view
+        +tags: [gold, dim, wave_g1]
+      fact:
+        +materialized: table
+        +tags: [gold, fact, wave_g2]
+        +engine: 'MergeTree()'
+      mart:
+        +materialized: view
+        +tags: [gold, mart, wave_g3]
     staging:
       +materialized: view
-    gold:
-      +materialized: table
+      +tags: [staging, legacy]
 
 vars:
-  raw_database: raw
+  bronze_database: raw
+  silver_database: silver
   gold_database: gold
+  raw_database: raw
+  matriz_valor_tenant_slugs: ['afya', 'allos', 'staging']
+  matriz_valor_dt_ref_from: null
+  matriz_valor_dt_ref_to: null
+  matriz_valor_unfiltered_guard: true
+  production_tenant_slugs: ['afya', 'allos']
