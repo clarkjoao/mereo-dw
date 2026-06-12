@@ -1,0 +1,3 @@
+[submodule "LocalDrawDB"]
+	path = LocalDrawDB
+	url = git@github.com:joaovitorclark/LocalDrawDB.git
