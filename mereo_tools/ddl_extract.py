@@ -162,6 +162,19 @@ class ForeignKeyDef:
     on_delete: str
     on_update: str
 
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "name": self.name,
+            "parent_schema": self.parent_schema,
+            "parent_table": self.parent_table,
+            "parent_columns": self.parent_columns,
+            "referenced_schema": self.referenced_schema,
+            "referenced_table": self.referenced_table,
+            "referenced_columns": self.referenced_columns,
+            "on_delete": self.on_delete,
+            "on_update": self.on_update,
+        }
+
 
 @dataclass
 class DatabaseDdl:

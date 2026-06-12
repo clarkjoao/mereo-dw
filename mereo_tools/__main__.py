@@ -9,7 +9,7 @@ def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if not args or args[0] in ("-h", "--help"):
         print(__doc__)
-        print("\nComandos: discover, inventory, inventory-batches, schema, drift, mapping-report, teste_query, seed-sim, clone-sim, backup-local, restore-local")
+        print("\nComandos: discover, inventory, inventory-batches, schema, drift, mapping-report, export-fk-graph, teste_query, seed-sim, clone-sim, backup-local, restore-local, backup-to-ch")
         print("Exemplo: uv run python -m mereo_tools teste_query --db MereoGR-Staging")
         return 0 if args else 1
 
@@ -36,6 +36,10 @@ def main(argv: list[str] | None = None) -> int:
         from mereo_tools.mapping_report import main as mapping_report_main
 
         return mapping_report_main(rest)
+    if command == "export-fk-graph":
+        from mereo_tools.export_fk_graph import main as export_fk_graph_main
+
+        return export_fk_graph_main(rest)
     if command == "teste_query":
         from mereo_tools.teste_query import main as teste_query_main
 
@@ -56,6 +60,10 @@ def main(argv: list[str] | None = None) -> int:
         from mereo_tools.restore_local import main as restore_local_main
 
         return restore_local_main(rest)
+    if command == "backup-to-ch":
+        from mereo_tools.backup_to_ch import main as backup_to_ch_main
+
+        return backup_to_ch_main(rest)
     if command == "inventory-batches":
         from mereo_tools.run_inventory_batches import main as batches_main
 

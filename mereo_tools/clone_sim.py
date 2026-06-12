@@ -30,6 +30,12 @@ CDC_TABLE = ("dbo", "COLABORADOR")
 GUID_RE = re.compile(
     r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
 )
+_STRING_TYPES = frozenset(
+    {"char", "nchar", "varchar", "nvarchar", "text", "ntext", "sysname"}
+)
+_MSSQL_MAX_PARAMS = 2100
+# pymssql desalinha parâmetros em INSERT multi-row acima disso (~155 linhas × 12 cols).
+_PYMSSQL_MULTIROW_MAX_PARAMS = 1860
 
 
 @dataclass
@@ -60,6 +66,8 @@ def _coerce_value(value: Any, type_name: str) -> Any:
         return text
     if type_name == "bit":
         return 1 if value in (True, 1, "1", "true", "True") else 0
+    if type_name in _STRING_TYPES:
+        return str(value)
     return value
 
 
@@ -214,11 +222,17 @@ def _insert_batch(
     if not rows:
         return
     insert_cols = table.select_columns
+    if not insert_cols:
+        return
+    ncols = len(insert_cols)
     col_list = ", ".join(f"[{c.name}]" for c in insert_cols)
-    placeholders = ", ".join(["%s"] * len(insert_cols))
     schema = table.schema.replace("]", "]]")
     name = table.name.replace("]", "]]")
-    insert_sql = f"INSERT INTO [{schema}].[{name}] ({col_list}) VALUES ({placeholders})"
+    row_placeholder = "(" + ", ".join(["%s"] * ncols) + ")"
+    chunk_size = max(
+        1,
+        min(_MSSQL_MAX_PARAMS // ncols, _PYMSSQL_MULTIROW_MAX_PARAMS // ncols),
+    )
 
     with use_database(dst_conn, database):
         prev = dst_conn.autocommit_state
@@ -227,11 +241,18 @@ def _insert_batch(
             cur = dst_conn.cursor()
             if identity_on:
                 cur.execute(f"SET IDENTITY_INSERT [{schema}].[{name}] ON")
-            for row in rows:
-                values = tuple(
-                    _coerce_value(row[c.name], c.type_name) for c in insert_cols
+            for start in range(0, len(rows), chunk_size):
+                chunk = rows[start : start + chunk_size]
+                placeholders = ", ".join([row_placeholder] * len(chunk))
+                insert_sql = (
+                    f"INSERT INTO [{schema}].[{name}] ({col_list}) VALUES {placeholders}"
                 )
-                cur.execute(insert_sql, values)
+                values: list[Any] = []
+                for row in chunk:
+                    values.extend(
+                        _coerce_value(row[c.name], c.type_name) for c in insert_cols
+                    )
+                cur.execute(insert_sql, tuple(values))
             if identity_on:
                 cur.execute(f"SET IDENTITY_INSERT [{schema}].[{name}] OFF")
         finally:

@@ -43,6 +43,24 @@ class RestoreOptions:
     skip_drop: bool
     enable_cdc: bool
     resume: bool
+    tables: list[tuple[str, str]] | None
+    skip_schema: bool
+
+
+def _parse_tables_arg(value: str) -> list[tuple[str, str]]:
+    """Parse 'dbo.COLABORADOR,dbo.Foo' → [('dbo','COLABORADOR'), ...]."""
+    out: list[tuple[str, str]] = []
+    for part in value.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        if "." not in part:
+            raise ValueError(f"Tabela inválida (use schema.tabela): {part!r}")
+        schema, table = part.split(".", 1)
+        out.append((schema.strip(), table.strip()))
+    if not out:
+        raise ValueError("Nenhuma tabela em --tables")
+    return out
 
 
 def _table_data_path(out_db: Path, schema: str, table: str) -> Path:
@@ -142,29 +160,58 @@ def _insert_from_backup(
     return total
 
 
+def _should_enable_cdc(options: RestoreOptions) -> bool:
+    if not options.enable_cdc:
+        return False
+    if options.tables is None:
+        return True
+    return any(
+        s.lower() == "dbo" and t.upper() == "COLABORADOR" for s, t in options.tables
+    )
+
+
 def restore_database(conn, database: str, *, options: RestoreOptions) -> dict[str, Any]:
     in_db = options.in_dir / database
     schema_sql = in_db / "schema" / "schema.sql"
-    if not schema_sql.exists():
+    if not schema_sql.exists() and not options.skip_schema:
         raise FileNotFoundError(f"Schema não encontrado: {schema_sql}")
 
     progress = _progress_path(in_db)
     completed = _load_progress(progress) if options.resume else set()
 
+    tables_label = (
+        ", ".join(f"{s}.{t}" for s, t in options.tables) if options.tables else "todas"
+    )
+
     print(f"\n{'=' * 60}")
     print(f"Banco: {database}")
     print(f"  origem: {in_db}")
+    print(f"  tabelas: {tables_label} | skip_schema={options.skip_schema}")
 
     if not options.skip_drop:
         print("  Recriando banco...")
         _drop_database(conn, database)
         _create_database(conn, database)
 
-    print("  Aplicando schema...")
-    _apply_schema_sql(conn, database, schema_sql)
+    if options.skip_schema:
+        print("  Schema: ignorado (--skip-schema ou padrão com --tables)")
+    else:
+        print("  Aplicando schema...")
+        _apply_schema_sql(conn, database, schema_sql)
 
     ddl = extract_database_ddl(conn, database)
-    print(f"  tabelas: {len(ddl.tables)} | restore dados...")
+    if options.tables:
+        allowed = {(s.lower(), t.lower()) for s, t in options.tables}
+        ddl.tables = [
+            t
+            for t in ddl.tables
+            if (t.schema.lower(), t.name.lower()) in allowed
+        ]
+        if not ddl.tables:
+            raise ValueError(
+                f"Nenhuma tabela pedida encontrada em {database}: {tables_label}"
+            )
+    print(f"  restore: {len(ddl.tables)} tabela(s) | carregando dados...")
 
     _set_foreign_keys_enabled(conn, database, enabled=False)
 
@@ -192,9 +239,11 @@ def restore_database(conn, database: str, *, options: RestoreOptions) -> dict[st
 
     _set_foreign_keys_enabled(conn, database, enabled=True)
 
-    if options.enable_cdc:
+    if _should_enable_cdc(options):
         print("  Habilitando CDC em dbo.COLABORADOR...")
         _enable_cdc(conn, database)
+    elif options.enable_cdc and options.tables:
+        print("  CDC: ignorado (dbo.COLABORADOR não está em --tables)")
 
     if not options.resume:
         progress.unlink(missing_ok=True)
@@ -207,10 +256,17 @@ def restore_database(conn, database: str, *, options: RestoreOptions) -> dict[st
 
 
 def run_restore(options: RestoreOptions) -> int:
+    tables_label = (
+        ", ".join(f"{s}.{t}" for s, t in options.tables) if options.tables else "todas"
+    )
     print("Origem: backup local")
     print(f"Destino: MSSQL_* (simulador)")
     print(f"Bancos: {', '.join(options.databases)}")
-    print(f"resume={options.resume} skip_drop={options.skip_drop} cdc={options.enable_cdc}")
+    print(f"Tabelas: {tables_label}")
+    print(
+        f"resume={options.resume} skip_drop={options.skip_drop} "
+        f"skip_schema={options.skip_schema} cdc={options.enable_cdc}"
+    )
     print()
 
     conn = db.connect(config=load_mssql_config())
@@ -246,9 +302,11 @@ def main(argv: list[str] | None = None) -> int:
         default=str(DEFAULT_IN),
         help="Diretório base do backup (padrão: output/backups)",
     )
-    parser.add_argument("--batch-size", type=int, default=500, help="Linhas por INSERT batch")
-    parser.add_argument("--pause-table", type=float, default=0.1, help="Pausa entre tabelas (s)")
-    parser.add_argument("--pause-db", type=float, default=5.0, help="Pausa entre bancos (s)")
+    parser.add_argument(
+        "--batch-size", type=int, default=2000, help="Linhas por INSERT batch (multi-row)"
+    )
+    parser.add_argument("--pause-table", type=float, default=0.0, help="Pausa entre tabelas (s)")
+    parser.add_argument("--pause-db", type=float, default=0.0, help="Pausa entre bancos (s)")
     parser.add_argument(
         "--skip-drop",
         action="store_true",
@@ -267,7 +325,34 @@ def main(argv: list[str] | None = None) -> int:
         help="Não habilitar CDC",
     )
     parser.add_argument("--resume", action="store_true", help="Retomar tabelas já restauradas")
+    parser.add_argument(
+        "--tables",
+        metavar="SCHEMA.TABLE",
+        help="Lista schema.tabela separada por vírgula (ex.: dbo.COLABORADOR)",
+    )
+    parser.add_argument(
+        "--skip-schema",
+        action="store_true",
+        help="Não reaplicar schema.sql (banco já existe ou init K8s)",
+    )
+    parser.add_argument(
+        "--skip-schema-on-resume",
+        action="store_true",
+        help="Com --resume, não reaplicar schema",
+    )
     args = parser.parse_args(argv)
+
+    tables: list[tuple[str, str]] | None = None
+    if args.tables:
+        tables = _parse_tables_arg(args.tables)
+
+    skip_schema = args.skip_schema or (
+        args.resume and args.skip_schema_on_resume
+    )
+    if tables is not None and not args.skip_schema and not (
+        args.resume and args.skip_schema_on_resume
+    ):
+        skip_schema = True
 
     options = RestoreOptions(
         databases=[d.strip() for d in args.databases.split(",") if d.strip()],
@@ -278,6 +363,8 @@ def main(argv: list[str] | None = None) -> int:
         skip_drop=args.skip_drop,
         enable_cdc=args.enable_cdc,
         resume=args.resume,
+        tables=tables,
+        skip_schema=skip_schema,
     )
     try:
         return run_restore(options)

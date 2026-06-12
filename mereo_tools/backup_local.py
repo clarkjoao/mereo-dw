@@ -130,6 +130,7 @@ def _write_schema(out_db: Path, ddl: DatabaseDdl) -> None:
                 "schemas": ddl.schemas,
                 "table_count": len(ddl.tables),
                 "fk_count": len(ddl.foreign_keys),
+                "foreign_keys": [fk.to_dict() for fk in ddl.foreign_keys],
                 "tables": [
                     {
                         "schema": t.schema,

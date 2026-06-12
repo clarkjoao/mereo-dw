@@ -5,8 +5,10 @@ description = "Ferramentas de mapeamento dos bancos Mereo (SQL Server)"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "clickhouse-connect>=0.7.0",
     "pymssql>=2.3.0",
     "python-dotenv>=1.0.0",
+    "pyyaml>=6.0",
 ]
 
 [tool.uv]
