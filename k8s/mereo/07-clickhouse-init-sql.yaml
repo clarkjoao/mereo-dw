@@ -32,6 +32,17 @@ data:
     -- Databases
     -- ------------------------------------------------------------------
     CREATE DATABASE IF NOT EXISTS raw;
+    CREATE DATABASE IF NOT EXISTS bronze;
+    CREATE DATABASE IF NOT EXISTS silver;
+    CREATE DATABASE IF NOT EXISTS colaborador;
+    CREATE DATABASE IF NOT EXISTS organizacao;
+    CREATE DATABASE IF NOT EXISTS metricas;
+    CREATE DATABASE IF NOT EXISTS avaliacao;
+    CREATE DATABASE IF NOT EXISTS remuneracao;
+    CREATE DATABASE IF NOT EXISTS referencia;
+    CREATE DATABASE IF NOT EXISTS acao;
+    CREATE DATABASE IF NOT EXISTS sucessao;
+    CREATE DATABASE IF NOT EXISTS pdi;
     CREATE DATABASE IF NOT EXISTS gold;
     CREATE DATABASE IF NOT EXISTS pipeline;
 
@@ -96,8 +107,21 @@ data:
 
     -- ------------------------------------------------------------------
     -- pipeline.* — métricas operacionais
-    -- (preenchidas pelo CronJob pipeline-lag-snapshot e sensor freshness)
+    -- (ingestion_snapshots + watermarks/lag: job Dagster raw_ingestion_observability;
+    --  freshness_events: sensor raw_freshness_sensor; CronJob lag opcional/legado)
     -- ------------------------------------------------------------------
+    CREATE TABLE IF NOT EXISTS pipeline.ingestion_snapshots (
+        entity String,
+        tenant_slug String,
+        row_count UInt64,
+        row_count_final UInt64,
+        ch_max_ts_ms UInt64,
+        kafka_lag Int64,
+        snapshot_at DateTime64(3) DEFAULT now64(3)
+    )
+    ENGINE = MergeTree()
+    ORDER BY (entity, tenant_slug, snapshot_at);
+
     CREATE TABLE IF NOT EXISTS pipeline.entity_watermarks (
         entity String,
         ch_max_ts_ms UInt64,

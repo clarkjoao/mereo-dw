@@ -30,13 +30,25 @@ fi
 
 kubectl apply -f "$REPO_ROOT/k8s/00-namespaces.yaml"
 
-kubectl create secret generic mssql-debezium-creds \
-  -n "$NAMESPACE" \
-  --from-literal=debezium.properties="database.hostname=${MSSQL_HOST}
+_debezium_secret() {
+  local ns="$1"
+  kubectl create secret generic mssql-debezium-creds \
+    -n "$ns" \
+    --from-literal=debezium.properties="database.hostname=${MSSQL_HOST}
 database.port=${MSSQL_PORT}
 database.user=${MSSQL_USER}
 database.password=${MSSQL_PASSWORD}" \
-  --dry-run=client -o yaml | kubectl apply -f -
+    --dry-run=client -o yaml | kubectl apply -f -
+}
+
+_debezium_secret "$NAMESPACE"
+
+# Stack CDC legado: connectors em mereo-test-ns-cdc (fora do namespace mereo)
+KAFKA_CDC_NS="${KAFKA_CDC_NS:-mereo-test-ns-cdc}"
+if [[ "$KAFKA_CDC_NS" != "$NAMESPACE" ]] && kubectl get namespace "$KAFKA_CDC_NS" >/dev/null 2>&1; then
+  _debezium_secret "$KAFKA_CDC_NS"
+  echo "Debezium secret synced to ${KAFKA_CDC_NS}"
+fi
 
 if [[ -n "$CH_PASS" ]]; then
   kubectl create secret generic clickhouse-dbt-credentials \

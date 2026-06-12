@@ -62,6 +62,11 @@ spec:
           env:
             - name: DBT_TARGET
               value: k8s
+            - name: DAGSTER_PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: dagster-postgresql
+                  key: postgresql-password
             - name: CH_DBT_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -97,6 +102,9 @@ spec:
             - mountPath: /config/models
               name: dbt-models
               readOnly: true
+            - mountPath: /config/macros
+              name: dbt-macros
+              readOnly: true
             - mountPath: /config/dagster
               name: dagster-code
       volumes:
@@ -106,6 +114,9 @@ spec:
         - name: dbt-models
           configMap:
             name: dbt-models
+        - name: dbt-macros
+          configMap:
+            name: dbt-macros
         - name: dagster-code
           configMap:
             name: dagster-code

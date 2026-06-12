@@ -96,6 +96,9 @@ data:
           - mountPath: /config/models
             name: dbt-models
             readOnly: true
+          - mountPath: /config/macros
+            name: dbt-macros
+            readOnly: true
           - mountPath: /config/dagster
             name: dagster-code
         volumes:
@@ -105,6 +108,9 @@ data:
           - configMap:
               name: dbt-models
             name: dbt-models
+          - configMap:
+              name: dbt-macros
+            name: dbt-macros
           - configMap:
               defaultMode: 493     # 0755 — scripts executáveis
               name: dagster-code
@@ -397,13 +403,23 @@ data:
   sync-workspace.sh: |
     #!/usr/bin/env bash
     # Sincroniza ConfigMaps → /opt/dagster (user-code pod e run jobs).
+    # Fonte canônica: k8s/runtime/sync-workspace.sh (via ./k8s/sync-configmaps.sh).
     set -euo pipefail
 
-    mkdir -p /opt/dagster/dbt/models/staging /opt/dagster/dbt/models/gold
+    mkdir -p /opt/dagster/dbt/models/staging /opt/dagster/dbt/models/gold /opt/dagster/dbt/macros
     cp /config/dbt/dbt_project.yml /config/dbt/packages.yml /opt/dagster/dbt/
     cp /config/dbt/profiles.yml /opt/dagster/dbt/profiles.yml
 
-    # Expande chave `staging__stg_colaborador.sql` → staging/stg_colaborador.sql.
+    if [[ -d /config/macros ]]; then
+      for f in /config/macros/*; do
+        [ -f "$f" ] || continue
+        key=$(basename "$f")
+        rel="${key//__//}"
+        mkdir -p "/opt/dagster/dbt/macros/$(dirname "$rel")"
+        cp "$f" "/opt/dagster/dbt/macros/$rel"
+      done
+    fi
+
     for f in /config/models/*; do
       [ -f "$f" ] || continue
       key=$(basename "$f")

@@ -2,9 +2,19 @@
 # Sincroniza ConfigMaps → /opt/dagster (user-code pod e run jobs).
 set -euo pipefail
 
-mkdir -p /opt/dagster/dbt/models/staging /opt/dagster/dbt/models/gold
+mkdir -p /opt/dagster/dbt/models/staging /opt/dagster/dbt/models/gold /opt/dagster/dbt/macros
 cp /config/dbt/dbt_project.yml /config/dbt/packages.yml /opt/dagster/dbt/
 cp /config/dbt/profiles.yml /opt/dagster/dbt/profiles.yml
+
+if [[ -d /config/macros ]]; then
+  for f in /config/macros/*; do
+    [ -f "$f" ] || continue
+    key=$(basename "$f")
+    rel="${key//__//}"
+    mkdir -p "/opt/dagster/dbt/macros/$(dirname "$rel")"
+    cp "$f" "/opt/dagster/dbt/macros/$rel"
+  done
+fi
 
 for f in /config/models/*; do
   [ -f "$f" ] || continue

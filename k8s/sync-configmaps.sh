@@ -28,9 +28,22 @@ while IFS= read -r f; do
   key="${rel//\//__}"
   DBT_MODEL_ARGS+=( "--from-file=${key}=${f}" )
 done < <(find "$ANALYTICS_ROOT/dbt/models" -type f)
+# Server-side apply: evita annotation last-applied-configuration > 256KiB (373+ models).
 kubectl create configmap dbt-models \
   -n "$NAMESPACE" \
   "${DBT_MODEL_ARGS[@]}" \
+  --dry-run=client -o yaml | kubectl apply --server-side -f -
+
+echo "==> ConfigMap dbt-macros"
+DBT_MACRO_ARGS=()
+while IFS= read -r f; do
+  rel="${f#$ANALYTICS_ROOT/dbt/macros/}"
+  key="${rel//\//__}"
+  DBT_MACRO_ARGS+=( "--from-file=${key}=${f}" )
+done < <(find "$ANALYTICS_ROOT/dbt/macros" -type f)
+kubectl create configmap dbt-macros \
+  -n "$NAMESPACE" \
+  "${DBT_MACRO_ARGS[@]}" \
   --dry-run=client -o yaml | kubectl apply -f -
 
 echo "==> ConfigMap dagster-code"
